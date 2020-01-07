@@ -1,0 +1,10 @@
+.cursor {
+  position: absolute;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  background-color: grey;
+  height: 30px;
+  width: 2px;
+  line-height: 30px;
+}
