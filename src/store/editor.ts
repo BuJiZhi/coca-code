@@ -10,7 +10,7 @@ import {
 const initialState: EditorState = {
   code: '//hello world',
   doc: ['//hello world'],
-  keyArr: {on: false, type: 'varibleDeclare', payload: {name: 'a', value: 1}}, 
+  keyArr: {on: false, type: 'varibleDeclare', payload: {name: 'a', value: '1'}}, 
   tokens: [['//hello', ' ', 'world']]
 }
 

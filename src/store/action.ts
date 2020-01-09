@@ -3,6 +3,7 @@ import {
   CompilerActionTypes,
   StyleActionTypes,
   Tokens,
+  IanimateKey,
   UPDATE_CODE, 
   UPDATE_TOKENS,
   UPDATE_FONTWIDTH,
@@ -42,7 +43,7 @@ export function updateTokens(tokens: Tokens): EditorAtionTypes {
   }
 }
 
-export function updateKeys(keys: number[][]): EditorAtionTypes {
+export function updateKeys(keys: IanimateKey): EditorAtionTypes {
   return {
     type: UPDATE_KEYS,
     payload: keys

@@ -87,7 +87,7 @@ export interface UpdateDocAction {
 
 export interface UpdateKeysAction {
   type: typeof UPDATE_KEYS,
-  payload: number[][]
+  payload: IanimateKey
 }
 
 export type EditorAtionTypes = 

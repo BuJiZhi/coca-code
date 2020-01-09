@@ -45,7 +45,7 @@ export interface CustomOptions {
   updateIndex?: (index:[number, number]) => void,
   updateCursor?: (cor: [number, number]) => void,
   handleRootClick?:(e: React.MouseEvent) => void,
-  updateKeys?:(keys: IanimateKey[][]) => void,
+  updateKeys?:(keys: IanimateKey) => void,
 }
 
 interface Options {
@@ -172,7 +172,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   addOperation: (op: Ioperation) => dispatch(addOperation(op)),
   clearOperation: () => dispatch(clearOperation()),
   updateCurrent: (current: number) => dispatch(updateCurrent(current)),
-  updateKeys: (keys: number[][]) => dispatch(updateKeys(keys))
+  updateKeys: (keys: IanimateKey) => dispatch(updateKeys(keys))
 })
 
 export default connect(

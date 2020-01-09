@@ -28,7 +28,7 @@ export default class index extends Component<CustomOptions> {
   render() {
     const { 
       style, 
-      doc, 
+      doc,
       updateFontWidth, 
       handleKeyPress, 
       handleRootClick,
@@ -75,7 +75,9 @@ export default class index extends Component<CustomOptions> {
         {/* lines */}
         <div>
           <div>
-            <Animate />
+            <Animate 
+              keyArr={ doc.keyArr }
+            />
             <Cursor style={ style }/>
             { //lines
               doc.tokens.map((lineTokens, index) => 
