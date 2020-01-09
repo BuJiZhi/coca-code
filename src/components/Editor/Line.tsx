@@ -22,7 +22,10 @@ const Line: React.FC<{
   return (
     <pre className="line measureLine" style={ lineStyle }>
       {lineTokens.map((token, index) => 
-          <Element key={ index } content={ token }></Element>
+          <Element 
+            key={ index } 
+            content={ token }
+          ></Element>
         )
       }
     </pre>

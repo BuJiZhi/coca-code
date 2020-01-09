@@ -56,7 +56,13 @@ export interface EditorState {
   code: string,
   doc: DocType,
   tokens: Tokens,
-  animateKeys: number[][]
+  keyArr: IanimateKey
+}
+
+export interface IanimateKey {
+  on: boolean,
+  type: string,
+  payload: any
 }
 
 export const UPDATE_CODE = 'UPDATE_CODE';

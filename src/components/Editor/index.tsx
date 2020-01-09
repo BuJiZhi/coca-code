@@ -4,6 +4,7 @@ import './common.css';
 import Cursor from './Cursor';
 import Line from './Line';
 import Measure from './Measure';
+import Animate from './Animate';
 import { CustomOptions } from '../../containers/EditorCon';
 
 export default class index extends Component<CustomOptions> {
@@ -74,10 +75,8 @@ export default class index extends Component<CustomOptions> {
         {/* lines */}
         <div>
           <div>
-            {/* cursor */}
-            <Cursor 
-              style={ style }
-            />
+            <Animate />
+            <Cursor style={ style }/>
             { //lines
               doc.tokens.map((lineTokens, index) => 
                 <Line 

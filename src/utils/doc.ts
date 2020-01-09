@@ -1,12 +1,13 @@
 import { reg } from '../utils/jsTokens';
 import { KeyboardEvent } from 'react';
+import { IanimateKey } from '../types/store';
 
 export interface DocType{
   code: string,
   doc: string[],
   tokens: string[][],
   lineSep: string,
-  keyArr: number[][],
+  keyArr: IanimateKey,
   currentIndex: [number, number],
   init(): void,
   setIndex(idx: [number, number]): void,
@@ -17,7 +18,7 @@ export interface DocType{
   keyPressHandler(e: KeyboardEvent): void,
   keyDownHandler(e: KeyboardEvent): void,
   getValue(): string,
-  animateKeyArr(): void
+  // animateKeyArr(): void
 }
 
 export default class Doc implements DocType {
@@ -26,7 +27,7 @@ export default class Doc implements DocType {
   doc: string[];
   tokens: string[][];
   lineSep: string;
-  keyArr: number[][];
+  keyArr: IanimateKey;
   currentIndex:[number, number];
   
   constructor(
@@ -36,7 +37,7 @@ export default class Doc implements DocType {
     this.doc = [];
     this.tokens = [];
     this.lineSep = '\n';
-    this.keyArr = [];
+    this.keyArr = Object.create(null);
     this.currentIndex = [0, 0];
   }
 
@@ -78,17 +79,21 @@ export default class Doc implements DocType {
     }
   }
 
-  animateKeyArr(): number[][] {
-    let keyArr: number[][] = [];
-    for (let i = 0; i < this.tokens.length; i++) {
-      keyArr[i] = [];
-      for (let j = 0; j < this.tokens[i].length; j++) {
-        keyArr[i].push(0);
-      }
-    }
-    this.keyArr = keyArr;
-    return this.keyArr;
-  }
+  // animateKeyArr(): IanimateKey[][] {
+  //   let keyArr: IanimateKey[][] = [];
+  //   for (let i = 0; i < this.tokens.length; i++) {
+  //     keyArr[i] = [];
+  //     for (let j = 0; j < this.tokens[i].length; j++) {
+  //       keyArr[i].push({
+  //         type: 'init',
+  //         on: false,
+  //         payload: null
+  //       });
+  //     }
+  //   }
+  //   this.keyArr = keyArr;
+  //   return this.keyArr;
+  // }
 
   codeUpdateDoc(code: string): string[] {
     let doc = code.split('\n');
@@ -138,7 +143,7 @@ export default class Doc implements DocType {
         break;
     }
     this.tokenizer();
-    this.animateKeyArr();
+    // this.animateKeyArr();
   }
 
   keyDownHandler(e: KeyboardEvent): void {
@@ -171,7 +176,7 @@ export default class Doc implements DocType {
         break;
     }
     this.tokenizer();
-    this.animateKeyArr();
+    // this.animateKeyArr();
   }
   // static appendText(text, line) {
   //   this.doc[line] += text;

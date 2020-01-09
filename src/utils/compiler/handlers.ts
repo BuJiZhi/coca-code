@@ -30,8 +30,9 @@ const nodeHandlers: InodeHandler =  {
     }
   },
 
-  // // 值定义
+  // 值定义
   Literal: nodeIterator => {
+    console.log(nodeIterator.node)
     if(nodeIterator.node.value === undefined) {
       return undefined;
     }

@@ -2,7 +2,7 @@ import nodeHandlers from './handlers';
 import Scope from './Scope';
 import Operation from './Mirror';
 import { 
-  Iiterator, 
+  Iiterator,
   Iscope, 
   InodeHandler,
   Ioptions,
@@ -11,12 +11,12 @@ import {
   InodeTypes
 } from '../../types/compiler';
 
-class Iterator implements Iiterator{
+class Iterator implements Iiterator {
 
-  node: InodeTypes
-  scope: Iscope
-  mirrorScope: Iscope
-  stateHandler: IstateHandler
+  node: InodeTypes;
+  scope: Iscope;
+  mirrorScope: Iscope;
+  stateHandler: IstateHandler;
 
   constructor(
     node: InodeTypes, 

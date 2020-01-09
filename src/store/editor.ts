@@ -10,7 +10,7 @@ import {
 const initialState: EditorState = {
   code: '//hello world',
   doc: ['//hello world'],
-  animateKeys: [[0]], 
+  keyArr: {on: false, type: 'varibleDeclare', payload: {name: 'a', value: 1}}, 
   tokens: [['//hello', ' ', 'world']]
 }
 
@@ -37,7 +37,7 @@ export function editorReducer(
     case UPDATE_KEYS:
       return {
         ...state,
-        animateKeys: action.payload
+        keyArr: action.payload
       }
     default:
       return state;

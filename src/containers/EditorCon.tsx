@@ -7,7 +7,7 @@ import { Dispatch } from 'redux';
 import Doc, { DocType } from '../utils/doc';
 import Compiler from '../utils/compiler/index';
 import { click2index } from '../utils/tools';
-import { EditorState, Styles,Tokens } from '../types/store';
+import { EditorState, Styles,Tokens, IanimateKey } from '../types/store';
 import { Iscope, Ioperation, Icompiler, IstateHandler } from '../types/compiler';
 import { 
   updateCode, 
@@ -45,7 +45,7 @@ export interface CustomOptions {
   updateIndex?: (index:[number, number]) => void,
   updateCursor?: (cor: [number, number]) => void,
   handleRootClick?:(e: React.MouseEvent) => void,
-  updateKeys?:(keys: number[][]) => void,
+  updateKeys?:(keys: IanimateKey[][]) => void,
 }
 
 interface Options {
@@ -67,6 +67,7 @@ class EditorCon extends Component<CustomOptions & IstateHandler> {
   }
 
   handleKeyPress = (e: React.KeyboardEvent): void => {
+    e.preventDefault()
     const { updateDoc, updateTokens, updateIndex, updateKeys } = this.props;
     this.doc.keyPressHandler(e);
     if (updateDoc && updateTokens && updateIndex && updateKeys) {
