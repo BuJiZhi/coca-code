@@ -2,7 +2,8 @@ import React from 'react';
 import { Button } from '@material-ui/core';
 
 interface ShellProps {
-  handleRunClick(e: React.MouseEvent): void  
+  handleRunClick(e: React.MouseEvent): void,
+  handleNexClick(e: React.MouseEvent): void
 }
 
 const Shell: React.FC<ShellProps> = props => {
@@ -12,6 +13,12 @@ const Shell: React.FC<ShellProps> = props => {
         onClick={ props.handleRunClick }
         color="primary"
       >RUN</Button>
+      <Button
+        onClick={ props.handleNexClick }
+        color="primary"
+      >
+        NEXT
+      </Button>
     </div>
   );
 }

@@ -56,19 +56,23 @@ export interface EditorState {
   code: string,
   doc: DocType,
   tokens: Tokens,
-  keyArr: IanimateKey
+  current: number,
+  animate: IanimateKey[]
 }
 
 export interface IanimateKey {
   on: boolean,
   type: string,
+  pos: [number, number],
   payload: any
 }
 
 export const UPDATE_CODE = 'UPDATE_CODE';
 export const UPDATE_TOKENS = 'UPDATE_TOKENS';
 export const UPDATE_DOC = 'UPDATE_DOC';
-export const UPDATE_KEYS = 'UPDATE_KEYS'
+export const UPDATE_KEYS = 'UPDATE_KEYS';
+export const CLEAR_KEYS = 'CLEAR_KEYS';
+export const UPDATE_CURRENT = 'UPDATE_CURRENT'
 
 export interface UpdateCodeAction {
   type: typeof UPDATE_CODE,
@@ -90,11 +94,22 @@ export interface UpdateKeysAction {
   payload: IanimateKey
 }
 
+export interface ClearKeysAction {
+  type: typeof CLEAR_KEYS
+}
+
+export interface UpdateCurrentAction {
+  type: typeof UPDATE_CURRENT,
+  payload: number
+}
+
 export type EditorAtionTypes = 
 UpdateCodeAction |
 UpdateTokensAction |
 UpdateDocAction |
-UpdateKeysAction;
+UpdateKeysAction |
+ClearKeysAction |
+UpdateCurrentAction;
 
 /**
  * mirror scope
@@ -102,8 +117,7 @@ UpdateKeysAction;
 
 export interface MirrorState {
   mirrorScope: Iscope,
-  operations: object[],
-  current: number
+  operations: object[]
 }
 
 export interface ScopeState {
@@ -115,7 +129,6 @@ export const UPDATE_MIRROR_SCOPE = 'UPDATE_MIRROR_SCOPE';
 export const CLEAR_MIRROR_SCOPE = 'CLEAR_MIRROR_SCOPE';
 export const ADD_OPERATION = 'ADD_OPERATION';
 export const CLEAR_OPERATION = 'CLEAR_OPERATION';
-export const UPDATE_CURRENT = 'UPDATE_CURRENT';
 
 interface UpdateMirrorScopeAction {
   type: typeof UPDATE_MIRROR_SCOPE,
@@ -135,16 +148,10 @@ interface ClearOperationAction {
   type: typeof CLEAR_OPERATION
 }
 
-interface AddCurrentAction {
-  type: typeof UPDATE_CURRENT,
-  payload: number
-}
-
 export type MirrorActionTypes = 
 UpdateMirrorScopeAction |
 AddOperationAction |
 ClearOperationAction |
-AddCurrentAction |
 ClearMirrorScopeAction
 
 /**

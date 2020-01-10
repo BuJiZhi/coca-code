@@ -1,3 +1,5 @@
+import { IanimateKey } from "./store";
+
 export type Ivalue = any;
 
 export type IscopeValue = any;
@@ -34,7 +36,8 @@ export interface Iiterator {
   stateHandle?: IstateHandler,
   traverse(node: object, options?: object): void,
   createScope(type: string): Iscope,
-  createMirrorOperate(type: any): void
+  createMirrorOperate(type: any): void,
+  createMirrorAnimate(animate: IanimateKey): void
 }
 
 export interface Icompiler {
@@ -61,7 +64,9 @@ export interface IstateHandler {
   clearMirrorScope: () => void,
   addOperation: (op: Ioperation) => void,
   clearOperation: () => void,
-  updateCurrent: (current: number) => void
+  updateCurrent: (current: number) => void,
+  updateKeys: (animate: IanimateKey) => void,
+  clearKeys: () => void
 }
 
 // ast shape

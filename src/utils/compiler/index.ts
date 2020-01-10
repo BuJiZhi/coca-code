@@ -24,6 +24,7 @@ class Compiler implements Icompiler {
     this.stateHandler?.clearScope();
     this.stateHandler?.clearMirrorScope();
     this.stateHandler?.clearOperation();
+    this.stateHandler?.clearKeys();
 
     this.scope = new Scope('function', null);
     this.mirrorScope = new Scope('function', null);

@@ -17,8 +17,7 @@ const initialState:CompilerState = {
   ast: {},
   scope: Object.create(null),
   mirrorScope: Object.create(null),
-  operations: [],
-  current: 0
+  operations: []
 }
 
 export function compilerReducer(
@@ -67,11 +66,6 @@ export function compilerReducer(
       return {
         ...state,
         operations: []
-      }
-    case UPDATE_CURRENT:
-      return {
-        ...state,
-        current: action.payload
       }
     default:
       return state;

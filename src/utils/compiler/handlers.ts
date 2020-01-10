@@ -2,6 +2,7 @@ import {
   InodeHandler,
   Iiterator,
  } from '../../types/compiler';
+import { IanimateKey } from '../../types/store';
 
 const nodeHandlers: InodeHandler =  {
 
@@ -13,6 +14,7 @@ const nodeHandlers: InodeHandler =  {
 
   // 变量定义
   VariableDeclaration: nodeIterator => {
+    console.log(nodeIterator.node)
     const kind = nodeIterator.node.kind;
     if (nodeIterator.node.declarations) {
       for (const declaration of nodeIterator.node.declarations) {
@@ -32,11 +34,25 @@ const nodeHandlers: InodeHandler =  {
 
   // 值定义
   Literal: nodeIterator => {
-    console.log(nodeIterator.node)
+
+    let animate: IanimateKey = {
+      on: true,
+      type: 'Literal',
+      pos: [0, 0],
+      payload: Object.create(null)
+    }
+
     if(nodeIterator.node.value === undefined) {
+      animate.payload = {value: undefined}
+      const literalOperate = () => {  return;  }
+      nodeIterator.createMirrorOperate(literalOperate);
+      nodeIterator.createMirrorAnimate(animate);
       return undefined;
     }
-    return nodeIterator.node.value
+    const literalOperate = () => { return; }
+    nodeIterator.createMirrorOperate(literalOperate);
+    nodeIterator.createMirrorAnimate(animate);
+    return nodeIterator.node.value;
   },
 
   // // 标识符

@@ -4,13 +4,24 @@ import {
   UPDATE_CODE,
   UPDATE_TOKENS,
   UPDATE_DOC,
-  UPDATE_KEYS
+  UPDATE_KEYS,
+  CLEAR_KEYS,
+  UPDATE_CURRENT
 } from '../types/store';
 
 const initialState: EditorState = {
   code: '//hello world',
   doc: ['//hello world'],
-  keyArr: {on: false, type: 'varibleDeclare', payload: {name: 'a', value: '1'}}, 
+  current: 0,
+  animate: [{
+    on: true, 
+    type: 'varibleDeclare',
+    pos: [25, 30],
+    payload: {
+      name: 'a', 
+      value: '1',
+      to: [0, 0]
+  }}], 
   tokens: [['//hello', ' ', 'world']]
 }
 
@@ -34,10 +45,23 @@ export function editorReducer(
         ...state,
         doc: action.payload
       }
+    
     case UPDATE_KEYS:
+      const newArr = state.animate;
+      newArr.push(action.payload);
       return {
         ...state,
-        keyArr: action.payload
+        animate: newArr
+      }
+    case CLEAR_KEYS:
+      return {
+        ...state,
+        animate: initialState.animate
+      }
+    case UPDATE_CURRENT:
+      return {
+        ...state,
+        current: action.payload
       }
     default:
       return state;

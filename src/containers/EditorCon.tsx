@@ -27,7 +27,8 @@ import {
   addOperation,
   clearOperation,
   updateCurrent,
-  updateKeys
+  updateKeys,
+  clearKeys
 } from '../store/action';
 
 // 自定义选项
@@ -46,6 +47,7 @@ export interface CustomOptions {
   updateCursor?: (cor: [number, number]) => void,
   handleRootClick?:(e: React.MouseEvent) => void,
   updateKeys?:(keys: IanimateKey) => void,
+  clearKeys?:() => void
 }
 
 interface Options {
@@ -74,7 +76,7 @@ class EditorCon extends Component<CustomOptions & IstateHandler> {
       updateDoc(this.doc.doc);
       updateTokens(this.doc.tokens);
       updateIndex(this.doc.currentIndex);
-      updateKeys(this.doc.keyArr);
+      // updateKeys(this.doc.animate);
     }
   }
 
@@ -85,7 +87,7 @@ class EditorCon extends Component<CustomOptions & IstateHandler> {
       updateDoc(this.doc.doc);
       updateTokens(this.doc.tokens);
       updateIndex(this.doc.currentIndex);
-      updateKeys(this.doc.keyArr);
+      // updateKeys(this.doc.animate);
     }
   }
 
@@ -112,7 +114,9 @@ class EditorCon extends Component<CustomOptions & IstateHandler> {
       clearMirrorScope,
       addOperation,
       clearOperation,
-      updateCurrent
+      updateCurrent,
+      updateKeys,
+      clearKeys,
     } = this.props;
     const compiler = new Compiler(value, {
       updateAst,
@@ -123,10 +127,16 @@ class EditorCon extends Component<CustomOptions & IstateHandler> {
       clearMirrorScope,
       addOperation,
       clearOperation,
-      updateCurrent
+      updateCurrent,
+      updateKeys,
+      clearKeys,
     })
     compiler.init();
     compiler.run();
+  }
+
+  handleNextClick = () => {
+    console.log('next');
   }
 
   render() {
@@ -142,6 +152,7 @@ class EditorCon extends Component<CustomOptions & IstateHandler> {
           }}/>
           <Shell
             handleRunClick={ this.handleRunClick }
+            handleNexClick={ this.handleNextClick }
           />
       </div>
     )
@@ -172,7 +183,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   addOperation: (op: Ioperation) => dispatch(addOperation(op)),
   clearOperation: () => dispatch(clearOperation()),
   updateCurrent: (current: number) => dispatch(updateCurrent(current)),
-  updateKeys: (keys: IanimateKey) => dispatch(updateKeys(keys))
+  updateKeys: (keys: IanimateKey) => dispatch(updateKeys(keys)),
+  clearKeys: () => dispatch(clearKeys())
 })
 
 export default connect(

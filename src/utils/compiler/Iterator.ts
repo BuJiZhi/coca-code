@@ -7,9 +7,9 @@ import {
   InodeHandler,
   Ioptions,
   IstateHandler,
-  Ioperation,
-  InodeTypes
+  InodeTypes,
 } from '../../types/compiler';
+import { IanimateKey } from '../../types//store';
 
 class Iterator implements Iiterator {
 
@@ -62,8 +62,11 @@ class Iterator implements Iiterator {
   createMirrorOperate(fn: ()=>void) {
     const operation = new Operation(fn);
     this.stateHandler.addOperation(operation);
-  } 
+  }
 
+  createMirrorAnimate(animate: IanimateKey) {
+    this.stateHandler.updateKeys(animate);
+  }
 }
 
 export default Iterator;

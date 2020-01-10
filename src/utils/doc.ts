@@ -7,7 +7,7 @@ export interface DocType{
   doc: string[],
   tokens: string[][],
   lineSep: string,
-  keyArr: IanimateKey,
+  animate: IanimateKey[],
   currentIndex: [number, number],
   init(): void,
   setIndex(idx: [number, number]): void,
@@ -27,7 +27,7 @@ export default class Doc implements DocType {
   doc: string[];
   tokens: string[][];
   lineSep: string;
-  keyArr: IanimateKey;
+  animate: IanimateKey[];
   currentIndex:[number, number];
   
   constructor(
@@ -37,7 +37,7 @@ export default class Doc implements DocType {
     this.doc = [];
     this.tokens = [];
     this.lineSep = '\n';
-    this.keyArr = Object.create(null);
+    this.animate = [Object.create(null)];
     this.currentIndex = [0, 0];
   }
 

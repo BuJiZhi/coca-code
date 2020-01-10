@@ -21,7 +21,8 @@ import {
   ADD_OPERATION,
   CLEAR_OPERATION,
   UPDATE_CURRENT,
-  UPDATE_KEYS
+  UPDATE_KEYS,
+  CLEAR_KEYS
 } from '../types/store';
 
 import {
@@ -47,6 +48,12 @@ export function updateKeys(keys: IanimateKey): EditorAtionTypes {
   return {
     type: UPDATE_KEYS,
     payload: keys
+  }
+}
+
+export function clearKeys(): EditorAtionTypes {
+  return {
+    type: CLEAR_KEYS
   }
 }
 
@@ -95,6 +102,13 @@ export function updateCursor(cor: [number, number]) {
   }
 }
 
+export function updateCurrent(index: number) {
+  return {
+    type: UPDATE_CURRENT,
+    payload: index
+  }
+}
+
 /**
  * compiler
  */
@@ -122,13 +136,6 @@ export function addOperation(operation: Ioperation) {
 export function clearOperation() {
   return {
     type: CLEAR_OPERATION
-  }
-}
-
-export function updateCurrent(current: number) {
-  return {
-    type: UPDATE_CURRENT,
-    payload: current
   }
 }
 

@@ -76,7 +76,7 @@ export default class index extends Component<CustomOptions> {
         <div>
           <div>
             <Animate 
-              keyArr={ doc.keyArr }
+              keyArr={ doc.animate[0] }
             />
             <Cursor style={ style }/>
             { //lines
