@@ -3,6 +3,7 @@ import {
   Iiterator,
  } from '../../types/compiler';
 import { IanimateKey } from '../../types/store';
+import { startend2Index } from '../tools';
 
 const nodeHandlers: InodeHandler =  {
 
@@ -14,7 +15,6 @@ const nodeHandlers: InodeHandler =  {
 
   // 变量定义
   VariableDeclaration: nodeIterator => {
-    console.log(nodeIterator.node)
     const kind = nodeIterator.node.kind;
     if (nodeIterator.node.declarations) {
       for (const declaration of nodeIterator.node.declarations) {
@@ -34,24 +34,23 @@ const nodeHandlers: InodeHandler =  {
 
   // 值定义
   Literal: nodeIterator => {
-
+    const { start, end } = nodeIterator.node;
+    const code = nodeIterator.code;
+    const pos = startend2Index(start, end, code);
     let animate: IanimateKey = {
       on: true,
       type: 'Literal',
-      pos: [0, 0],
+      pos: pos,
       payload: Object.create(null)
     }
-
+    const literalOperate = () => { return nodeIterator.node.value; }
     if(nodeIterator.node.value === undefined) {
-      animate.payload = {value: undefined}
-      const literalOperate = () => {  return;  }
-      nodeIterator.createMirrorOperate(literalOperate);
-      nodeIterator.createMirrorAnimate(animate);
+      animate.payload.value = 'undefined';
+      nodeIterator.createMirrorOpAnm(literalOperate, animate);
       return undefined;
     }
-    const literalOperate = () => { return; }
-    nodeIterator.createMirrorOperate(literalOperate);
-    nodeIterator.createMirrorAnimate(animate);
+    animate.payload.value = nodeIterator.node.value;
+    nodeIterator.createMirrorOpAnm(literalOperate, animate);
     return nodeIterator.node.value;
   },
 
@@ -60,7 +59,6 @@ const nodeHandlers: InodeHandler =  {
   //   const name = nodeIterator.node.name;
   //   return nodeIterator.scope.get(name).value;
   // },
-
   // // 表达式
   // ExpressionStatement: nodeIterator => {
   //   return nodeIterator.traverse(nodeIterator.node.expression);

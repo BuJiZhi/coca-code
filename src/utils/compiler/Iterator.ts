@@ -1,6 +1,5 @@
 import nodeHandlers from './handlers';
 import Scope from './Scope';
-import Operation from './Mirror';
 import { 
   Iiterator,
   Iscope, 
@@ -17,24 +16,27 @@ class Iterator implements Iiterator {
   scope: Iscope;
   mirrorScope: Iscope;
   stateHandler: IstateHandler;
+  code: string;
 
   constructor(
     node: InodeTypes, 
     scope: Iscope, 
     mirrorScope: Iscope, 
-    stateHandler: IstateHandler
+    stateHandler: IstateHandler,
+    code: string
     ) {
     this.node = node;
     this.scope = scope;
     this.mirrorScope = mirrorScope;
     this.stateHandler = stateHandler;
+    this.code = code;
   }
 
   traverse(node: InodeTypes, options: Ioptions={}) {
     const scope = options.scope || this.scope;
     const mirrorScope = options.mirrorScope || this.mirrorScope;
     const _eval = nodeHandlers[node.type as keyof InodeHandler];
-    const iterator = new Iterator(node, scope, mirrorScope, this.stateHandler);
+    const iterator = new Iterator(node, scope, mirrorScope, this.stateHandler, this.code);
     if (!_eval) {
       throw new Error(`No handler for ${node.type}`)
     }
@@ -59,13 +61,17 @@ class Iterator implements Iiterator {
     return newMirrorScope;
   }
 
-  createMirrorOperate(fn: ()=>void) {
-    const operation = new Operation(fn);
-    this.stateHandler.addOperation(operation);
+  createMirrorOperate(fn: ()=>any) {
+    this.stateHandler.addOperation(fn);
   }
 
   createMirrorAnimate(animate: IanimateKey) {
     this.stateHandler.updateKeys(animate);
+  }
+
+  createMirrorOpAnm(fn: ()=>void, animate: IanimateKey) {
+    this.createMirrorOperate(fn);
+    this.createMirrorAnimate(animate);
   }
 }
 

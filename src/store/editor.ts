@@ -14,9 +14,9 @@ const initialState: EditorState = {
   doc: ['//hello world'],
   current: 0,
   animate: [{
-    on: true, 
+    on: false, 
     type: 'varibleDeclare',
-    pos: [25, 30],
+    pos: [[0, 0], [100, 100]],
     payload: {
       name: 'a', 
       value: '1',
@@ -56,7 +56,7 @@ export function editorReducer(
     case CLEAR_KEYS:
       return {
         ...state,
-        animate: initialState.animate
+        animate: []
       }
     case UPDATE_CURRENT:
       return {

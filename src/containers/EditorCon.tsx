@@ -47,7 +47,8 @@ export interface CustomOptions {
   updateCursor?: (cor: [number, number]) => void,
   handleRootClick?:(e: React.MouseEvent) => void,
   updateKeys?:(keys: IanimateKey) => void,
-  clearKeys?:() => void
+  clearKeys?:() => void,
+  updateCurrent?: (index: number) => void
 }
 
 interface Options {
@@ -136,7 +137,12 @@ class EditorCon extends Component<CustomOptions & IstateHandler> {
   }
 
   handleNextClick = () => {
-    console.log('next');
+    const { current, animate } = this.props.doc;
+    if (current < animate.length - 1) {
+      const newIdx = current + 1;
+      this.props.compiler.operations[newIdx]();
+      this.props.updateCurrent(newIdx);
+    }
   }
 
   render() {
@@ -151,6 +157,7 @@ class EditorCon extends Component<CustomOptions & IstateHandler> {
             handleRootClick: this.handleRootClick
           }}/>
           <Shell
+            compiler = { this.props.compiler }
             handleRunClick={ this.handleRunClick }
             handleNexClick={ this.handleNextClick }
           />

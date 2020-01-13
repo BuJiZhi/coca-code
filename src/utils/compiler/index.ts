@@ -1,7 +1,7 @@
 import { Parser } from 'acorn';
 import Iterator from './Iterator';
 import Scope from './Scope';
-import { Icompiler, Iiterator, Iscope, IstateHandler } from '../../types/compiler';
+import { Icompiler, Iiterator, Iscope, IstateHandler, Ioperation } from '../../types/compiler';
 class Compiler implements Icompiler {
 
   code: string;
@@ -10,6 +10,7 @@ class Compiler implements Icompiler {
   mirrorScope: Iscope;
   stateHandler: IstateHandler;
   iterator: Iiterator;
+  operations: Ioperation[]
 
   constructor(code: string, stateHandler: IstateHandler) {
     this.code = code;
@@ -18,6 +19,7 @@ class Compiler implements Icompiler {
     this.mirrorScope = Object.create(null);
     this.stateHandler = stateHandler;
     this.iterator = Object.create(null);
+    this.operations = [];
   }
 
   init() {
@@ -25,6 +27,7 @@ class Compiler implements Icompiler {
     this.stateHandler?.clearMirrorScope();
     this.stateHandler?.clearOperation();
     this.stateHandler?.clearKeys();
+    this.stateHandler?.updateCurrent(0);
 
     this.scope = new Scope('function', null);
     this.mirrorScope = new Scope('function', null);
@@ -33,8 +36,17 @@ class Compiler implements Icompiler {
 
     this.ast = Parser.parse(this.code);
     this.stateHandler.updateAst(this.ast);
+
+    this.operations = [];
+    // this.stateHandler
     
-    this.iterator = new Iterator(Object.create(null), this.scope, this.mirrorScope, this.stateHandler);
+    this.iterator = new Iterator(
+      Object.create(null), 
+      this.scope, 
+      this.mirrorScope, 
+      this.stateHandler,
+      this.code
+      );
   }
 
   run() {

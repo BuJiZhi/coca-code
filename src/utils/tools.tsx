@@ -21,3 +21,36 @@ export function click2index(
     Math.round((clickPos[1] - containerOffset[1]) / lineHeight)
   ]
 }
+
+function num2index(
+  num: number,
+  code: string
+): [number, number]{
+  let ln: number = 0;
+  let ch: number = 0;
+  let isbegin = 1;
+  for (let i = 0; i < code.length && i <= num; i++) {
+    if (code[i] === '\n') {
+      ln += 1;
+      isbegin = 1;
+      ch = 0;
+    } else {
+      if (isbegin) {
+        ch = 0;
+        isbegin = 0;
+      } else {
+        ch += 1;
+      }
+    }
+  }
+  return [ln, ch]
+}
+
+export function startend2Index(
+  start: number, 
+  end: number, 
+  code: string
+  ): [[number, number], [number, number]] {
+  return [num2index(start, code), num2index(end, code)]
+}
+

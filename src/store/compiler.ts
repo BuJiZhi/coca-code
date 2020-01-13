@@ -10,7 +10,8 @@ import {
   CLEAR_MIRROR_SCOPE,
   ADD_OPERATION,
   CLEAR_OPERATION,
-  UPDATE_CURRENT
+  UPDATE_CURRENT,
+  UPDATE_OPERATION
 } from '../types/store';
 
 const initialState:CompilerState = {
@@ -54,6 +55,11 @@ export function compilerReducer(
       return {
         ...state,
         mirrorScope: {}
+      }
+    case UPDATE_OPERATION:
+      return {
+        ...state,
+        operations: action.payload
       }
     case ADD_OPERATION:
       const op = state.operations;

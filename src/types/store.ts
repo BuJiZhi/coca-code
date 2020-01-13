@@ -1,21 +1,21 @@
-import { Dispatch } from 'redux';
-import { Iscope } from './compiler';
+import { Iscope, Ioperation } from './compiler';
 
 export type Tokens = string[][];
-export type DocType = string[]
+export type DocType = string[];
+export type Position = [number, number];
 
 /**
  * styles
  */
 export interface Styles {
-  containerOffset: [number, number],
+  containerOffset: Position,
   fontWidth: number,
-  currenIndex: [number, number],
+  currenIndex: Position,
   fontSize?: number,
   lineHeight: number,
   color?: [number, number, number],
-  clickPos: [number, number],
-  cursorPos?: [number, number]
+  clickPos: Position,
+  cursorPos?: Position
 }
 export const UPDATE_FONTWIDTH = 'UPDATE_FONTWIDTH';
 export const SET_OFFSET = 'SET_OFFSET';
@@ -28,19 +28,19 @@ export interface UpdateFontWidth {
 }
 export interface SetOffsetAction {
   type: typeof SET_OFFSET,
-  payload: [number, number]
+  payload: Position
 }
 export interface UpdateClickposAction {
   type: typeof UPDATE_CLICKPOS,
-  payload: [number, number]
+  payload: Position
 }
 export interface UpdateIndexAction {
   type: typeof UPDATE_INDEX,
-  payload: [number, number]
+  payload: Position
 }
 export interface UpdateCursorAction {
   type: typeof UPDATE_CURSOR,
-  payload: [number, number]
+  payload: Position
 }
 export type StyleActionTypes = 
 UpdateFontWidth |
@@ -63,7 +63,7 @@ export interface EditorState {
 export interface IanimateKey {
   on: boolean,
   type: string,
-  pos: [number, number],
+  pos: [Position, Position],
   payload: any
 }
 
@@ -129,6 +129,7 @@ export const UPDATE_MIRROR_SCOPE = 'UPDATE_MIRROR_SCOPE';
 export const CLEAR_MIRROR_SCOPE = 'CLEAR_MIRROR_SCOPE';
 export const ADD_OPERATION = 'ADD_OPERATION';
 export const CLEAR_OPERATION = 'CLEAR_OPERATION';
+export const UPDATE_OPERATION = 'UPDATE_OPRATION';
 
 interface UpdateMirrorScopeAction {
   type: typeof UPDATE_MIRROR_SCOPE,
@@ -148,11 +149,17 @@ interface ClearOperationAction {
   type: typeof CLEAR_OPERATION
 }
 
+interface UpdateOperationAction {
+  type: typeof UPDATE_OPERATION,
+  payload: Ioperation[]
+}
+
 export type MirrorActionTypes = 
 UpdateMirrorScopeAction |
 AddOperationAction |
 ClearOperationAction |
-ClearMirrorScopeAction
+ClearMirrorScopeAction |
+UpdateOperationAction;
 
 /**
  * scope

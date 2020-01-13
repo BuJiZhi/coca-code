@@ -1,8 +1,8 @@
-import { IanimateKey } from "./store";
+import { IanimateKey, DocType } from "./store";
 
 export type Ivalue = any;
-
 export type IscopeValue = any;
+export type Ioperation = () => void;
 
 export interface IsimpleValue {
   kind: string,
@@ -34,25 +34,22 @@ export interface Iiterator {
   scope: Iscope,
   mirrorScope: Iscope,
   stateHandle?: IstateHandler,
+  code: string,
   traverse(node: object, options?: object): void,
   createScope(type: string): Iscope,
   createMirrorOperate(type: any): void,
-  createMirrorAnimate(animate: IanimateKey): void
+  createMirrorAnimate(animate: IanimateKey): void,
+  createMirrorOpAnm(fn:()=>void, animate:IanimateKey): void
 }
 
 export interface Icompiler {
   code: string,
   ast: object,
+  operations: Ioperation[],
   iterator?: Iiterator,
   scope: Iscope,
   mirrorScope: Iscope,
   stateHandler: IstateHandler
-}
-
-export interface Ioperation {
-  operate(): void,
-  begin: number,
-  end: number
 }
 
 export interface IstateHandler {
@@ -75,6 +72,11 @@ const VariableDeclaration = 'VariableDeclaration';
 const VariableDeclartor = 'VariableDeclartor';
 const BinaryExpression = 'BinaryExpression';
 const Literal = 'Literal';
+
+export interface Icommon {
+  start: number,
+  end: number
+}
 
 export interface Iid {
   type: string,
@@ -114,6 +116,7 @@ export interface Iliteral {
 }
 
 export type InodeTypes = 
+Icommon &
 IprogramNode &
 IVariableDecalrations &
 IvariableDeclartor &

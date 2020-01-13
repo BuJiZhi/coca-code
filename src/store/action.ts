@@ -2,6 +2,7 @@ import {
   EditorAtionTypes,
   CompilerActionTypes,
   StyleActionTypes,
+  MirrorActionTypes,
   Tokens,
   IanimateKey,
   UPDATE_CODE, 
@@ -22,7 +23,8 @@ import {
   CLEAR_OPERATION,
   UPDATE_CURRENT,
   UPDATE_KEYS,
-  CLEAR_KEYS
+  CLEAR_KEYS,
+  UPDATE_OPERATION
 } from '../types/store';
 
 import {
@@ -165,3 +167,9 @@ export function clearScope(): CompilerActionTypes {
   }
 }
 
+export function updateOperation(operations: Ioperation[]): MirrorActionTypes {
+  return {
+    type: UPDATE_OPERATION,
+    payload: operations
+  }
+}
