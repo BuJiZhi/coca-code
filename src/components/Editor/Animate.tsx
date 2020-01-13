@@ -10,38 +10,54 @@ interface Ianimate {
 
 
 const Animate: React.FC<Ianimate> = ({keyArr, style}) => {
-  const { pos, payload, type, on } = keyArr;
+  
   const { lineHeight, fontWidth, fontSize, color,  } = style;
-  const propsTypes = {
-    varibleDeclare: useSpring({
-      from: {
-        position: 'absolute'
-      },
-      to:{}
-    }),
-    Literal: useSpring({
-      to: {
-        color: 'blue',
-        bold: 'normal'
-      },
-      from : {
-        color: 'red',
-      },
-      config: {
-        mass: 10
-      }
-    })
+  const springFac = (animateInfo:  IanimateKey) => {
+    const { pos, payload, type, on } = animateInfo;
+    switch (type) {
+      case 'VariableDeclaration':
+        console.log(payload)
+        return {
+          from: {
+            opacity: 0,
+            left: `${payload.pos[0][1] * fontWidth}px`,
+            top: `${payload.pos[0][0] * lineHeight + 3}px`,
+          },
+          opacity: 1,
+          left: `${pos[0][1] * fontWidth}px`,
+          top: `${pos[0][0] * lineHeight + 3}px`,
+          value: payload.payload.value
+        }
+      case 'Literal':
+        return {
+          to: {
+            color: 'blue',
+            bold: 'normal',
+            value: payload.value,
+            left: `${pos[0][1] * fontWidth}px`,
+            top: `${pos[0][0] * lineHeight + 3}px`,
+          },
+          from : {
+            color: 'red'
+          },
+          config: {
+            mass: 1
+          }
+        }
+      default:
+        return {};
+    }
   }
+
   const commonStyle = {
     color,
     fontSize,
     position: 'absolute',
-    left: `${pos[0][1] * fontWidth}px`,
-    top: `${pos[0][0] * lineHeight + 3}px`,
     zIndex: 10000
   }
+  console.log(springFac(keyArr))
   // @ts-ignore
-  const props = propsTypes[type];
+  const props = useSpring(springFac(keyArr));
   
   return (
     <div>
@@ -51,7 +67,7 @@ const Animate: React.FC<Ianimate> = ({keyArr, style}) => {
         ? <animated.span 
             className="animateRoot" 
             style={{...commonStyle, ...props}}
-          >{ keyArr.payload.value }</animated.span>
+          >{ props.value }</animated.span>
         : ''
       }
     </div>

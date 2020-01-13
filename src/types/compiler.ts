@@ -35,7 +35,7 @@ export interface Iiterator {
   mirrorScope: Iscope,
   stateHandle?: IstateHandler,
   code: string,
-  traverse(node: object, options?: object): void,
+  traverse(node: object, options?: object): any,
   createScope(type: string): Iscope,
   createMirrorOperate(type: any): void,
   createMirrorAnimate(animate: IanimateKey): void,
@@ -73,6 +73,11 @@ const VariableDeclartor = 'VariableDeclartor';
 const BinaryExpression = 'BinaryExpression';
 const Literal = 'Literal';
 
+export interface ItarversBack {
+  value: any,
+  animate: IanimateKey
+}
+
 export interface Icommon {
   start: number,
   end: number
@@ -80,7 +85,9 @@ export interface Icommon {
 
 export interface Iid {
   type: string,
-  name: string
+  name: string,
+  start: number,
+  end: number
 }
 
 export interface IprogramNode {
@@ -115,20 +122,25 @@ export interface Iliteral {
   raw: any
 }
 
+export interface Iidentifier {
+  name: string
+}
+
 export type InodeTypes = 
 Icommon &
 IprogramNode &
 IVariableDecalrations &
 IvariableDeclartor &
 IbinaryExpression &
-Iliteral;
+Iliteral &
+Iidentifier;
 
 export interface InodeHandler {
-  Program(node: Iiterator): void,
-  VariableDeclaration(node: Iiterator): void,
+  Program(node: Iiterator): any,
+  VariableDeclaration(node: Iiterator): any,
   Literal(node: Iiterator): any,
-  // nodeIterator(node: Iiterator): void,
-  // Identifier(node: Iiterator): void,
+  // nodeIterator(node: Iiterator): any,
+  Identifier(node: Iiterator): any,
   // ExpressionStatement(node: Iiterator): void,
   // AssignmentExpression(node: Iiterator): void,
   // BinaryExpression(node: Iiterator): void,

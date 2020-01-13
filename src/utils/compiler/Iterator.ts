@@ -7,6 +7,7 @@ import {
   Ioptions,
   IstateHandler,
   InodeTypes,
+  ItarversBack
 } from '../../types/compiler';
 import { IanimateKey } from '../../types//store';
 
@@ -32,7 +33,7 @@ class Iterator implements Iiterator {
     this.code = code;
   }
 
-  traverse(node: InodeTypes, options: Ioptions={}) {
+  traverse(node: InodeTypes, options: Ioptions={}): ItarversBack {
     const scope = options.scope || this.scope;
     const mirrorScope = options.mirrorScope || this.mirrorScope;
     const _eval = nodeHandlers[node.type as keyof InodeHandler];

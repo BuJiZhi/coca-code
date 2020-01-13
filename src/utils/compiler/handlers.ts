@@ -1,6 +1,7 @@
 import { 
   InodeHandler,
   Iiterator,
+  ItarversBack
  } from '../../types/compiler';
 import { IanimateKey } from '../../types/store';
 import { startend2Index } from '../tools';
@@ -15,19 +16,29 @@ const nodeHandlers: InodeHandler =  {
 
   // 变量定义
   VariableDeclaration: nodeIterator => {
+    // const { start, end } = nodeIterator.node;
+    const code = nodeIterator.code;
     const kind = nodeIterator.node.kind;
     if (nodeIterator.node.declarations) {
       for (const declaration of nodeIterator.node.declarations) {
-        const { name } = declaration.id;
-        const value = declaration.init ?
+        const { name, start, end } = declaration.id;
+        const pos = startend2Index(start, end, code);
+        let animate: IanimateKey = {
+          on: true,
+          type: 'VariableDeclaration',
+          pos: pos,
+          payload: Object.create(null)
+        }
+        const backInfo = declaration.init ?
           nodeIterator.traverse(declaration.init) :
-          undefined;
-        nodeIterator.scope.declare(name, value, kind);
+          {value: undefined};
+        nodeIterator.scope.declare(name, backInfo.value, kind);
+        animate.payload = backInfo.animate;
         const mirrorOperate = (): void => {
           // 在state添加了mirrorScope以后，如果改变了它的值，store里是否会更新？
-          nodeIterator.mirrorScope.declare(name, value, kind);
+          nodeIterator.mirrorScope.declare(name, backInfo.value, kind);
         }
-        nodeIterator.createMirrorOperate(mirrorOperate);
+        nodeIterator.createMirrorOpAnm(mirrorOperate, animate);
       }
     }
   },
@@ -47,16 +58,28 @@ const nodeHandlers: InodeHandler =  {
     if(nodeIterator.node.value === undefined) {
       animate.payload.value = 'undefined';
       nodeIterator.createMirrorOpAnm(literalOperate, animate);
-      return undefined;
+      return {value: undefined, animate};
     }
     animate.payload.value = nodeIterator.node.value;
     nodeIterator.createMirrorOpAnm(literalOperate, animate);
-    return nodeIterator.node.value;
+    return {value: nodeIterator.node.value, animate};
   },
 
-  // // 标识符
+  // 标识符
   // Identifier: nodeIterator => {
-  //   const name = nodeIterator.node.name;
+  //   const { code, node } = nodeIterator;
+  //   const { name, start, end } = node;
+  //   const pos = startend2Index(start, end, code);
+  //   const IdentifierOperate = () => {
+  //     return;
+  //   }
+  //   let animate = {
+  //     on: true,
+  //     type: 'Identifier',
+  //     pos,
+  //     payload: Object.create(null);
+  //   }
+  //   nodeIterator.createMirrorOpAnm(IdentifierOperate, animate);
   //   return nodeIterator.scope.get(name).value;
   // },
   // // 表达式

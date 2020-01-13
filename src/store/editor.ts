@@ -15,7 +15,7 @@ const initialState: EditorState = {
   current: 0,
   animate: [{
     on: false, 
-    type: 'varibleDeclare',
+    type: 'none',
     pos: [[0, 0], [100, 100]],
     payload: {
       name: 'a', 
