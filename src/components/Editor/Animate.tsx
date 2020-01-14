@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './Animate.css';
-import { useSpring,animated } from 'react-spring';
+import { useSpring, animated, useTransition } from 'react-spring';
 import { IanimateKey, Styles } from '../../types/store';
 
 interface Ianimate {
@@ -8,25 +8,24 @@ interface Ianimate {
   style: Styles
 }
 
-
 const Animate: React.FC<Ianimate> = ({keyArr, style}) => {
-  
   const { lineHeight, fontWidth, fontSize, color,  } = style;
+  const [reload, change] = useState(false);
   const springFac = (animateInfo:  IanimateKey) => {
     const { pos, payload, type, on } = animateInfo;
     switch (type) {
       case 'VariableDeclaration':
-        console.log(payload)
         return {
           from: {
             opacity: 0,
             left: `${payload.pos[0][1] * fontWidth}px`,
             top: `${payload.pos[0][0] * lineHeight + 3}px`,
+            value: payload.payload.value
           },
           opacity: 1,
           left: `${pos[0][1] * fontWidth}px`,
           top: `${pos[0][0] * lineHeight + 3}px`,
-          value: payload.payload.value
+          value: payload.payload.value,
         }
       case 'Literal':
         return {
@@ -38,7 +37,7 @@ const Animate: React.FC<Ianimate> = ({keyArr, style}) => {
             top: `${pos[0][0] * lineHeight + 3}px`,
           },
           from : {
-            color: 'red'
+            color: 'red',
           },
           config: {
             mass: 1
@@ -55,22 +54,20 @@ const Animate: React.FC<Ianimate> = ({keyArr, style}) => {
     position: 'absolute',
     zIndex: 10000
   }
-  console.log(springFac(keyArr))
   // @ts-ignore
   const props = useSpring(springFac(keyArr));
-  
   return (
-    <div>
-      {
-        // @ts-ignore
-        keyArr.on
-        ? <animated.span 
-            className="animateRoot" 
-            style={{...commonStyle, ...props}}
-          >{ props.value }</animated.span>
-        : ''
-      }
-    </div>
+    reload 
+    ? <animated.div 
+      className="animateRoot" 
+      style={{...commonStyle, ...props}}
+      onClick={() => change(!reload)}
+    >{ props.value }</animated.div>
+    : <animated.div 
+        className="animateRoot" 
+        style={{...commonStyle, ...props}}
+        onClick={() => change(!reload)}
+      >{ props.value }</animated.div>
   );
 }
 

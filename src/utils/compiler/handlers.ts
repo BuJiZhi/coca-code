@@ -66,22 +66,22 @@ const nodeHandlers: InodeHandler =  {
   },
 
   // 标识符
-  // Identifier: nodeIterator => {
-  //   const { code, node } = nodeIterator;
-  //   const { name, start, end } = node;
-  //   const pos = startend2Index(start, end, code);
-  //   const IdentifierOperate = () => {
-  //     return;
-  //   }
-  //   let animate = {
-  //     on: true,
-  //     type: 'Identifier',
-  //     pos,
-  //     payload: Object.create(null);
-  //   }
-  //   nodeIterator.createMirrorOpAnm(IdentifierOperate, animate);
-  //   return nodeIterator.scope.get(name).value;
-  // },
+  Identifier: nodeIterator => {
+    const { code, node } = nodeIterator;
+    const { name, start, end } = node;
+    const pos = startend2Index(start, end, code);
+    const IdentifierOperate = () => {
+      return;
+    }
+    let animate = {
+      on: true,
+      type: 'Identifier',
+      pos,
+      payload: Object.create(null)
+    }
+    nodeIterator.createMirrorOpAnm(IdentifierOperate, animate);
+    return nodeIterator.scope.get(name).value;
+  },
   // // 表达式
   // ExpressionStatement: nodeIterator => {
   //   return nodeIterator.traverse(nodeIterator.node.expression);
