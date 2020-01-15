@@ -25,3 +25,4 @@ function num2index(
 function startend2Index(start, end, code) {
   return [num2index(start, code), num2index(end, code)]
 }
+
