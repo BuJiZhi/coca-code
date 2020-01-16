@@ -6,7 +6,9 @@ export type Ioperation = () => void;
 
 export interface IsimpleValue {
   kind: string,
-  value: any
+  value: any,
+  get(): any,
+  set(value: any): void
 }
 
 export interface Iscope {
@@ -90,26 +92,26 @@ export interface Iid {
   end: number
 }
 
-export interface IprogramNode {
+interface IprogramNode {
   type: typeof Program,
   body: object[],
   sourceType?: string,
   declarations?: IvariableDeclartor[],
 }
 
-export interface IVariableDecalrations {
+interface IVariableDecalrations {
   type: typeof VariableDeclaration,
   declarations: IvariableDeclartor[],
   kind: string
 }
 
-export interface IvariableDeclartor {
+interface IvariableDeclartor {
   type: typeof VariableDeclartor,
   id: Iid,
   init?: IbinaryExpression
 }
 
-export interface IbinaryExpression {
+interface IbinaryExpression {
   type: typeof BinaryExpression,
   operator: string,
   left: InodeTypes,
@@ -126,6 +128,10 @@ export interface Iidentifier {
   name: string
 }
 
+interface Iexpression {
+  expression: any
+}
+
 export type InodeTypes = 
 Icommon &
 IprogramNode &
@@ -133,7 +139,8 @@ IVariableDecalrations &
 IvariableDeclartor &
 IbinaryExpression &
 Iliteral &
-Iidentifier;
+Iidentifier &
+Iexpression;
 
 export interface InodeHandler {
   Program(node: Iiterator): any,
@@ -141,8 +148,9 @@ export interface InodeHandler {
   Literal(node: Iiterator): any,
   // nodeIterator(node: Iiterator): any,
   Identifier(node: Iiterator): any,
-  // ExpressionStatement(node: Iiterator): void,
-  // AssignmentExpression(node: Iiterator): void,
+  ExpressionStatement(node: Iiterator): any,
+  AssignmentExpressionMap: any,
+  AssignmentExpression(node: Iiterator): void,
   // BinaryExpression(node: Iiterator): void,
   // IfStatement(node: Iiterator): void,
   // BlockStatement(node: Iiterator): void,

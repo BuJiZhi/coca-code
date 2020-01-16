@@ -1,7 +1,8 @@
 import { 
   InodeHandler,
   Iiterator,
-  ItarversBack
+  ItarversBack,
+  IsimpleValue
  } from '../../types/compiler';
 import { IanimateKey } from '../../types/store';
 import { startend2Index } from '../tools';
@@ -82,24 +83,24 @@ const nodeHandlers: InodeHandler =  {
     nodeIterator.createMirrorOpAnm(IdentifierOperate, animate);
     return nodeIterator.scope.get(name).value;
   },
-  // // 表达式
-  // ExpressionStatement: nodeIterator => {
-  //   return nodeIterator.traverse(nodeIterator.node.expression);
-  // },
+  // 表达式
+  ExpressionStatement: nodeIterator => {
+    return nodeIterator.traverse(nodeIterator.node.expression);
+  },
 
-  // AssignmentExpressionMap: {
-  //  "=": (simpleValue, value) => simpleValue.set(value),
-  //  "++": (simpleValue) => simpleValue.set(++simpleValue.value)
-  // },
+  AssignmentExpressionMap: {
+   "=": (simpleValue: IsimpleValue, value: any) => simpleValue.set(value),
+   "++": (simpleValue: IsimpleValue) => simpleValue.set(++simpleValue.value)
+  },
 
-  // // 赋值表达式
-  // AssignmentExpression: nodeIterator => {
-  //   const node = nodeIterator.node;
-  //   if (node.left.type === 'Identifier') {
-  //     const simpleValue = nodeIterator.scope.get(node.left.name);
-  //     nodeHandlers.AssignmentExpressionMap[node.operator](simpleValue, nodeIterator.traverse(node.right));
-  //   }
-  // },
+  // 赋值表达式
+  AssignmentExpression: nodeIterator => {
+    const node = nodeIterator.node;
+    if (node.left.type === 'Identifier') {
+      const simpleValue = nodeIterator.scope.get(node.left.name);
+      nodeHandlers.AssignmentExpressionMap[node.operator](simpleValue, nodeIterator.traverse(node.right));
+    }
+  },
 
   // // 运算操作
   // BinaryExpressionOperatorMap: {

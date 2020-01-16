@@ -19,7 +19,7 @@ const initialState: EditorState = {
     pos: [[0, 0], [100, 100]],
     payload: {
       name: 'a', 
-      value: '1',
+      value: '',
       to: [0, 0]
   }}], 
   tokens: [['//hello', ' ', 'world']]
