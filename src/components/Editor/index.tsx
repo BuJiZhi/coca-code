@@ -57,7 +57,6 @@ export default class index extends Component<CustomOptions> {
         // 让div获取焦点
         tabIndex={ 0 }
       >
-        {/* measure */}
         <Measure 
           updateFont={ updateFontWidth }
           styles={ style }
@@ -72,13 +71,15 @@ export default class index extends Component<CustomOptions> {
         <div className="textarea">
           <textarea name="codeInput"></textarea>
         </div>
-        {/* lines */}
         <div>
           <div>
-            <Animate 
-              keyArr={ doc.animate[doc.current] }
-              style = { style }
-            />
+            {doc.animate.map((item, index) => 
+                <Animate 
+                  key={ index }
+                  keyArr={ item }
+                  style={ style }
+                />)
+            }
             <Cursor style={ style }/>
             { //lines
               doc.tokens.map((lineTokens, index) => 

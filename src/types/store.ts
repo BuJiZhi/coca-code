@@ -1,4 +1,5 @@
 import { Iscope, Ioperation } from './compiler';
+import { IrenderResult, Icontent, Iframe, Itrack } from './animate';
 
 export type Tokens = string[][];
 export type DocType = string[];
@@ -57,14 +58,8 @@ export interface EditorState {
   doc: DocType,
   tokens: Tokens,
   current: number,
-  animate: IanimateKey[]
-}
-
-export interface IanimateKey {
-  on: boolean,
-  type: string,
-  pos: [Position, Position],
-  payload: any
+  tracks: Itrack[],
+  renderResult: IrenderResult
 }
 
 export const UPDATE_CODE = 'UPDATE_CODE';
@@ -72,7 +67,9 @@ export const UPDATE_TOKENS = 'UPDATE_TOKENS';
 export const UPDATE_DOC = 'UPDATE_DOC';
 export const UPDATE_KEYS = 'UPDATE_KEYS';
 export const CLEAR_KEYS = 'CLEAR_KEYS';
-export const UPDATE_CURRENT = 'UPDATE_CURRENT'
+export const UPDATE_CURRENT = 'UPDATE_CURRENT';
+export const UPDATE_TRACKS = 'UPDATE_TRACKS';
+export const UPDATE_RENDERESULT = 'UPDATE_RENDERRESULT'
 
 export interface UpdateCodeAction {
   type: typeof UPDATE_CODE,
@@ -89,9 +86,9 @@ export interface UpdateDocAction {
   payload: string[]
 }
 
-export interface UpdateKeysAction {
-  type: typeof UPDATE_KEYS,
-  payload: IanimateKey
+export interface UpdateTracksAction {
+  type: typeof UPDATE_TRACKS,
+  payload: Itrack
 }
 
 export interface ClearKeysAction {
@@ -103,13 +100,19 @@ export interface UpdateCurrentAction {
   payload: number
 }
 
+export interface UpdateRenderResult {
+  type: typeof UPDATE_RENDERESULT,
+  payload: Iframe[]
+}
+
 export type EditorAtionTypes = 
 UpdateCodeAction |
 UpdateTokensAction |
 UpdateDocAction |
-UpdateKeysAction |
+UpdateTracksAction |
 ClearKeysAction |
-UpdateCurrentAction;
+UpdateCurrentAction |
+UpdateRenderResult;
 
 /**
  * mirror scope

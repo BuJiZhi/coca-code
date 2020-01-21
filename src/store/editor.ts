@@ -4,25 +4,36 @@ import {
   UPDATE_CODE,
   UPDATE_TOKENS,
   UPDATE_DOC,
-  UPDATE_KEYS,
-  CLEAR_KEYS,
-  UPDATE_CURRENT
+  UPDATE_TRACKS,
+  UPDATE_CURRENT,
+  UPDATE_RENDERESULT
 } from '../types/store';
 
 const initialState: EditorState = {
   code: '//hello world',
   doc: ['//hello world'],
+  tokens: [['//hello', ' ', 'world']],
   current: 0,
-  animate: [{
-    on: false, 
-    type: 'none',
-    pos: [[0, 0], [100, 100]],
-    payload: {
-      name: 'a', 
+  tracks: [{
+    begin: 0,
+    end: 0,
+    content: {
+      type: 't0',
+      startpos: [0, 0],
+      endpos: [0, 0],
+      process: 'enter',
+      key: 'sp-0',
       value: '',
-      to: [0, 0]
-  }}], 
-  tokens: [['//hello', ' ', 'world']]
+    }
+  }],
+  renderResult: [[{
+    type: 't0',
+    startpos: [0, 0],
+    endpos: [0, 0],
+    process: 'enter',
+    key: 'sp-0',
+    value: null
+  }]]
 }
 
 export function editorReducer(
@@ -45,18 +56,15 @@ export function editorReducer(
         ...state,
         doc: action.payload
       }
-    
-    case UPDATE_KEYS:
-      const newArr = state.animate;
-      newArr.push(action.payload);
+    case UPDATE_TRACKS:
       return {
         ...state,
-        animate: newArr
+        tracks: action.payload
       }
-    case CLEAR_KEYS:
+    case UPDATE_RENDERESULT:
       return {
         ...state,
-        animate: []
+        renderResult: action.payload
       }
     case UPDATE_CURRENT:
       return {

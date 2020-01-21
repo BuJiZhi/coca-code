@@ -26,3 +26,15 @@ function startend2Index(start, end, code) {
   return [num2index(start, code), num2index(end, code)]
 }
 
+{
+  on: true,
+  stay: true,
+  leave: true,
+  payload: {
+    pos: [number, number],
+    startpos: [],
+    endpos: [],
+    value: 'string'
+  }
+}
+

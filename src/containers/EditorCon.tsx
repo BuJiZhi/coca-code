@@ -7,7 +7,7 @@ import { Dispatch } from 'redux';
 import Doc, { DocType } from '../utils/doc';
 import Compiler from '../utils/compiler/index';
 import { click2index } from '../utils/tools';
-import { EditorState, Styles,Tokens, IanimateKey } from '../types/store';
+import { EditorState, Styles,Tokens } from '../types/store';
 import { Iscope, Ioperation, Icompiler, IstateHandler } from '../types/compiler';
 import { 
   updateCode, 
