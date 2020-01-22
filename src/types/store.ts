@@ -59,7 +59,8 @@ export interface EditorState {
   tokens: Tokens,
   current: number,
   tracks: Itrack[],
-  renderResult: IrenderResult
+  renderResult: IrenderResult,
+  initialTrack: Icontent
 }
 
 export const UPDATE_CODE = 'UPDATE_CODE';

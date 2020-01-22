@@ -23,49 +23,50 @@ class Player extends Component<Iprops> {
   //   updateCurrent(idx);
   // }
 
-  // init = (): void => {
-  //   const { tracks, renderResult } = this.props;
-  //   let end = 0;
-  //   // 计算轨道长度
-  //   for (let i = 0; i < tracks.length; i++) {
-  //     if (tracks[i].end > end) {
-  //       end = tracks[i].end;
-  //     }
-  //   }
-  //   // 轨道初始化
-  //   for (let j = 0; j < end; j++) {
-  //     renderResult[j] = [initialTrack];
-  //   }
-  // }
-  // // 每个帧一个key，还是每个轨道一个key？
-  // animateRender = (): void => {
-  //   const { tracks, renderResult } = this.props;
-  //   for (let i = 0; i < tracks.length; i++) {
-  //     const { begin, end, content } = tracks[i];
-  //     // 轨道切割
-  //     for (let j = begin; j < end; j++) {
-  //       if (j === begin) {
-  //         content.process = 'enter';
-  //       } else {
-  //         content.process = 'stay';
-  //       }
-  //       const newContent = deepCopy(content);
-  //       renderResult[j].push(newContent);
-  //     }
-  //   }
-  // }
+  init = (): void => {
+    const { tracks, renderResult, initialTrack } = this.props.editor;
+    let end = 0;
+    // 计算轨道长度
+    for (let i = 0; i < tracks.length; i++) {
+      if (tracks[i].end > end) {
+        end = tracks[i].end;
+      }
+    }
+    // 轨道初始化
+    for (let j = 0; j < end; j++) {
+      renderResult[j] = [initialTrack];
+    }
+  }
+  
+  // 每个帧一个key，还是每个轨道一个key？
+  animateRender = (): void => {
+    const { tracks, renderResult } = this.props.editor;
+    for (let i = 0; i < tracks.length; i++) {
+      const { begin, end, content } = tracks[i];
+      // 轨道切割
+      for (let j = begin; j < end; j++) {
+        if (j === begin) {
+          content.process = 'enter';
+        } else {
+          content.process = 'stay';
+        }
+        const newContent = deepCopy(content);
+        renderResult[j].push(newContent);
+      }
+    }
+  }
 
-  // getCurrentFrame(): Iframe {
-  //   return this.renderResult[this.current];
-  // }
+  getCurrentFrame(): Iframe {
+    const { editor } = this.props;
+    const { renderResult, current } = editor;
+    return renderResult[current]; 
+  }
 
   render() {
     const { editor } = this.props;
-    const { renderResult, current } = editor;
-    const currentFrame = renderResult[current]; 
     return (
       <Frame
-        currentFrame={ currentFrame }
+        currentFrame={ this.getCurrentFrame() }
         editor={ editor }
       />
     )

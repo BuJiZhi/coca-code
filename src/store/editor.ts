@@ -33,7 +33,15 @@ const initialState: EditorState = {
     process: 'enter',
     key: 'sp-0',
     value: 'hello'
-  }]]
+  }]],
+  initialTrack: {
+    type: 't0',
+    startpos: [0, 0],
+    endpos: [0, 0],
+    process: 'enter',
+    key: 'sp-0',
+    value: '',
+  }
 }
 
 export function editorReducer(
