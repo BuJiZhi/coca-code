@@ -4,7 +4,6 @@ import {
   StyleActionTypes,
   MirrorActionTypes,
   Tokens,
-  IanimateKey,
   UPDATE_CODE, 
   UPDATE_TOKENS,
   UPDATE_FONTWIDTH,
@@ -24,7 +23,7 @@ import {
   UPDATE_CURRENT,
   UPDATE_KEYS,
   CLEAR_KEYS,
-  UPDATE_OPERATION
+  UPDATE_OPERATION,
 } from '../types/store';
 
 import {
@@ -43,13 +42,6 @@ export function updateTokens(tokens: Tokens): EditorAtionTypes {
   return {
     type: UPDATE_TOKENS,
     payload: tokens
-  }
-}
-
-export function updateKeys(keys: IanimateKey): EditorAtionTypes {
-  return {
-    type: UPDATE_KEYS,
-    payload: keys
   }
 }
 

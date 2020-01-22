@@ -10,7 +10,7 @@ class Compiler implements Icompiler {
   mirrorScope: Iscope;
   stateHandler: IstateHandler;
   iterator: Iiterator;
-  operations: Ioperation[]
+  operations: Ioperation[];
 
   constructor(code: string, stateHandler: IstateHandler) {
     this.code = code;

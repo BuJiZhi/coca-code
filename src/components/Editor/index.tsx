@@ -4,7 +4,7 @@ import './common.css';
 import Cursor from './Cursor';
 import Line from './Line';
 import Measure from './Measure';
-import Animate from './Animate';
+import PlayerCon from '../../containers/PlayerCon';
 import { CustomOptions } from '../../containers/EditorCon';
 
 export default class index extends Component<CustomOptions> {
@@ -73,13 +73,14 @@ export default class index extends Component<CustomOptions> {
         </div>
         <div>
           <div>
-            {doc.animate.map((item, index) => 
+            <PlayerCon />
+            {/* {doc.animate.map((item, index) => 
                 <Animate 
                   key={ index }
                   keyArr={ item }
                   style={ style }
                 />)
-            }
+            } */}
             <Cursor style={ style }/>
             { //lines
               doc.tokens.map((lineTokens, index) => 

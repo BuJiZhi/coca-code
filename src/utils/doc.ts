@@ -1,13 +1,11 @@
 import { reg } from '../utils/jsTokens';
 import { KeyboardEvent } from 'react';
-import { IanimateKey } from '../types/store';
 
 export interface DocType{
   code: string,
   doc: string[],
   tokens: string[][],
   lineSep: string,
-  animate: IanimateKey[],
   currentIndex: [number, number],
   init(): void,
   setIndex(idx: [number, number]): void,
@@ -27,7 +25,6 @@ export default class Doc implements DocType {
   doc: string[];
   tokens: string[][];
   lineSep: string;
-  animate: IanimateKey[];
   currentIndex:[number, number];
   
   constructor(
@@ -37,7 +34,6 @@ export default class Doc implements DocType {
     this.doc = [];
     this.tokens = [];
     this.lineSep = '\n';
-    this.animate = [Object.create(null)];
     this.currentIndex = [0, 0];
   }
 

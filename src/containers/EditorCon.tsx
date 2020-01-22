@@ -27,7 +27,6 @@ import {
   addOperation,
   clearOperation,
   updateCurrent,
-  updateKeys,
   clearKeys
 } from '../store/action';
 
@@ -46,7 +45,6 @@ export interface CustomOptions {
   updateIndex?: (index:[number, number]) => void,
   updateCursor?: (cor: [number, number]) => void,
   handleRootClick?:(e: React.MouseEvent) => void,
-  updateKeys?:(keys: IanimateKey) => void,
   clearKeys?:() => void,
   updateCurrent?: (index: number) => void
 }
@@ -71,24 +69,22 @@ class EditorCon extends Component<CustomOptions & IstateHandler> {
 
   handleKeyPress = (e: React.KeyboardEvent): void => {
     e.preventDefault()
-    const { updateDoc, updateTokens, updateIndex, updateKeys } = this.props;
+    const { updateDoc, updateTokens, updateIndex } = this.props;
     this.doc.keyPressHandler(e);
-    if (updateDoc && updateTokens && updateIndex && updateKeys) {
+    if (updateDoc && updateTokens && updateIndex) {
       updateDoc(this.doc.doc);
       updateTokens(this.doc.tokens);
       updateIndex(this.doc.currentIndex);
-      // updateKeys(this.doc.animate);
     }
   }
 
-  handleKeyDown = (e: React.KeyboardEvent): void => {
-    const { updateDoc, updateTokens, updateIndex, updateKeys } = this.props;
+  handleKeyDown = (e: React.KeyboardEvent) => {
+    const { updateDoc, updateTokens, updateIndex } = this.props;
     this.doc.keyDownHandler(e);
-    if (updateDoc && updateTokens && updateIndex && updateKeys) {
+    if (updateDoc && updateTokens && updateIndex) {
       updateDoc(this.doc.doc);
       updateTokens(this.doc.tokens);
       updateIndex(this.doc.currentIndex);
-      // updateKeys(this.doc.animate);
     }
   }
 
@@ -116,7 +112,6 @@ class EditorCon extends Component<CustomOptions & IstateHandler> {
       addOperation,
       clearOperation,
       updateCurrent,
-      updateKeys,
       clearKeys,
     } = this.props;
     const compiler = new Compiler(value, {
@@ -129,7 +124,6 @@ class EditorCon extends Component<CustomOptions & IstateHandler> {
       addOperation,
       clearOperation,
       updateCurrent,
-      updateKeys,
       clearKeys,
     })
     compiler.init();
@@ -137,8 +131,8 @@ class EditorCon extends Component<CustomOptions & IstateHandler> {
   }
 
   handleNextClick = () => {
-    const { current, animate } = this.props.doc;
-    if (current < animate.length - 1) {
+    const { current, renderResult } = this.props.doc;
+    if (current < renderResult.length - 1) {
       const newIdx = current + 1;
       this.props.compiler.operations[newIdx]();
       this.props.updateCurrent(newIdx);
@@ -190,7 +184,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   addOperation: (op: Ioperation) => dispatch(addOperation(op)),
   clearOperation: () => dispatch(clearOperation()),
   updateCurrent: (current: number) => dispatch(updateCurrent(current)),
-  updateKeys: (keys: IanimateKey) => dispatch(updateKeys(keys)),
   clearKeys: () => dispatch(clearKeys())
 })
 

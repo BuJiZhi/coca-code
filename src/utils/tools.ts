@@ -54,3 +54,14 @@ export function startend2Index(
   return [num2index(start, code), num2index(end, code)]
 }
 
+export function deepCopy<T>(obj: T): T {
+  　　if ( typeof obj !== 'object' ){ // ( obj  instanceof Object || obj  instanceof Array )
+  　　　　return obj;
+  　　}
+      let newobj: T = Object.create(null);
+  　　for ( let attr in obj) {
+  　　　　newobj[attr] = deepCopy(obj[attr]);
+  　　}
+  　　return newobj;
+  }
+

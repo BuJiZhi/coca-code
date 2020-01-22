@@ -202,3 +202,4 @@ ClearAstAction |
 UpdateScopeAction |
 ClearScopeAction;
 
+export type IanimateKey = any

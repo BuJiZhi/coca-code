@@ -64,7 +64,6 @@ export interface IstateHandler {
   addOperation: (op: Ioperation) => void,
   clearOperation: () => void,
   updateCurrent: (current: number) => void,
-  updateKeys: (animate: IanimateKey) => void,
   clearKeys: () => void
 }
 
