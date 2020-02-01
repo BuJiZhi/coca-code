@@ -4,12 +4,16 @@ import {
   ItarversBack,
   IsimpleValue
  } from '../../types/compiler';
+ import { Node } from 'acorn';
+import { Itrack } from '../../types/animate';
 import { IanimateKey } from '../../types/store';
 import { startend2Index } from '../tools';
 
+let trackCount: number;
 const nodeHandlers: InodeHandler =  {
 
   Program: (nodeIterator: Iiterator) => {
+    trackCount = 0;
     nodeIterator.node.body.forEach(item => {
       nodeIterator.traverse(item);
     })
@@ -17,71 +21,94 @@ const nodeHandlers: InodeHandler =  {
 
   // 变量定义
   VariableDeclaration: nodeIterator => {
-    // const { start, end } = nodeIterator.node;
     const code = nodeIterator.code;
     const kind = nodeIterator.node.kind;
+    console.log(nodeIterator.node)
     if (nodeIterator.node.declarations) {
       for (const declaration of nodeIterator.node.declarations) {
-        const { name, start, end } = declaration.id;
-        const pos = startend2Index(start, end, code);
-        let animate: IanimateKey = {
-          on: true,
-          type: 'VariableDeclaration',
-          pos: pos,
-          payload: Object.create(null)
+        const { start, end, id, init} = declaration;
+        if (id instanceof Node) {
+          const {value, preTrack} = nodeIterator.traverse(id);
+          const initValue = declaration.init
+            ? nodeIterator.traverse(declaration.init)
+            : {value: undefined};
+          nodeIterator.scope.declare(value, initValue.value, kind);
         }
-        const backInfo = declaration.init ?
-          nodeIterator.traverse(declaration.init) :
-          {value: undefined};
-        nodeIterator.scope.declare(name, backInfo.value, kind);
-        animate.payload = backInfo.animate;
-        const mirrorOperate = (): void => {
-          // 在state添加了mirrorScope以后，如果改变了它的值，store里是否会更新？
-          nodeIterator.mirrorScope.declare(name, backInfo.value, kind);
-        }
-        nodeIterator.createMirrorOpAnm(mirrorOperate, animate);
+        // const pos = startend2Index(start, end, code);
+        // let track: Itrack = {
+        //   on: true,
+        //   type: 'VariableDeclaration',
+        //   pos: pos,
+        //   payload: Object.create(null)
+        // }
+        // const backInfo = declaration.init ?
+        //   nodeIterator.traverse(declaration.init) :
+        //   {value: undefined};
+        // nodeIterator.scope.declare(name, backInfo.value, kind);
+        // animate.payload = backInfo.animate;
+        // const mirrorOperate = (): void => {
+        //   // 在state添加了mirrorScope以后，如果改变了它的值，store里是否会更新？
+        //   nodeIterator.mirrorScope.declare(name, backInfo.value, kind);
+        // }
+        // nodeIterator.createMirrorOpAnm(mirrorOperate, animate);
       }
     }
   },
 
   // 值定义
   Literal: nodeIterator => {
-    const { start, end } = nodeIterator.node;
+    const { start, end, value } = nodeIterator.node;
     const code = nodeIterator.code;
     const pos = startend2Index(start, end, code);
-    let animate: IanimateKey = {
-      on: true,
-      type: 'Literal',
-      pos: pos,
-      payload: Object.create(null)
+    let track: Itrack = {
+      begin: trackCount,
+      end: ++trackCount,
+      content: {
+        type: "t2",
+        startpos: pos[0],
+        endpos: pos[1],
+        value,
+        key: `lta-${trackCount}`
+      }
     }
     const literalOperate = () => { return nodeIterator.node.value; }
     if(nodeIterator.node.value === undefined) {
-      animate.payload.value = 'undefined';
-      nodeIterator.createMirrorOpAnm(literalOperate, animate);
-      return {value: undefined, animate};
+      track.content.value = 'undefined';
+      nodeIterator.addOperateTrack(literalOperate, track);
+      return {value: undefined, preTrack: track};
     }
-    animate.payload.value = nodeIterator.node.value;
-    nodeIterator.createMirrorOpAnm(literalOperate, animate);
-    return {value: nodeIterator.node.value, animate};
+    track.content.value = nodeIterator.node.value;
+    nodeIterator.addOperateTrack(literalOperate, track);
+    return {value: nodeIterator.node.value, preTrack: track};
   },
 
   // 标识符
   Identifier: nodeIterator => {
-    const { code, node } = nodeIterator;
+    const { code, node, stateHandler } = nodeIterator;
     const { name, start, end } = node;
     const pos = startend2Index(start, end, code);
+    
+    // track
+    let track: Itrack = {
+      begin: trackCount,
+      end: ++trackCount,
+      content: {
+        type: "t1",
+        startpos: pos[0],
+        endpos: pos[1],
+        value: name,
+        key: `idf-${trackCount}`
+      }
+    }
+    // operation
     const IdentifierOperate = () => {
       return;
     }
-    let animate = {
-      on: true,
-      type: 'Identifier',
-      pos,
-      payload: Object.create(null)
+    nodeIterator.addOperateTrack(IdentifierOperate, track);
+    return {
+      value: name,
+      preTrack: track
     }
-    nodeIterator.createMirrorOpAnm(IdentifierOperate, animate);
-    return nodeIterator.scope.get(name).value;
   },
   // 表达式
   ExpressionStatement: nodeIterator => {

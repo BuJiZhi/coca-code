@@ -1,5 +1,5 @@
 import { IanimateKey, DocType } from "./store";
-
+import { IrenderResult, Itrack } from "./animate";
 export type Ivalue = any;
 export type IscopeValue = any;
 export type Ioperation = () => void;
@@ -35,13 +35,14 @@ export interface Iiterator {
   node: InodeTypes,
   scope: Iscope,
   mirrorScope: Iscope,
-  stateHandle?: IstateHandler,
+  stateHandler?: IstateHandler,
   code: string,
   traverse(node: object, options?: object): any,
   createScope(type: string): Iscope,
   createMirrorOperate(type: any): void,
   createMirrorAnimate(animate: IanimateKey): void,
-  createMirrorOpAnm(fn:()=>void, animate:IanimateKey): void
+  addOperateTrack(fn:()=>void, track:Itrack): void,
+  addTrack(track: Itrack): void
 }
 
 export interface Icompiler {
@@ -64,7 +65,10 @@ export interface IstateHandler {
   addOperation: (op: Ioperation) => void,
   clearOperation: () => void,
   updateCurrent: (current: number) => void,
-  clearKeys: () => void
+  clearKeys: () => void,
+  updateRenderResult: (result: IrenderResult) => void,
+  addTrack: (track: Itrack) => void,
+  clearTracks: () => void
 }
 
 // ast shape
@@ -106,6 +110,8 @@ interface IVariableDecalrations {
 
 interface IvariableDeclartor {
   type: typeof VariableDeclartor,
+  start: number,
+  end: number,
   id: Iid,
   init?: IbinaryExpression
 }

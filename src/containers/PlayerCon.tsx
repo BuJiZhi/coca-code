@@ -1,19 +1,24 @@
 import React, { Component } from 'react';
-import { Itrack, Icontent, Iframe } from '../types/animate';
+import { Itrack, Icontent, Iframe, IrenderResult } from '../types/animate';
 import { deepCopy } from '../utils/tools';
 import { connect } from 'react-redux';
 import { RootState } from '../store';
 import { Dispatch } from 'redux';
-import { EditorState } from '../types/store';
+import { EditorState, Styles } from '../types/store';
+import { Button } from '@material-ui/core';
 import Frame from '../components/Editor/Frame';
 import {
-  updateCurrent
+  updateCurrent,
+  updateRenderResult
 } from '../store/action';
 
 export interface Iprops {
-  editor: EditorState
+  editor: EditorState,
+  ui: Styles,
+  updateRenderResult(result: IrenderResult): void
 }
 
+// 动画播放组件
 class Player extends Component<Iprops> {
 
   // currentUpdate = (idx: number): void => {
@@ -23,38 +28,42 @@ class Player extends Component<Iprops> {
   //   updateCurrent(idx);
   // }
 
-  init = (): void => {
-    const { tracks, renderResult, initialTrack } = this.props.editor;
-    let end = 0;
-    // 计算轨道长度
-    for (let i = 0; i < tracks.length; i++) {
-      if (tracks[i].end > end) {
-        end = tracks[i].end;
-      }
-    }
-    // 轨道初始化
-    for (let j = 0; j < end; j++) {
-      renderResult[j] = [initialTrack];
-    }
-  }
+  // init = (): void => {
+  //   const { tracks, initialTrack } = this.props.editor;
+  //   let end = 0;
+  //   let newRenderResult = [];
+  //   // 计算轨道长度
+  //   for (let i = 0; i < tracks.length; i++) {
+  //     if (tracks[i].end > end) {
+  //       end = tracks[i].end;
+  //     }
+  //   }
+  //   // 轨道初始化
+  //   for (let j = 0; j < end; j++) {
+  //     newRenderResult[j] = [initialTrack];
+  //   }
+  //   this.props.updateRenderResult(newRenderResult);
+  // }
   
-  // 每个帧一个key，还是每个轨道一个key？
-  animateRender = (): void => {
-    const { tracks, renderResult } = this.props.editor;
-    for (let i = 0; i < tracks.length; i++) {
-      const { begin, end, content } = tracks[i];
-      // 轨道切割
-      for (let j = begin; j < end; j++) {
-        if (j === begin) {
-          content.process = 'enter';
-        } else {
-          content.process = 'stay';
-        }
-        const newContent = deepCopy(content);
-        renderResult[j].push(newContent);
-      }
-    }
-  }
+  // // 每个帧一个key，还是每个轨道一个key？
+  // animateRender = (): void => {
+  //   const { tracks } = this.props.editor;
+  //   let newRenderResult: IrenderResult = [];
+  //   for (let i = 0; i < tracks.length; i++) {
+  //     const { begin, end, content } = tracks[i];
+  //     let newContent = deepCopy(content);
+  //     // 轨道切割
+  //     for (let j = begin; j < end; j++) {
+  //       if (j === begin) {
+  //         newContent.process = 'enter';
+  //       } else {
+  //         newContent.process = 'stay';
+  //       }
+  //       newRenderResult[j].push(newContent);
+  //     }
+  //     this.props.updateRenderResult(newRenderResult);
+  //   }
+  // }
 
   getCurrentFrame(): Iframe {
     const { editor } = this.props;
@@ -63,22 +72,25 @@ class Player extends Component<Iprops> {
   }
 
   render() {
-    const { editor } = this.props;
+    const { editor, ui } = this.props;
     return (
       <Frame
         currentFrame={ this.getCurrentFrame() }
         editor={ editor }
+        ui={ ui }
       />
     )
   }
 }
 
 const mapStateToProps = (state: RootState) => ({
-  editor: state.editor
+  editor: state.editor,
+  ui: state.ui
 })
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  updateCurrent: (idx: number) => dispatch(updateCurrent(idx))
+  updateCurrent: (idx: number) => dispatch(updateCurrent(idx)),
+  updateRenderResult: (result: IrenderResult) => dispatch(updateRenderResult(result))
 })
 
 export default connect(

@@ -9,6 +9,8 @@ import Compiler from '../utils/compiler/index';
 import { click2index } from '../utils/tools';
 import { EditorState, Styles,Tokens } from '../types/store';
 import { Iscope, Ioperation, Icompiler, IstateHandler } from '../types/compiler';
+import { IrenderResult, Itrack } from '../types/animate';
+import { deepCopy } from '../utils/tools';
 import { 
   updateCode, 
   updateTokens,
@@ -27,7 +29,10 @@ import {
   addOperation,
   clearOperation,
   updateCurrent,
-  clearKeys
+  clearKeys,
+  updateRenderResult,
+  addTrack,
+  clearTracks
 } from '../store/action';
 
 // 自定义选项
@@ -46,7 +51,9 @@ export interface CustomOptions {
   updateCursor?: (cor: [number, number]) => void,
   handleRootClick?:(e: React.MouseEvent) => void,
   clearKeys?:() => void,
-  updateCurrent?: (index: number) => void
+  updateCurrent?: (index: number) => void,
+  updateRenderResult?: (result: IrenderResult) => void,
+  addTrack?: (track: Itrack) => void
 }
 
 interface Options {
@@ -113,6 +120,9 @@ class EditorCon extends Component<CustomOptions & IstateHandler> {
       clearOperation,
       updateCurrent,
       clearKeys,
+      updateRenderResult,
+      addTrack,
+      clearTracks
     } = this.props;
     const compiler = new Compiler(value, {
       updateAst,
@@ -125,9 +135,14 @@ class EditorCon extends Component<CustomOptions & IstateHandler> {
       clearOperation,
       updateCurrent,
       clearKeys,
+      updateRenderResult,
+      addTrack,
+      clearTracks
     })
     compiler.init();
     compiler.run();
+    this.animateInit();
+    // this.animateRender();
   }
 
   handleNextClick = () => {
@@ -138,6 +153,62 @@ class EditorCon extends Component<CustomOptions & IstateHandler> {
       this.props.updateCurrent(newIdx);
     }
   }
+
+  handleRenderClick = ():void => {
+    this.animateInit();
+    // this.animateRender();
+  }
+
+  animateInit = (): void => {
+    const { tracks, initialTrack } = this.props.doc;
+    let end = 0;
+    let newRenderResult = [];
+    // 计算轨道长度
+    for (let i = 0; i < tracks.length; i++) {
+      if (tracks[i].end > end) {
+        end = tracks[i].end;
+      }
+    }
+    // 轨道初始化
+    for (let j = 0; j < end; j++) {
+      newRenderResult[j] = [initialTrack];
+    }
+    for (let i = 0; i < tracks.length; i++) {
+      const { begin, end, content } = tracks[i];
+      let newContent = deepCopy(content);
+      // 轨道切割
+      for (let j = begin; j < end; j++) {
+        if (j === begin) {
+          newContent.process = 'enter';
+        } else {
+          newContent.process = 'stay';
+        }
+        newRenderResult[j].push(newContent);
+      }
+      // this.props.updateRenderResult(newRenderResult);
+    }
+    this.props.updateRenderResult(newRenderResult);
+  }
+  
+  // 每个帧一个key，还是每个轨道一个key？
+  // animateRender = (): void => {
+  //   const { tracks, renderResult } = this.props.doc;
+  //   let newRenderResult: IrenderResult = renderResult;
+  //   for (let i = 0; i < tracks.length; i++) {
+  //     const { begin, end, content } = tracks[i];
+  //     let newContent = deepCopy(content);
+  //     // 轨道切割
+  //     for (let j = begin; j < end; j++) {
+  //       if (j === begin) {
+  //         newContent.process = 'enter';
+  //       } else {
+  //         newContent.process = 'stay';
+  //       }
+  //       newRenderResult[j].push(newContent);
+  //     }
+  //     this.props.updateRenderResult(newRenderResult);
+  //   }
+  // }
 
   render() {
     return (
@@ -154,6 +225,7 @@ class EditorCon extends Component<CustomOptions & IstateHandler> {
             compiler = { this.props.compiler }
             handleRunClick={ this.handleRunClick }
             handleNexClick={ this.handleNextClick }
+            handleRenderClick={this.handleRenderClick}
           />
       </div>
     )
@@ -184,7 +256,10 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   addOperation: (op: Ioperation) => dispatch(addOperation(op)),
   clearOperation: () => dispatch(clearOperation()),
   updateCurrent: (current: number) => dispatch(updateCurrent(current)),
-  clearKeys: () => dispatch(clearKeys())
+  clearKeys: () => dispatch(clearKeys()),
+  updateRenderResult: (result: IrenderResult) => dispatch(updateRenderResult(result)),
+  addTrack: (track: Itrack) => dispatch(addTrack(track)),
+  clearTracks: () => dispatch(clearTracks())
 })
 
 export default connect(

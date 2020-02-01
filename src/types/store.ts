@@ -70,6 +70,8 @@ export const UPDATE_KEYS = 'UPDATE_KEYS';
 export const CLEAR_KEYS = 'CLEAR_KEYS';
 export const UPDATE_CURRENT = 'UPDATE_CURRENT';
 export const UPDATE_TRACKS = 'UPDATE_TRACKS';
+export const ADD_TRACK = 'ADD_TRACK';
+export const CLEAR_TRACKS = 'CLEAR_TRACKS';
 export const UPDATE_RENDERESULT = 'UPDATE_RENDERRESULT'
 
 export interface UpdateCodeAction {
@@ -106,6 +108,15 @@ export interface UpdateRenderResult {
   payload: Iframe[]
 }
 
+export interface AddTrack {
+  type: typeof ADD_TRACK,
+  payload: Itrack
+}
+
+export interface ClearTracks {
+  type: typeof CLEAR_TRACKS
+}
+
 export type EditorAtionTypes = 
 UpdateCodeAction |
 UpdateTokensAction |
@@ -113,7 +124,9 @@ UpdateDocAction |
 UpdateTracksAction |
 ClearKeysAction |
 UpdateCurrentAction |
-UpdateRenderResult;
+UpdateRenderResult |
+AddTrack |
+ClearTracks;
 
 /**
  * mirror scope

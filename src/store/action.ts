@@ -24,12 +24,17 @@ import {
   UPDATE_KEYS,
   CLEAR_KEYS,
   UPDATE_OPERATION,
+  UPDATE_RENDERESULT,
+  ADD_TRACK,
+  CLEAR_TRACKS
 } from '../types/store';
 
 import {
   Iscope,
   Ioperation
 } from '../types/compiler';
+
+import { IrenderResult, Itrack } from '../types/animate';
 
 export function updateCode(code: string): EditorAtionTypes {
   return {
@@ -48,6 +53,26 @@ export function updateTokens(tokens: Tokens): EditorAtionTypes {
 export function clearKeys(): EditorAtionTypes {
   return {
     type: CLEAR_KEYS
+  }
+}
+
+export function updateRenderResult(result: IrenderResult): EditorAtionTypes {
+  return {
+    type: UPDATE_RENDERESULT,
+    payload: result
+  }
+}
+
+export function addTrack(track: Itrack) {
+  return {
+    type: ADD_TRACK,
+    payload: track
+  }
+}
+
+export function clearTracks() {
+  return {
+    type: CLEAR_TRACKS
   }
 }
 

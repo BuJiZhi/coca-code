@@ -6,7 +6,9 @@ import {
   UPDATE_DOC,
   UPDATE_TRACKS,
   UPDATE_CURRENT,
-  UPDATE_RENDERESULT
+  UPDATE_RENDERESULT,
+  ADD_TRACK,
+  CLEAR_TRACKS
 } from '../types/store';
 
 const initialState: EditorState = {
@@ -27,12 +29,12 @@ const initialState: EditorState = {
     }
   }],
   renderResult: [[{
-    type: 't1',
+    type: 't0',
     startpos: [0, 0],
     endpos: [1, 0],
     process: 'enter',
     key: 'sp-0',
-    value: 'hello'
+    value: ''
   }]],
   initialTrack: {
     type: 't0',
@@ -63,6 +65,18 @@ export function editorReducer(
       return {
         ...state,
         doc: action.payload
+      }
+    case ADD_TRACK:
+      const newTracks = [...state.tracks];
+      newTracks.push(action.payload);
+      return {
+        ...state,
+        tracks: newTracks
+      }
+    case CLEAR_TRACKS:
+      return {
+        ...state,
+        tracks: initialState.tracks
       }
     case UPDATE_TRACKS:
       return {

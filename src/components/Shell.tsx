@@ -5,7 +5,8 @@ import { Button, Paper, Card, makeStyles } from '@material-ui/core';
 interface ShellProps {
   compiler: Icompiler
   handleRunClick(e: React.MouseEvent): void,
-  handleNexClick(e: React.MouseEvent): void
+  handleNexClick(e: React.MouseEvent): void,
+  handleRenderClick(e: React.MouseEvent): void
 }
 
 const useStyles = makeStyles(theme => ({
@@ -53,6 +54,11 @@ const Shell: React.FC<ShellProps> = props => {
           onClick={ props.handleRunClick }
           color="primary"
         >RUN</Button>
+        <Button
+          onClick={ props.handleRenderClick }
+          color="primary"
+        > RENDER
+        </Button>
         <Button
           onClick={ props.handleNexClick }
           color="primary"

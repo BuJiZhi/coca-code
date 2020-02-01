@@ -9,7 +9,8 @@ import {
   InodeTypes,
   ItarversBack
 } from '../../types/compiler';
-import { IanimateKey } from '../../types//store';
+import { Itrack } from '../../types/animate';
+import { IanimateKey } from '../../types/store';
 
 class Iterator implements Iiterator {
 
@@ -67,12 +68,16 @@ class Iterator implements Iiterator {
   }
 
   createMirrorAnimate(animate: IanimateKey) {
-    this.stateHandler.updateKeys(animate);
+  //   this.stateHandler.updateKeys(animate);
   }
 
-  createMirrorOpAnm(fn: ()=>void, animate: IanimateKey) {
+  addOperateTrack(fn:()=>void, track: Itrack) {
     this.createMirrorOperate(fn);
-    this.createMirrorAnimate(animate);
+    this.addTrack(track);
+  }
+
+  addTrack(track: Itrack): void {
+    this.stateHandler.addTrack(track);
   }
 }
 
