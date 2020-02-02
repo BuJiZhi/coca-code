@@ -55,7 +55,7 @@ const nodeHandlers: InodeHandler =  {
             }};
 
           // 本节点动画
-          const track = {
+          const track: Itrack = {
             begin: trackCount++,
             end: trackCount,
             content: {
@@ -203,7 +203,7 @@ const nodeHandlers: InodeHandler =  {
     const left = nodeIterator.traverse(node.left).value;
     const result = nodeHandlers.BinaryExpressionOperatorMap[nodeIterator.node.operator](left, right)
     // 1.本节点动画
-    let track = {
+    let track: Itrack = {
       begin: trackCount++,
       end: 0,
       content: {

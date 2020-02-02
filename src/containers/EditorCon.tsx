@@ -254,12 +254,12 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   clearScope: () => dispatch(clearScope()),
   updateMirrorScope: (scope: Iscope) => dispatch(updateMirrorScope(scope)),
   clearMirrorScope: () => dispatch(clearMirrorScope()),
-  addOperation: (op: Ioperation) => dispatch(addOperation(op)),
+  addOperation: (op: Ioperation[]) => dispatch(addOperation(op)),
   clearOperation: () => dispatch(clearOperation()),
   updateCurrent: (current: number) => dispatch(updateCurrent(current)),
   clearKeys: () => dispatch(clearKeys()),
   updateRenderResult: (result: IrenderResult) => dispatch(updateRenderResult(result)),
-  addTrack: (track: Itrack) => dispatch(addTrack(track)),
+  addTrack: (track: Itrack[]) => dispatch(addTrack(track)),
   clearTracks: () => dispatch(clearTracks())
 })
 
