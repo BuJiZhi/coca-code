@@ -45,10 +45,12 @@ const springFac = (content: Icontent, ui: Styles) => {
     case 't2':
       springs.style = {
         to: {
-          left: '100px'
+          left: startpos[1] * fontWidth,
+          top: startpos[0] * lineHeight,
+          fontWeight: 500
         },
         from: {
-          left: '300px'
+          fontWeight: 100
         }
       }
       break;

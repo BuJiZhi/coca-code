@@ -63,7 +63,7 @@ export function updateRenderResult(result: IrenderResult): EditorAtionTypes {
   }
 }
 
-export function addTrack(track: Itrack) {
+export function addTrack(track: Itrack[]) {
   return {
     type: ADD_TRACK,
     payload: track
@@ -145,7 +145,7 @@ export function clearMirrorScope() {
   }
 }
 
-export function addOperation(operation: Ioperation) {
+export function addOperation(operation: Ioperation[]) {
   return {
     type: ADD_OPERATION,
     payload: operation

@@ -15,7 +15,7 @@ const nodeHandlers: InodeHandler =  {
   Program: (nodeIterator: Iiterator) => {
     trackCount = 0;
     nodeIterator.node.body.forEach(item => {
-      nodeIterator.traverse(item);
+      nodeIterator.traverse(item, undefined, []);
     })
   },
 
@@ -26,43 +26,72 @@ const nodeHandlers: InodeHandler =  {
     console.log(nodeIterator.node)
     if (nodeIterator.node.declarations) {
       for (const declaration of nodeIterator.node.declarations) {
+        // 一个轨道列表就相当于是一条语句
         const { start, end, id, init} = declaration;
         if (id instanceof Node) {
-          const {value, preTrack} = nodeIterator.traverse(id);
-          const initValue = declaration.init
+          const idNode = nodeIterator.traverse(id);
+          const initNode = declaration.init
             ? nodeIterator.traverse(declaration.init)
-            : {value: undefined};
-          nodeIterator.scope.declare(value, initValue.value, kind);
+            : {value: undefined, preTrack: {
+              begin: trackCount++,
+              end: 0,
+              content: {
+                type: "t2",
+                startpos: idNode.content.startpos[0],
+                endpos: idNode.content.endpos[0],
+                value: "undefined",
+                key: "undefined"
+              }
+            }};
+
+          // 本节点动画
+          const track = {
+            begin: trackCount++,
+            end: trackCount,
+            content: {
+              type: "t3",
+              startpos: idNode.preTrack.content.startpos[0],
+              endpos: initNode.preTrack.content.startpos[1],
+              value: initNode.value,
+              key: `lta-${trackCount}`
+            }
+          }
+          nodeIterator.addTrack(track);
+          
+          // 本节点操作
+          nodeIterator.scope.declare(idNode.value, initNode.value, kind);
+          const mirrorOperate = (): void => {
+              // 在state添加了mirrorScope以后，如果改变了它的值，store里是否会更新？
+              nodeIterator.mirrorScope.declare(idNode.value, initNode.value, kind);
+            }
+
+          // 前面节点动画结束点
+          for (let i = 0; i < nodeIterator.tracks.length - 1; i++) {
+            let track = nodeIterator.tracks[i];
+            if (track.end === 0) {
+              track.end = trackCount;
+            }
+          }
+
+          // 上传轨道
+          nodeIterator.addOperateTrack(nodeIterator.operations, nodeIterator.tracks);
         }
-        // const pos = startend2Index(start, end, code);
-        // let track: Itrack = {
-        //   on: true,
-        //   type: 'VariableDeclaration',
-        //   pos: pos,
-        //   payload: Object.create(null)
-        // }
-        // const backInfo = declaration.init ?
-        //   nodeIterator.traverse(declaration.init) :
-        //   {value: undefined};
-        // nodeIterator.scope.declare(name, backInfo.value, kind);
-        // animate.payload = backInfo.animate;
-        // const mirrorOperate = (): void => {
-        //   // 在state添加了mirrorScope以后，如果改变了它的值，store里是否会更新？
-        //   nodeIterator.mirrorScope.declare(name, backInfo.value, kind);
-        // }
-        // nodeIterator.createMirrorOpAnm(mirrorOperate, animate);
       }
     }
+    console.log(nodeIterator.tracks);
   },
 
   // 值定义
   Literal: nodeIterator => {
     const { start, end, value } = nodeIterator.node;
+
     const code = nodeIterator.code;
     const pos = startend2Index(start, end, code);
+
+    // 本节点动画
     let track: Itrack = {
-      begin: trackCount,
-      end: ++trackCount,
+      begin: trackCount++,
+      end: 0,
       content: {
         type: "t2",
         startpos: pos[0],
@@ -71,14 +100,21 @@ const nodeHandlers: InodeHandler =  {
         key: `lta-${trackCount}`
       }
     }
+    nodeIterator.addTrack(track);
+
+    // 本节点操作
     const literalOperate = () => { return nodeIterator.node.value; }
+    nodeIterator.addOperation(literalOperate);
+    // 上一个节点的结束点 无
+
+    // 返回值
     if(nodeIterator.node.value === undefined) {
       track.content.value = 'undefined';
-      nodeIterator.addOperateTrack(literalOperate, track);
+      // nodeIterator.addOperateTrack(literalOperate, track);
       return {value: undefined, preTrack: track};
     }
     track.content.value = nodeIterator.node.value;
-    nodeIterator.addOperateTrack(literalOperate, track);
+    // nodeIterator.addOperateTrack(literalOperate, track);
     return {value: nodeIterator.node.value, preTrack: track};
   },
 
@@ -90,8 +126,8 @@ const nodeHandlers: InodeHandler =  {
     
     // track
     let track: Itrack = {
-      begin: trackCount,
-      end: ++trackCount,
+      begin: trackCount++,
+      end: 0,
       content: {
         type: "t1",
         startpos: pos[0],
@@ -100,16 +136,19 @@ const nodeHandlers: InodeHandler =  {
         key: `idf-${trackCount}`
       }
     }
+    nodeIterator.addTrack(track);
     // operation
-    const IdentifierOperate = () => {
+    const identifierOperate = () => {
       return;
     }
-    nodeIterator.addOperateTrack(IdentifierOperate, track);
+    nodeIterator.addOperation(identifierOperate);
+    // nodeIterator.addOperateTrack(IdentifierOperate, track);
     return {
       value: name,
       preTrack: track
     }
   },
+
   // 表达式
   ExpressionStatement: nodeIterator => {
     return nodeIterator.traverse(nodeIterator.node.expression);

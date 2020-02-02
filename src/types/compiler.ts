@@ -35,14 +35,18 @@ export interface Iiterator {
   node: InodeTypes,
   scope: Iscope,
   mirrorScope: Iscope,
+  tracks: Itrack[],
   stateHandler?: IstateHandler,
   code: string,
-  traverse(node: object, options?: object): any,
+  operations: Ioperation[],
+  traverse(node: object, options?: object, track?: Itrack[], operations?: Ioperation[]): any,
   createScope(type: string): Iscope,
-  createMirrorOperate(type: any): void,
+  createMirrorOperate(operations: Ioperation[]): void,
   createMirrorAnimate(animate: IanimateKey): void,
-  addOperateTrack(fn:()=>void, track:Itrack): void,
-  addTrack(track: Itrack): void
+  addOperateTrack(operations: Ioperation[], tracks:Itrack[]): void,
+  storeAddTrack(track: Itrack[]): void,
+  addTrack(track: Itrack): void,
+  addOperation(operations: Ioperation): void
 }
 
 export interface Icompiler {
@@ -62,7 +66,7 @@ export interface IstateHandler {
   clearScope: () => void,
   updateMirrorScope: (scope: Iscope) => void,
   clearMirrorScope: () => void,
-  addOperation: (op: Ioperation) => void,
+  addOperation: (op: Ioperation[]) => void,
   clearOperation: () => void,
   updateCurrent: (current: number) => void,
   clearKeys: () => void,
