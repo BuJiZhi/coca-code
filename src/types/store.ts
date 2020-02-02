@@ -110,7 +110,7 @@ export interface UpdateRenderResult {
 
 export interface AddTrack {
   type: typeof ADD_TRACK,
-  payload: Itrack
+  payload: Itrack[]
 }
 
 export interface ClearTracks {
@@ -159,7 +159,7 @@ interface ClearMirrorScopeAction {
 
 interface AddOperationAction {
   type: typeof ADD_OPERATION,
-  payload: () => void
+  payload: Ioperation[]
 }
 
 interface ClearOperationAction {

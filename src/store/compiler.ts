@@ -62,8 +62,7 @@ export function compilerReducer(
         operations: action.payload
       }
     case ADD_OPERATION:
-      const op = state.operations;
-      op.push(action.payload)
+      const op = [...state.operations, ...action.payload];
       return {
         ...state,
         operations: op

@@ -15,7 +15,8 @@ export interface Icontent {
   process?: Process,
   key: string,
   value: any,
-  payload?: any
+  payload?: any,
+  width?: number
 }
 
 export interface Ispring {

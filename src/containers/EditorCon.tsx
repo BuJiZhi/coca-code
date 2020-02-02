@@ -175,10 +175,11 @@ class EditorCon extends Component<CustomOptions & IstateHandler> {
     }
     for (let i = 0; i < tracks.length; i++) {
       const { begin, end, content } = tracks[i];
-      let newContent = deepCopy(content);
       // 轨道切割
       for (let j = begin; j < end; j++) {
+        let newContent = deepCopy(content);
         if (j === begin) {
+          console.log('enter')
           newContent.process = 'enter';
         } else {
           newContent.process = 'stay';

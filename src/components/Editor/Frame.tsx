@@ -57,20 +57,44 @@ const springFac = (content: Icontent, ui: Styles) => {
     case 't3': {
       springs.style = {
         to: {
-          color: 'red'
+          color: 'red',
+          left: endpos[1] * fontWidth,
+          top: endpos[0] * lineHeight,
+          opacity: 0
         },
         from: {
-          color: 'green'
+          color: 'green',
+          left: startpos[1] * fontWidth,
+          top: startpos[0] * lineHeight,
+          opacity: 1
         }
       }
       break;
     }
+    case 't4':
+      springs.style = {
+        to: {
+          opacity: 1,
+          left: startpos[1] * fontWidth,
+          top: startpos[0] * lineHeight,
+          backgroundColor: "#fff",
+          border: "1px solid #aaa",
+          borderRadius: "3px",
+          width: (endpos[1] - startpos[1]) * fontWidth,
+          textAlign: "center",
+        },
+        from: {
+          opacity: 0
+        }
+      }
+      break;
     default:
       break;
   }
   springs.key = key;
   springs.style.reset = true;
   springs.style.from = {...commonStyle, ...springs.style.from}
+  springs.style.to = {...commonStyle, ...springs.style.to}
   return springs;
 }
 

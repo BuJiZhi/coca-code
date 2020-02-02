@@ -67,8 +67,7 @@ export function editorReducer(
         doc: action.payload
       }
     case ADD_TRACK:
-      const newTracks = [...state.tracks];
-      newTracks.push(action.payload);
+      const newTracks = [...state.tracks, ...action.payload];
       return {
         ...state,
         tracks: newTracks

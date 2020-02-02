@@ -10,7 +10,7 @@ const Element: React.FC<Iprops> = ({info}) => {
   const spring = useSpring(style);
   return (
     <animated.div 
-      style={ process === 'enter' ? spring : style.from }
+      style={ process === 'enter' ? spring : style.to }
     >
       { value }
     </animated.div>

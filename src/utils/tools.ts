@@ -29,7 +29,7 @@ function num2index(
   let ln: number = 0;
   let ch: number = 0;
   let isbegin = 1;
-  for (let i = 0; i < code.length && i <= num; i++) {
+  for (let i = 0; i <= code.length && i <= num; i++) {
     if (code[i] === '\n') {
       ln += 1;
       isbegin = 1;
