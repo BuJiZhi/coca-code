@@ -14,7 +14,7 @@ const initialState: Styles = {
   fontWidth: 20,
   fontSize: 25,
   lineHeight: 30,
-  color: [255, 0, 255],
+  color: [0, 0, 0],
   clickPos: [0, 0],
   cursorPos: [0, 0],
 }

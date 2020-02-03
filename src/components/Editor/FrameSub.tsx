@@ -12,7 +12,7 @@ const Element: React.FC<Iprops> = ({info}) => {
     <animated.div 
       style={ process === 'enter' ? spring : style.to }
     >
-      { value }
+      { value === true ? 'true' : value === false ? 'false' : value }
     </animated.div>
   );
 }

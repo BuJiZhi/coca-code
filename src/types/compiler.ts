@@ -162,7 +162,7 @@ export interface InodeHandler {
   BinaryExpressionOperatorMap: any,
   AssignmentExpression(node: Iiterator): void,
   BinaryExpression(node: Iiterator): void,
-  // IfStatement(node: Iiterator): void,
+  IfStatement(node: Iiterator): void,
   // BlockStatement(node: Iiterator): void,
   // FunctionDeclaration(node: Iiterator): void,
 }

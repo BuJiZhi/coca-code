@@ -26,6 +26,15 @@ const springFac = (content: Icontent, ui: Styles) => {
       opacity: 1
     }
   }
+  const bottomFrame = {
+    opacity: 1,
+    backgroundColor: "#fff",
+    border: "1px solid #aaa",
+    borderRadius: "3px",
+    width: (endpos[1] - startpos[1]) * fontWidth,
+    textAlign: "center",
+    overflow: "hidden"
+  }
   const commonStyle = {
     position: 'absolute',
     zIndex: 1000,
@@ -42,7 +51,8 @@ const springFac = (content: Icontent, ui: Styles) => {
         to:{
           fontWeight: 500,
           left: startpos[1] * fontWidth,
-          top: startpos[0] * lineHeight
+          top: startpos[0] * lineHeight,
+          ...bottomFrame
         },
         from: {
           fontWeight: 100
@@ -54,7 +64,8 @@ const springFac = (content: Icontent, ui: Styles) => {
         to: {
           left: startpos[1] * fontWidth,
           top: startpos[0] * lineHeight,
-          fontWeight: 500
+          fontWeight: 500,
+          ...bottomFrame
         },
         from: {
           fontWeight: 100
@@ -67,7 +78,8 @@ const springFac = (content: Icontent, ui: Styles) => {
           color: 'red',
           left: endpos[1] * fontWidth,
           top: endpos[0] * lineHeight,
-          opacity: 0
+          opacity: 0,
+          ...bottomFrame
         },
         from: {
           color: 'green',
@@ -89,6 +101,7 @@ const springFac = (content: Icontent, ui: Styles) => {
           borderRadius: "3px",
           width: (endpos[1] - startpos[1]) * fontWidth,
           textAlign: "center",
+          overflow: "hidden"
         },
         from: {
           opacity: 0

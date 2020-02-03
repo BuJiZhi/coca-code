@@ -4,7 +4,7 @@ import {
   ItarversBack,
   IsimpleValue
  } from '../../types/compiler';
- import { Node } from 'acorn';
+import { Node } from 'acorn';
 import { Itrack } from '../../types/animate';
 import { startend2Index } from '../tools';
 
@@ -267,7 +267,9 @@ const nodeHandlers: InodeHandler =  {
     '%': (a: number, b: number) => a % b,
     '==': (a: number, b: number) => a === b,
     '>': (a: number, b: number) => a > b,
-    '<': (a: number, b: number) => a < b
+    '<': (a: number, b: number) => a < b,
+    '>=': (a: number, b: number) => a >= b,
+    '<=': (a: number, b: number) => a <= b
   },
 
   BinaryExpression: nodeIterator => {
@@ -277,8 +279,9 @@ const nodeHandlers: InodeHandler =  {
     // 从右到左运算？
     const right = nodeIterator.traverse(node.right).value;
     const left = nodeIterator.traverse(node.left).value;
-    const result = nodeHandlers.BinaryExpressionOperatorMap[nodeIterator.node.operator](left, right)
+    const result = nodeHandlers.BinaryExpressionOperatorMap[nodeIterator.node.operator](left, right);
     // 1.本节点动画
+    let value = result === true ? 'true' : result === false ? 'false' : result;
     let track: Itrack = {
       begin: trackCount++,
       end: 0,
@@ -286,7 +289,7 @@ const nodeHandlers: InodeHandler =  {
         type: "t4",
         startpos: pos[0],
         endpos: pos[1],
-        value: result,
+        value,
         key: `idf-${++keyCount}`
       }
     }
@@ -304,13 +307,15 @@ const nodeHandlers: InodeHandler =  {
   },
 
   // // 条件判断
-  // IfStatement: nodeIterator => {
-  //   if (nodeIterator.traverse(nodeIterator.node.test)) {
-  //     nodeIterator.traverse(nodeIterator.node.consequent)
-  //   } else if (nodeIterator.node.alternate) {
-  //     nodeIterator.traverse(nodeIterator.node.alternate);
-  //   }
-  // },
+  IfStatement: nodeIterator => {
+    const { node } = nodeIterator;
+    console.log(node);
+    // if (nodeIterator.traverse(nodeIterator.node.test)) {
+    //   nodeIterator.traverse(nodeIterator.node.consequent)
+    // } else if (nodeIterator.node.alternate) {
+    //   nodeIterator.traverse(nodeIterator.node.alternate);
+    // }
+  },
 
   // // 块语句
   // BlockStatement: nodeIterator => {
