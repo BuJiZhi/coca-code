@@ -1,3 +1,10 @@
+/**
+ * t0 默认类型(default)                     无动画效果
+ * t1 变量定义名(identifier)                显示变量名字
+ * t2 基础数值(literal)                     显示值
+ * t3 变量定义/赋值(varialblledeclaration)  初始值移到变量名
+ * t4 运算(binaryExpression)                显示运算结果
+ */
 import React from 'react';
 import { EditorState, Styles } from '../../types/store';
 import { Iframe, Icontent, Ispring } from '../../types/animate';
