@@ -27,7 +27,6 @@ const springFac = (content: Icontent, ui: Styles) => {
     }
   }
   const bottomFrame = {
-    opacity: 1,
     backgroundColor: "#fff",
     border: "1px solid #aaa",
     borderRadius: "3px",
@@ -78,8 +77,8 @@ const springFac = (content: Icontent, ui: Styles) => {
           color: 'red',
           left: endpos[1] * fontWidth,
           top: endpos[0] * lineHeight,
+          ...bottomFrame,
           opacity: 0,
-          ...bottomFrame
         },
         from: {
           color: 'green',

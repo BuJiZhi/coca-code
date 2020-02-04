@@ -1,5 +1,6 @@
 import { IanimateKey, DocType } from "./store";
 import { IrenderResult, Itrack } from "./animate";
+import { Node } from 'acorn';
 export type Ivalue = any;
 export type IscopeValue = any;
 export type Ioperation = () => void;
@@ -39,11 +40,11 @@ export interface Iiterator {
   stateHandler?: IstateHandler,
   code: string,
   operations: Ioperation[],
-  traverse(node: object, options?: object, track?: Itrack[], operations?: Ioperation[]): any,
+  traverse(node: Node, options?: object, track?: Itrack[], operations?: Ioperation[]): any,
   createScope(type: string): Iscope,
   createMirrorOperate(operations: Ioperation[]): void,
   createMirrorAnimate(animate: IanimateKey): void,
-  addOperateTrack(operations: Ioperation[], tracks:Itrack[]): void,
+  addOperateTrack(operations: Ioperation[] | undefined, tracks:Itrack[] | undefined): void,
   storeAddTrack(track: Itrack[]): void,
   addTrack(track: Itrack): void,
   addOperation(operations: Ioperation): void
@@ -101,7 +102,7 @@ export interface Iid {
 
 interface IprogramNode {
   type: typeof Program,
-  body: object[],
+  body: Node[] | Node,
   sourceType?: string,
   declarations?: IvariableDeclartor[],
 }
@@ -124,7 +125,9 @@ interface IbinaryExpression {
   type: typeof BinaryExpression,
   operator: string,
   left: InodeTypes,
-  right: InodeTypes
+  right: InodeTypes,
+  start: number,
+  end: number
 }
 
 export interface Iliteral {
@@ -141,6 +144,18 @@ interface Iexpression {
   expression: any
 }
 
+interface IifStatement {
+  test: Node,
+  consequent: Node,
+  alternate?: Node
+}
+
+interface IunaryExpression {
+  prefix: boolean,
+  argument: Node,
+  operator: String
+}
+
 export type InodeTypes = 
 Icommon &
 IprogramNode &
@@ -149,21 +164,27 @@ IvariableDeclartor &
 IbinaryExpression &
 Iliteral &
 Iidentifier &
-Iexpression;
+Iexpression &
+IifStatement &
+IunaryExpression;
 
 export interface InodeHandler {
   Program(node: Iiterator): any,
   VariableDeclaration(node: Iiterator): any,
   Literal(node: Iiterator): any,
-  // nodeIterator(node: Iiterator): any,
+  UnaryExpression(node: Iiterator): any,
   Identifier(node: Iiterator): any,
   ExpressionStatement(node: Iiterator): any,
-  AssignmentExpressionMap: any,
-  BinaryExpressionOperatorMap: any,
   AssignmentExpression(node: Iiterator): void,
   BinaryExpression(node: Iiterator): void,
   IfStatement(node: Iiterator): void,
-  // BlockStatement(node: Iiterator): void,
+  BlockStatement(node: Iiterator): void,
+  WhileStatement(node: Iiterator): void,
+  ForStatement(node:Iiterator): void,
+  UpdateExpression(node: Iiterator): void,
   // FunctionDeclaration(node: Iiterator): void,
+  AssignmentExpressionMap: any,
+  BinaryExpressionOperatorMap: any,
+  unaryoperateMap: any
 }
 

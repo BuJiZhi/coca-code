@@ -76,9 +76,14 @@ class Iterator implements Iiterator {
   //   this.stateHandler.updateKeys(animate);
   }
 
-  addOperateTrack(operations: Ioperation[], tracks: Itrack[]) {
-    this.createMirrorOperate(operations);
-    this.storeAddTrack(tracks);
+  addOperateTrack(operations: Ioperation[] | undefined, tracks: Itrack[] | undefined) {
+    if (!operations || !tracks) {
+      this.createMirrorOperate(this.operations);
+      this.storeAddTrack(this.tracks);
+    } else {
+      this.createMirrorOperate(operations);
+      this.storeAddTrack(tracks);
+    }
   }
 
   createMirrorOperate(fn: Ioperation[]) {

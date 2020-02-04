@@ -27,7 +27,7 @@ const nodeHandlers: InodeHandler =  {
     trackCount = 0;
     keyCount = 0;
     nodeIterator.node.body.forEach(item => {
-      nodeIterator.traverse(item, undefined, [], []);
+      nodeIterator.traverse(item as Node, undefined, [], []);
     })
   },
 
@@ -35,6 +35,7 @@ const nodeHandlers: InodeHandler =  {
   VariableDeclaration: nodeIterator => {
     const code = nodeIterator.code;
     const kind = nodeIterator.node.kind;
+    const variableTrack: Itrack[] = [];
     if (nodeIterator.node.declarations) {
       for (const declaration of nodeIterator.node.declarations) {
         // 一个轨道列表就相当于是一条语句
@@ -54,7 +55,7 @@ const nodeHandlers: InodeHandler =  {
                 key: `idf-${++keyCount}`
               }
           }
-          nodeIterator.addTrack(idTrack);
+          variableTrack.push(idTrack);
           // 2. id节点操作函数
           const idOperate = () => {};
           nodeIterator.addOperation(idOperate);
@@ -66,7 +67,7 @@ const nodeHandlers: InodeHandler =  {
           }
 
           const initNode = init
-            ? nodeIterator.traverse(init)
+            ? nodeIterator.traverse(init as Node, undefined, variableTrack)
             : {value: undefined, preTrack: {
               begin: trackCount++,
               end: 0,
@@ -91,7 +92,7 @@ const nodeHandlers: InodeHandler =  {
               key: `lta-${++keyCount}`
             }
           }
-          nodeIterator.addTrack(track);
+          variableTrack.push(track);
           
           // 本节点操作
           nodeIterator.scope.declare(idNode.value, initNode.value, kind);
@@ -102,8 +103,8 @@ const nodeHandlers: InodeHandler =  {
           nodeIterator.addOperation(mirrorOperate);
 
           // 前面节点动画结束点
-          for (let i = 0; i < nodeIterator.tracks.length - 1; i++) {
-            let track = nodeIterator.tracks[i];
+          for (let i = 0; i < variableTrack.length - 1; i++) {
+            let track = variableTrack[i];
             if (track.end === 0) {
               track.end = trackCount;
             }
@@ -111,7 +112,46 @@ const nodeHandlers: InodeHandler =  {
         }
       }
       // 上传轨道及操作函数
-      nodeIterator.addOperateTrack(nodeIterator.operations, nodeIterator.tracks);
+      nodeIterator.addOperateTrack(nodeIterator.operations, variableTrack);
+    }
+  },
+
+  unaryoperateMap: {
+    "-": (a: number) => -a
+  },
+
+  // 一元操作符
+  UnaryExpression: nodeIterator => {
+    const { node, code } = nodeIterator;
+    const { argument, operator, start, end } = node;
+    const pos = startend2Index(start, end, code);
+    const argResult = nodeIterator.traverse(argument);
+    const value = nodeHandlers.unaryoperateMap[operator](argResult.value);
+    
+    // 1.本节点动画
+    const track: Itrack = {
+      begin: trackCount++,
+      end: 0,
+      content: {
+        type: "t2",
+        startpos: pos[0],
+        endpos: pos[1],
+        value,
+        key: `uae-${++keyCount}`
+      }
+    }
+    nodeIterator.addTrack(track);
+
+    // 2.本节点操作函数
+    const unaryOp = () => {};
+    nodeIterator.addOperation(unaryOp);
+
+    // 3.上一个节点动画结束，无
+
+    // 4. 返回
+    return {
+      value,
+      preTrack: track
     }
   },
 
@@ -183,11 +223,11 @@ const nodeHandlers: InodeHandler =  {
 
   // 表达式
   ExpressionStatement: nodeIterator => {
-    const result = nodeIterator.traverse(nodeIterator.node.expression);
+    let expressionTrack: Itrack[] = [];
+    const result = nodeIterator.traverse(nodeIterator.node.expression, undefined, expressionTrack);
     let { tracks, operations } = nodeIterator;
-    tracks = trackSetEnd(tracks, trackCount);
-    console.log(nodeIterator.tracks);
-    nodeIterator.addOperateTrack(operations, tracks);
+    expressionTrack = trackSetEnd(expressionTrack, trackCount);
+    nodeIterator.addOperateTrack(operations, expressionTrack);
     return result;
   },
 
@@ -198,7 +238,6 @@ const nodeHandlers: InodeHandler =  {
 
   // 赋值表达式
   AssignmentExpression: nodeIterator => {
-    console.log(nodeIterator.node);
     const code = nodeIterator.code;
     const { left, right, operator } = nodeIterator.node;
     const { start, end, name } = left;
@@ -303,27 +342,67 @@ const nodeHandlers: InodeHandler =  {
 
     // 4. 返回
     return {value: result, preTrack: track};
-
   },
 
-  // // 条件判断
+  // 条件判断
   IfStatement: nodeIterator => {
     const { node } = nodeIterator;
+    const { test, consequent, alternate } = node;
+    const ifStmTracks: Itrack[] = [];
+    const testResult = nodeIterator.traverse(test, undefined, ifStmTracks);
+    if (testResult.value) {
+      nodeIterator.traverse(consequent, undefined, ifStmTracks);
+    } else if (node.alternate) {
+      nodeIterator.traverse(alternate as Node, undefined, ifStmTracks);
+    }
+    trackSetEnd(ifStmTracks, trackCount);
+    nodeIterator.addOperateTrack(nodeIterator.operations, ifStmTracks);
+  },
+
+  // 块语句
+  BlockStatement: nodeIterator => {
+    let scope = nodeIterator.createScope('block');
+    for (const node of nodeIterator.node.body) {
+      nodeIterator.traverse(node as Node, {scope})
+    }
+  },
+
+  // while循环
+  WhileStatement(nodeIterator) {
+    const { node } = nodeIterator;
+    const { test } = node;
+    const whileTrack: Itrack[] = [];
+    let whileCount = 0; //  防止死循环的出现
     console.log(node);
-    // if (nodeIterator.traverse(nodeIterator.node.test)) {
-    //   nodeIterator.traverse(nodeIterator.node.consequent)
-    // } else if (nodeIterator.node.alternate) {
-    //   nodeIterator.traverse(nodeIterator.node.alternate);
+    while (true && whileCount < 100) {
+      const testResult = nodeIterator.traverse(test, undefined, whileTrack);
+      if (testResult.value) {
+        nodeIterator.traverse(node.body as Node, undefined, whileTrack);
+      } else {
+        break;
+      }
+      trackSetEnd(whileTrack, trackCount);
+      whileCount += 1;
+    }
+    nodeIterator.addOperateTrack(nodeIterator.operations, whileTrack);
+  },
+
+  // for循环
+  ForStatement(nodeIterator) {
+    let scope = nodeIterator.createScope('block');
+    // for (nodeIterator.traverse(nodeIterator.node.init, {scope});
+    //   nodeIterator.traverse(nodeIterator.node.test, {scope});
+    //   nodeIterator.traverse(nodeIterator.node.update, {scope})
+    //   ) {
+    //     nodeIterator.traverse(nodeIterator.node.body, {scope});
     // }
   },
 
-  // // 块语句
-  // BlockStatement: nodeIterator => {
-  //   let scope = nodeIterator.createScope('block');
-  //   for (const node of nodeIterator.node.body) {
-  //     nodeIterator.traverse(node, {scope})
-  //   }
-  // },
+  // for循环，参数更新
+  UpdateExpression(nodeIterator) {
+    let simpleValue = nodeIterator.scope.get(nodeIterator.node.argument.name);
+    nodeHandlers.AssignmentExpressionMap[nodeIterator.node.operator](simpleValue);
+  }
 
   // FunctionDeclaration: nodeIterator => {
   //   const fn = nodeHandlers.FunctionExpression(nodeIterator);
@@ -351,7 +430,6 @@ const nodeHandlers: InodeHandler =  {
   //     name: {value: node.id ? node.id.name : ''},
   //     length: {value: node.params.length}
   //   })
-
   //   return fn;
   // },
 
@@ -362,30 +440,6 @@ const nodeHandlers: InodeHandler =  {
   //   const func = nodeIterator.traverse(nodeIterator.node.callee);
   //   return func.apply(args);
   // },
-
-  // // while循环
-  // WhileStatement(nodeIterator) {
-  //   while (nodeIterator.traverse(nodeIterator.node.test)) {
-  //     nodeIterator.traverse(nodeIterator.node.body);
-  //   }
-  // },
-
-  // // for循环
-  // ForStatement(nodeIterator) {
-  //   let scope = nodeIterator.createScope('block');
-  //   for (nodeIterator.traverse(nodeIterator.node.init, {scope});
-  //     nodeIterator.traverse(nodeIterator.node.test, {scope});
-  //     nodeIterator.traverse(nodeIterator.node.update, {scope})
-  //     ) {
-  //       nodeIterator.traverse(nodeIterator.node.body, {scope});
-  //   }
-  // },
-
-  // // for循环，参数更新
-  // UpdateExpression(nodeIterator) {
-  //   let simpleValue = nodeIterator.scope.get(nodeIterator.node.argument.name);
-  //   nodeHandlers.AssignmentExpressionMap[nodeIterator.node.operator](simpleValue);
-  // }
 }
 
 export default nodeHandlers;
