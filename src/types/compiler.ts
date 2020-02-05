@@ -4,6 +4,7 @@ import { Node } from 'acorn';
 export type Ivalue = any;
 export type IscopeValue = any;
 export type Ioperation = () => void;
+export type ScopeType = "function" | "block";
 
 export interface IsimpleValue {
   kind: string,
@@ -30,6 +31,8 @@ export interface Iscope {
 export interface Ioptions {
   scope?: Iscope,
   mirrorScope?: Iscope,
+  tracks?: Itrack[],
+  operations?: Ioperation[]
 }
 
 export interface Iiterator {
@@ -40,8 +43,9 @@ export interface Iiterator {
   stateHandler?: IstateHandler,
   code: string,
   operations: Ioperation[],
-  traverse(node: Node, options?: object, track?: Itrack[], operations?: Ioperation[]): any,
-  createScope(type: string): Iscope,
+  traverse(node: Node, options?: Ioptions): any,
+  createScope(type: ScopeType): Iscope,
+  createMirroScope(type: ScopeType): Iscope,
   createMirrorOperate(operations: Ioperation[]): void,
   createMirrorAnimate(animate: IanimateKey): void,
   addOperateTrack(operations: Ioperation[] | undefined, tracks:Itrack[] | undefined): void,
@@ -52,7 +56,7 @@ export interface Iiterator {
 
 export interface Icompiler {
   code: string,
-  ast: object,
+  ast: Node,
   operations: Ioperation[],
   iterator?: Iiterator,
   scope: Iscope,

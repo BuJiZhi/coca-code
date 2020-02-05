@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
-import { Itrack, Icontent, Iframe, IrenderResult } from '../types/animate';
-import { deepCopy } from '../utils/tools';
+import { Iframe, IrenderResult } from '../types/animate';
 import { connect } from 'react-redux';
 import { RootState } from '../store';
 import { Dispatch } from 'redux';
 import { EditorState, Styles } from '../types/store';
-import { Button } from '@material-ui/core';
+// import { Button } from '@material-ui/core';
 import Frame from '../components/Editor/Frame';
 import {
   updateCurrent,

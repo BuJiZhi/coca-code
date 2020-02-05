@@ -34,8 +34,6 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-
-
 const Shell: React.FC<ShellProps> = props => {
   const classes = useStyles();
   const renderScope = (scope: Iscope) =>

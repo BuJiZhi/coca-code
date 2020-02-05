@@ -1,11 +1,12 @@
 import { Parser } from 'acorn';
 import Iterator from './Iterator';
 import Scope from './Scope';
+import { Node } from 'acorn';
 import { Icompiler, Iiterator, Iscope, IstateHandler, Ioperation } from '../../types/compiler';
 class Compiler implements Icompiler {
 
   code: string;
-  ast: object;
+  ast: Node;
   scope: Iscope;
   mirrorScope: Iscope;
   stateHandler: IstateHandler;
@@ -14,7 +15,7 @@ class Compiler implements Icompiler {
 
   constructor(code: string, stateHandler: IstateHandler) {
     this.code = code;
-    this.ast = {};
+    this.ast = Object.create(null);
     this.scope = Object.create(null);
     this.mirrorScope = Object.create(null);
     this.stateHandler = stateHandler;
@@ -46,7 +47,9 @@ class Compiler implements Icompiler {
       this.scope, 
       this.mirrorScope, 
       this.stateHandler,
-      this.code
+      this.code,
+      [],
+      []
       );
   }
 

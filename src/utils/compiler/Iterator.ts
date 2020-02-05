@@ -41,13 +41,14 @@ class Iterator implements Iiterator {
     this.operations = operations;
   }
 
-  traverse(node: InodeTypes, options: Ioptions={}, track: Itrack[], operation: Ioperation[]): ItarversBack {
-    const tracks = track || this.tracks;
-    const operations = operation || this.operations;
-    const scope = options.scope || this.scope;
-    const mirrorScope = options.mirrorScope || this.mirrorScope;
+  traverse(node: InodeTypes, options: Ioptions={}): ItarversBack {
+    const { scope, tracks, operations, mirrorScope } = options;
+    const nextTracks = tracks || this.tracks;
+    const nextOperations = operations || this.operations;
+    const nextScope = scope || this.scope;
+    const nextMirrorScope = mirrorScope || this.mirrorScope;
     const _eval = nodeHandlers[node.type as keyof InodeHandler];
-    const iterator = new Iterator(node, scope, mirrorScope, this.stateHandler, this.code, tracks, operations);
+    const iterator = new Iterator(node, nextScope, nextMirrorScope, this.stateHandler, this.code, nextTracks, nextOperations);
     if (!_eval) {
       throw new Error(`No handler for ${node.type}`)
     }
@@ -55,21 +56,21 @@ class Iterator implements Iiterator {
   }
 
   createScope(scopeType='block') {
-    let newScope =  new Scope(scopeType, this.scope);
-    this.scope.addChild(newScope);
-    if (this.stateHandler.updateScope) {
-      this.stateHandler.updateScope(newScope);
-    }
-    return newScope;
+    this.scope =  new Scope(scopeType, this.scope);
+    this.scope.parentScope.addChild(this.scope);
+    // if (this.stateHandler.updateScope) {
+    //   this.stateHandler.updateScope(newScope);
+    // }
+    return this.scope;
   }
 
   createMirroScope(scopeType='block') {
-    let newMirrorScope =  new Scope(scopeType, this.mirrorScope);
-    this.mirrorScope.addChild(newMirrorScope);
-    if (this.stateHandler.updateMirrorScope) {
-      this.stateHandler.updateMirrorScope(newMirrorScope);
-    }
-    return newMirrorScope;
+    this.mirrorScope =  new Scope(scopeType, this.mirrorScope);
+    this.mirrorScope.parentScope.addChild(this.mirrorScope);
+    // if (this.stateHandler.updateMirrorScope) {
+    //   this.stateHandler.updateMirrorScope(newMirrorScope);
+    // }
+    return this.mirrorScope;
   }
 
   createMirrorAnimate(animate: IanimateKey) {
