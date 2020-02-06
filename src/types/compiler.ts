@@ -160,6 +160,13 @@ interface IunaryExpression {
   operator: String
 }
 
+interface IforStatement {
+  init?: Node,
+  test: Node,
+  update: Node,
+  body: Node
+}
+
 export type InodeTypes = 
 Icommon &
 IprogramNode &
@@ -170,7 +177,8 @@ Iliteral &
 Iidentifier &
 Iexpression &
 IifStatement &
-IunaryExpression;
+IunaryExpression &
+IforStatement;
 
 export interface InodeHandler {
   Program(node: Iiterator): any,

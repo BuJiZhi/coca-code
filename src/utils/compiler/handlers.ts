@@ -1,7 +1,8 @@
 import { 
   InodeHandler,
   Iiterator,
-  IsimpleValue
+  IsimpleValue,
+  Ioperation
  } from '../../types/compiler';
 import { Node } from 'acorn';
 import { Itrack } from '../../types/animate';
@@ -20,6 +21,12 @@ function trackSetEnd(tracks: Itrack[], endpoint: number): Itrack[] {
 
 let trackCount: number;
 let keyCount: number;
+
+/**
+ * 节点有主干节点以及叶子节点组成
+ * 主干节点有上传动画轨道及操作函数的权限，
+ * 因此主干节点都有创建新的轨道列表及操作列表
+ */
 const nodeHandlers: InodeHandler =  {
 
   Program: (nodeIterator: Iiterator) => {
@@ -35,7 +42,8 @@ const nodeHandlers: InodeHandler =  {
   VariableDeclaration: nodeIterator => {
     const code = nodeIterator.code;
     const kind = nodeIterator.node.kind;
-    const variableTrack: Itrack[] = [];
+    let variableTrack: Itrack[] = [];
+    let variableOperate: Ioperation[] = [];
     if (nodeIterator.node.declarations) {
       for (const declaration of nodeIterator.node.declarations) {
         // 一个轨道列表就相当于是一条语句
@@ -58,7 +66,7 @@ const nodeHandlers: InodeHandler =  {
           variableTrack.push(idTrack);
           // 2. id节点操作函数
           const idOperate = () => {};
-          nodeIterator.addOperation(idOperate);
+          variableOperate.push(idOperate);
           // 3. 上个节点的结束点，无
           // 4. 返回值
           const idNode = {
@@ -67,7 +75,7 @@ const nodeHandlers: InodeHandler =  {
           }
 
           const initNode = init
-            ? nodeIterator.traverse(init as Node, {tracks: variableTrack})
+            ? nodeIterator.traverse(init as Node, {tracks: variableTrack, operations: variableOperate})
             : {value: undefined, preTrack: {
               begin: trackCount++,
               end: 0,
@@ -100,7 +108,7 @@ const nodeHandlers: InodeHandler =  {
             // 在state添加了mirrorScope以后，如果改变了它的值，store里是否会更新？
             nodeIterator.mirrorScope.declare(idNode.value, initNode.value, kind);
           }
-          nodeIterator.addOperation(mirrorOperate);
+          variableOperate.push(mirrorOperate);
 
           // 前面节点动画结束点
           for (let i = 0; i < variableTrack.length - 1; i++) {
@@ -112,7 +120,7 @@ const nodeHandlers: InodeHandler =  {
         }
       }
       // 上传轨道及操作函数
-      nodeIterator.addOperateTrack(nodeIterator.operations, variableTrack);
+      nodeIterator.addOperateTrack(variableOperate, variableTrack);
     }
   },
 
@@ -222,10 +230,12 @@ const nodeHandlers: InodeHandler =  {
   // 表达式
   ExpressionStatement: nodeIterator => {
     let expressionTrack: Itrack[] = [];
-    const result = nodeIterator.traverse(nodeIterator.node.expression, {tracks: expressionTrack});
-    let { tracks, operations } = nodeIterator;
+    let expressionOperate: Ioperation[] = [];
+    console.log(nodeIterator.node)
+    const result = nodeIterator.traverse(nodeIterator.node.expression, {tracks: expressionTrack, operations: expressionOperate});
     expressionTrack = trackSetEnd(expressionTrack, trackCount);
-    nodeIterator.addOperateTrack(operations, expressionTrack);
+    console.log(expressionOperate);
+    nodeIterator.addOperateTrack(expressionOperate, expressionTrack);
     return result;
   },
 
@@ -239,6 +249,7 @@ const nodeHandlers: InodeHandler =  {
     const code = nodeIterator.code;
     const { left, right, operator } = nodeIterator.node;
     const { start, end, name } = left;
+    console.log(nodeIterator.operations);
     // 判断变量是否已经定义，如果没有会报错
     nodeIterator.scope.get(name);
     const idPos = startend2Index(start, end, code);
@@ -284,16 +295,14 @@ const nodeHandlers: InodeHandler =  {
       let val = nodeIterator.scope.get(name);
       nodeHandlers.AssignmentExpressionMap[operator](val, value);
       // 以闭包的方式保存，确保数据的准确
-      const literalOperate = ((val: any) => {
-        let valInside = val;
-        console.log(valInside);
+      const literalOperate = function(val: any) {
+        const valInside = val;
         return function() {
           let simplevalue = nodeIterator.mirrorScope.get(name);
-          console.log(valInside); // 为什么前后的值会不一样？
           nodeHandlers.AssignmentExpressionMap[operator](simplevalue, valInside);
         }
-      })(value);
-      nodeIterator.addOperation(literalOperate);
+      }
+      nodeIterator.addOperation(literalOperate(value));
 
       // 3. 上一个节点的结束点,无
 
@@ -350,16 +359,18 @@ const nodeHandlers: InodeHandler =  {
   // 条件判断
   IfStatement: nodeIterator => {
     const { node } = nodeIterator;
+    console.log(node);
     const { test, consequent, alternate } = node;
     const ifStmTracks: Itrack[] = [];
-    const testResult = nodeIterator.traverse(test, {tracks: ifStmTracks});
+    const ifOperate: Ioperation[] = [];
+    const testResult = nodeIterator.traverse(test, {tracks: ifStmTracks, operations: ifOperate});
     if (testResult.value) {
-      nodeIterator.traverse(consequent, {tracks: ifStmTracks});
+      nodeIterator.traverse(consequent, {tracks: ifStmTracks, operations: ifOperate});
     } else if (node.alternate) {
-      nodeIterator.traverse(alternate as Node, {tracks: ifStmTracks});
+      nodeIterator.traverse(alternate as Node, {tracks: ifStmTracks, operations: ifOperate});
     }
     trackSetEnd(ifStmTracks, trackCount);
-    nodeIterator.addOperateTrack(nodeIterator.operations, ifStmTracks);
+    nodeIterator.addOperateTrack(ifOperate, ifStmTracks);
   },
 
   // 块语句
@@ -368,8 +379,9 @@ const nodeHandlers: InodeHandler =  {
     let mirrorScope = nodeIterator.createMirroScope('block');
     const nodes = nodeIterator.node.body as Node[];
     for (const node of nodes) {
-      nodeIterator.traverse(node as Node, {scope, mirrorScope});
+      nodeIterator.traverse(node as Node, {scope, mirrorScope, operations: nodeIterator.operations});
     }
+    trackSetEnd(nodeIterator.tracks, trackCount);
   },
 
   // while循环
@@ -377,33 +389,61 @@ const nodeHandlers: InodeHandler =  {
     const { node } = nodeIterator;
     const { test } = node;
     const whileTrack: Itrack[] = [];
+    const whileOperate: Ioperation[] = [];
     let whileCount = 0; //  防止死循环的出现
-    while (nodeIterator.traverse(test, {tracks: whileTrack}).value && whileCount < 100) {
-      nodeIterator.traverse(node.body as Node, {tracks: whileTrack});
+    while (nodeIterator.traverse(test, {tracks: whileTrack, operations: whileOperate}).value && whileCount < 100) {
+      nodeIterator.traverse(node.body as Node, {tracks: whileTrack, operations: whileOperate});
       trackSetEnd(whileTrack, trackCount);
       whileCount += 1;
     }
-    console.log(nodeIterator.scope);
-    nodeIterator.addOperateTrack(nodeIterator.operations, whileTrack);
+    nodeIterator.addOperateTrack(whileOperate, whileTrack);
   },
 
   // for循环
   ForStatement(nodeIterator) {
     const { node } = nodeIterator;
     console.log(node);
-    let scope = nodeIterator.createScope('block');
-    // for (nodeIterator.traverse(nodeIterator.node.init, {scope});
-    //   nodeIterator.traverse(nodeIterator.node.test, {scope});
-    //   nodeIterator.traverse(nodeIterator.node.update, {scope})
-    //   ) {
-    //     nodeIterator.traverse(nodeIterator.node.body, {scope});
-    // }
+    const { init, test, update, body } = node;
+    let forTrack: Itrack[] = [];
+    let forOperate: Ioperation[] = []; 
+    // let scope = nodeIterator.createScope('block');
+    for (nodeIterator.traverse(init as Node, {tracks: forTrack, operations: forOperate});
+      nodeIterator.traverse(test, {tracks: forTrack, operations: forOperate}).value;
+      nodeIterator.traverse(update, {tracks: forTrack, operations: forOperate})
+      ) {
+        nodeIterator.traverse(body, {tracks: forTrack, operations: forOperate});
+    }
+    trackSetEnd(forTrack, trackCount);
+    nodeIterator.addOperateTrack(forOperate, forTrack);
   },
 
   // for循环，参数更新
   UpdateExpression(nodeIterator) {
-    // let simpleValue = nodeIterator.scope.get(nodeIterator.node.argument.name);
-    // nodeHandlers.AssignmentExpressionMap[nodeIterator.node.operator](simpleValue);
+    const { node, code } = nodeIterator;
+    const { argument, operator, start, end } = node;
+    const pos = startend2Index(start, end, code);
+    let simpleValue = nodeIterator.scope.get(argument.name);
+    const value = nodeHandlers.AssignmentExpressionMap[nodeIterator.node.operator](simpleValue);
+    // 1.本节点动画
+    const track: Itrack = {
+      begin: trackCount++,
+      end: 0,
+      content: {
+        type: 't4',
+        value,
+        startpos: pos[0],
+        endpos: pos[1],
+        key: `upd-${++keyCount}`
+      }
+    }
+    nodeIterator.addTrack(track);
+    // 2.本节点操作
+    const updateOperate = () => {
+      let simpleValue = nodeIterator.mirrorScope.get(argument.name);
+      nodeHandlers.AssignmentExpressionMap[nodeIterator.node.operator](simpleValue);
+    }
+    nodeIterator.addOperation(updateOperate);
+    // 3.设置结束，返回值，无
   }
 
   // FunctionDeclaration: nodeIterator => {

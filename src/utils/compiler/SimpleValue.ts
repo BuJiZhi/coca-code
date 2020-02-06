@@ -14,11 +14,12 @@ export default class SimpleValue implements IsimpleValue {
     return this.value;
   }
 
-  set(value: any): void {
+  set(value: any): any {
     if (this.kind === 'const') {
       throw new Error(`assignment of constant`)
     } else {
       this.value = value;
+      return this.value;
     }
   }
 }
