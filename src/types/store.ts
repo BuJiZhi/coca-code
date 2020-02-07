@@ -134,7 +134,8 @@ ClearTracks;
 
 export interface MirrorState {
   mirrorScope: Iscope,
-  operations: object[]
+  operations: Ioperation[],
+  // execOperations: Ioperation[]
 }
 
 export interface ScopeState {
@@ -147,6 +148,8 @@ export const CLEAR_MIRROR_SCOPE = 'CLEAR_MIRROR_SCOPE';
 export const ADD_OPERATION = 'ADD_OPERATION';
 export const CLEAR_OPERATION = 'CLEAR_OPERATION';
 export const UPDATE_OPERATION = 'UPDATE_OPRATION';
+// export const CLEAR_EXECOPRATION = 'CLEAR_EXECOPRATION';
+// export const UPDATE_EXECOPRATION = 'UPDATE_EXECOPRATION';
 
 interface UpdateMirrorScopeAction {
   type: typeof UPDATE_MIRROR_SCOPE,
@@ -170,6 +173,11 @@ interface UpdateOperationAction {
   type: typeof UPDATE_OPERATION,
   payload: Ioperation[]
 }
+
+// interface ClearExecOperationAction {
+//   type: typeof CLEAR_EXECOPRATION,
+//   payload: Ioperation[]
+// }
 
 export type MirrorActionTypes = 
 UpdateMirrorScopeAction |

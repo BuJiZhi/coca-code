@@ -27,6 +27,7 @@ import {
   updateMirrorScope,
   clearMirrorScope,
   addOperation,
+  updateOperation,
   clearOperation,
   updateCurrent,
   clearKeys,
@@ -51,6 +52,7 @@ export interface CustomOptions {
   updateCursor?: (cor: [number, number]) => void,
   handleRootClick?:(e: React.MouseEvent) => void,
   clearKeys?:() => void,
+  updateOperation?: (op: Ioperation[]) => void,
   updateCurrent?: (index: number) => void,
   updateRenderResult?: (result: IrenderResult) => void,
   addTrack?: (track: Itrack) => void
@@ -141,7 +143,7 @@ class EditorCon extends Component<CustomOptions & IstateHandler> {
     })
     compiler.init();
     compiler.run();
-    this.animateInit();
+    // this.animateInit();
     // this.animateRender();
   }
 
@@ -149,17 +151,36 @@ class EditorCon extends Component<CustomOptions & IstateHandler> {
     const { current, renderResult } = this.props.doc;
     if (current < renderResult.length - 1) {
       const newIdx = current + 1;
-      this.props.compiler.operations[newIdx]();
+      this.props.compiler.operations[newIdx].operation();
       this.props.updateCurrent(newIdx);
     }
   }
 
   handleRenderClick = ():void => {
     this.animateInit();
-    // this.animateRender();
+  }
+
+  /**
+   * 操作函数重新排序
+   * 每个对象的key应该和索引一致
+   */
+  operationSort = (): void => {
+    const { operations }  = this.props.compiler;
+    const newOperations = [...operations];
+    const sortedOperations: Ioperation[] = [];
+    for (let op of newOperations) {
+      sortedOperations.push(Object.create(null));
+    }
+    for (let op of newOperations) {
+      sortedOperations[op.key] = op;
+    }
+    if (this.props.updateOperation) {
+      this.props.updateOperation(sortedOperations);
+    }
   }
 
   animateInit = (): void => {
+    this.operationSort();
     const { tracks, initialTrack } = this.props.doc;
     let end = 0;
     let newRenderResult = [];
@@ -179,7 +200,6 @@ class EditorCon extends Component<CustomOptions & IstateHandler> {
       for (let j = begin; j < end; j++) {
         let newContent = deepCopy(content);
         if (j === begin) {
-          console.log('enter')
           newContent.process = 'enter';
         } else {
           newContent.process = 'stay';
@@ -255,6 +275,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateMirrorScope: (scope: Iscope) => dispatch(updateMirrorScope(scope)),
   clearMirrorScope: () => dispatch(clearMirrorScope()),
   addOperation: (op: Ioperation[]) => dispatch(addOperation(op)),
+  updateOperation: (op: Ioperation[]) => dispatch(updateOperation(op)),
   clearOperation: () => dispatch(clearOperation()),
   updateCurrent: (current: number) => dispatch(updateCurrent(current)),
   clearKeys: () => dispatch(clearKeys()),

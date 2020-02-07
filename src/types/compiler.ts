@@ -3,8 +3,12 @@ import { IrenderResult, Itrack } from "./animate";
 import { Node } from 'acorn';
 export type Ivalue = any;
 export type IscopeValue = any;
-export type Ioperation = () => void;
 export type ScopeType = "function" | "block";
+
+export interface Ioperation {
+  key: number,
+  operation: () => void
+}
 
 export interface IsimpleValue {
   kind: string,
@@ -194,7 +198,8 @@ export interface InodeHandler {
   WhileStatement(node: Iiterator): void,
   ForStatement(node:Iiterator): void,
   UpdateExpression(node: Iiterator): void,
-  // FunctionDeclaration(node: Iiterator): void,
+  FunctionDeclaration(node: Iiterator): void,
+  FunctionExpression(node: Iiterator): void,
   AssignmentExpressionMap: any,
   BinaryExpressionOperatorMap: any,
   unaryoperateMap: any
