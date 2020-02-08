@@ -3,7 +3,8 @@
  * t1 变量定义名(identifier)                显示变量名字
  * t2 基础数值(literal)                     显示值
  * t3 变量定义/赋值(varialblledeclaration)  初始值移到变量名
- * t4 运算(binaryExpression)                显示运算结果
+ * t4 运算(binaryExpression)               显示运算结果
+ * t5 函数定义(function declaration)       显示函数注册效果
  */
 import React from 'react';
 import { EditorState, Styles } from '../../types/store';
@@ -107,6 +108,23 @@ const springFac = (content: Icontent, ui: Styles) => {
         }
       }
       break;
+    case 't5':
+      springs.style = {
+        to: {
+          opacity: 1,
+          left: startpos[1] * fontWidth,
+          top: startpos[0] * lineHeight,
+          backgroundColor: "#fff",
+          border: "1px solid #aaa",
+          borderRadius: "3px",
+          // width: (endpos[1] - startpos[1]) * fontWidth,
+          textAlign: "center",
+          // overflow: "hidden"
+        },
+        from: {
+          opacity: 0
+        }
+      }
     default:
       break;
   }

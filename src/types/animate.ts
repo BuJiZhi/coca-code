@@ -1,5 +1,5 @@
 type Position = [number, number];
-type AnimateTypes =  't0' | 't1' | 't2' | 't3' | 't4';
+type SpringTypes =  't0' | 't1' | 't2' | 't3' | 't4' | 't5';
 type Process = 'enter' | 'stay' | 'leave';
 
 export interface Itrack {
@@ -9,13 +9,12 @@ export interface Itrack {
 }
 
 export interface Icontent {
-  type: AnimateTypes,
+  type: SpringTypes,
   startpos: Position,
   endpos: Position,
   process?: Process,
   key: string,
   value: any,
-  payload?: any,
   width?: number
 }
 

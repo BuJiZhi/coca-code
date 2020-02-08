@@ -4,10 +4,11 @@ import { Node } from 'acorn';
 export type Ivalue = any;
 export type IscopeValue = any;
 export type ScopeType = "function" | "block";
+export type Operation = () => void;
 
 export interface Ioperation {
   key: number,
-  operation: () => void
+  operation: Operation
 }
 
 export interface IsimpleValue {
@@ -28,8 +29,8 @@ export interface Iscope {
   addChild(scope: Iscope): void,
   declare(name: string, value: Ivalue, kind: string): void,
   varDeclare(name: string, value: Ivalue): void,
-  varDeclare(name: string, value: Ivalue): void,
-  varDeclare(name: string, value: Ivalue): void
+  letDeclare(name: string, value: Ivalue): void,
+  constDeclare(name: string, value: Ivalue): void
 }
 
 export interface Ioptions {
@@ -171,6 +172,20 @@ interface IforStatement {
   body: Node
 }
 
+interface IfuncDeclaration {
+  id : Node,
+  expression: Boolean,
+  generator: Boolean,
+  async: Boolean,
+  params: Node[],
+  body: Node
+}
+
+interface IfuncCaller {
+  arguments: [],
+  callee: Node
+}
+
 export type InodeTypes = 
 Icommon &
 IprogramNode &
@@ -182,7 +197,9 @@ Iidentifier &
 Iexpression &
 IifStatement &
 IunaryExpression &
-IforStatement;
+IforStatement &
+IfuncDeclaration &
+IfuncCaller;
 
 export interface InodeHandler {
   Program(node: Iiterator): any,
@@ -199,7 +216,8 @@ export interface InodeHandler {
   ForStatement(node:Iiterator): void,
   UpdateExpression(node: Iiterator): void,
   FunctionDeclaration(node: Iiterator): void,
-  FunctionExpression(node: Iiterator): void,
+  FunctionExpression(node: Iiterator): [Operation, Operation],
+  CallExpression(node: Iiterator): any,
   AssignmentExpressionMap: any,
   BinaryExpressionOperatorMap: any,
   unaryoperateMap: any

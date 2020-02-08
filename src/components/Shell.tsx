@@ -1,6 +1,7 @@
 import React from 'react';
 import { Icompiler, Iscope } from '../types/compiler';
 import { Button, Paper, Card, makeStyles } from '@material-ui/core';
+import { valueConvert } from '../utils/tools';
 
 interface ShellProps {
   compiler: Icompiler
@@ -40,12 +41,9 @@ const Shell: React.FC<ShellProps> = props => {
     <Card className={ classes.showCard }>
       {scope.declartion
         ? Object.keys(scope.declartion).map((item, index) => (
-            <div key={ index }>{ item }:{ scope.declartion[item].value === true 
-              ? 'true' 
-              : scope.declartion[item].value === false 
-                ? 'false' 
-                : scope.declartion[item].value 
-            }</div>
+            <div key={ index }>
+              { item }:{ valueConvert(scope.declartion[item].value)}
+            </div>
           ))
         : <div></div>
       }

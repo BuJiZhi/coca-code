@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSpring, animated } from 'react-spring';
+import { valueConvert } from '../../utils/tools';
 
 interface Iprops {
   info: any
@@ -12,7 +13,7 @@ const Element: React.FC<Iprops> = ({info}) => {
     <animated.div 
       style={ process === 'enter' ? spring : style.to }
     >
-      { value === true ? 'true' : value === false ? 'false' : value }
+      { valueConvert(value) }
     </animated.div>
   );
 }

@@ -2,7 +2,8 @@ import {
   InodeHandler,
   Iiterator,
   IsimpleValue,
-  Ioperation
+  Ioperation,
+  Iscope
  } from '../../types/compiler';
 import { Node } from 'acorn';
 import { Itrack } from '../../types/animate';
@@ -473,44 +474,119 @@ const nodeHandlers: InodeHandler =  {
   },
 
   FunctionDeclaration: nodeIterator => {
-    const { node } = nodeIterator;
-    console.log(node);
-    // const fn = nodeHandlers.FunctionExpression(nodeIterator);
-    // nodeIterator.scope.varDeclare(nodeIterator.node.id.name, fn);
+    const { node, code } = nodeIterator;
+    const { start, end, id } = node;
+    const pos = startend2Index(start, end, code);
+    const funcTracks: Itrack[] = [];
+    const funcOperations: Ioperation[] = [];
+    // 1. 本节点动画
+    const track: Itrack = {
+      begin: trackCount++,
+      end: 0,
+      content: {
+        type: 't5',
+        startpos: pos[0],
+        endpos: pos[1],
+        value: id.name,
+        key: `func-${++keyCount}`
+      }
+    }
+    funcTracks.push(track);
+    // 2.本节点操作函数
+    const fns = nodeHandlers.FunctionExpression(nodeIterator);
+    nodeIterator.scope.varDeclare(nodeIterator.node.id.name, fns[0]);
+    const funcOp: Ioperation = {
+      key: operationCount++,
+      operation: () => {
+        nodeIterator.mirrorScope.varDeclare(nodeIterator.node.id.name, fns[1]);
+      }
+    }
+    funcOperations.push(funcOp);
+    // 3. 节点设置结束点
+    trackSetEnd(funcTracks, trackCount);
+    nodeIterator.addOperateTrack(funcOperations, funcTracks);
     // return fn;
   },
 
-  FunctionExpression(nodeIterator) {
-    const { node } = nodeIterator;
-    console.log(node);
+  // 根据节点生成对应函数
+  FunctionExpression (nodeIterator) {
+    const node = nodeIterator.node
     /**
      * 1、定义函数需要先为其定义一个函数作用域，且允许继承父级作用域
      * 2、注册`this`, `arguments`和形参到作用域的变量空间
      * 3、检查return关键字
      * 4、定义函数名和长度
      */
-    // const fn = function() {
-    //   const scope = nodeIterator.createScope('function');
-    //   node.params.forEach((param, index) => {
-    //     const name = param.name;
-    //     scope.varDeclare(name, arguments[index]);
-    //   })
-    // }
+    function fnGen(sp: Iscope) {
+      return function() {
+        // scope.constDeclare('this', this)
+        sp.constDeclare('arguments', arguments);
 
-    // Object.defineProperties(fn, {
-    //   name: {value: node.id ? node.id.name : ''},
-    //   length: {value: node.params.length}
-    // })
-    // return fn;
+        node.params.forEach(function(param, index) {
+          //@ts-ignore
+          const name = param.name;
+          sp.varDeclare(name, arguments[index]); // 注册变量
+        })
+
+        // const signal = nodeIterator.traverse(node.body, { scope })
+        // if (Signal.isReturn(signal)) {
+        //   return signal.value
+        // }
+      }
+    }
+    const fn = function() {
+      const scope = nodeIterator.createScope('function')
+      scope.constDeclare('arguments', arguments);
+
+      node.params.forEach(function(param, index) {
+        //@ts-ignore
+        const name = param.name;
+        scope.varDeclare(name, arguments[index]); // 注册变量
+      })
+
+      nodeIterator.traverse(node.body, { scope });
+      // const signal = nodeIterator.traverse(node.body, { scope })
+      // if (Signal.isReturn(signal)) {
+      //   return signal.value
+      // }
+    }
+    const mirrorFn = function() {
+      const mirrorScope = nodeIterator.createMirroScope('function')
+      mirrorScope.constDeclare('arguments', arguments);
+
+      node.params.forEach(function(param, index) {
+        //@ts-ignore
+        const name = param.name;
+        mirrorScope.varDeclare(name, arguments[index]); // 注册变量
+      })
+
+      nodeIterator.traverse(node.body, { mirrorScope });
+      // const signal = nodeIterator.traverse(node.body, { scope })
+      // if (Signal.isReturn(signal)) {
+      //   return signal.value
+      // }
+    }
+    Object.defineProperties(fn, {
+      name: { value: node.id ? node.id.name : '' },
+      length: { value: node.params.length }
+    })
+    Object.defineProperties(mirrorFn, {
+      name: { value: node.id ? node.id.name : '' },
+      length: { value: node.params.length }
+    })
+
+    return [fn, mirrorFn];
   },
 
-  // // 调用函数
-  // CallExpression(nodeIterator) {
-  //   const node = nodeIterator.node;
-  //   const args = node.arguments.map(arg => nodeIterator.traverse(arg));
-  //   const func = nodeIterator.traverse(nodeIterator.node.callee);
-  //   return func.apply(args);
-  // },
+  // 调用函数
+  CallExpression(nodeIterator) {
+    const { node } = nodeIterator;
+    console.log(node);
+    const args = node.arguments.map(arg => nodeIterator.traverse(arg));
+    const func = nodeIterator.traverse(nodeIterator.node.callee);
+    console.log(func);
+    return func.value.apply(args);
+  },
 }
 
 export default nodeHandlers;

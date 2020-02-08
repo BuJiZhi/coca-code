@@ -65,3 +65,18 @@ export function deepCopy<T>(obj: T): T {
   　　return newobj;
   }
 
+export function valueConvert(value: any): any {
+    switch(typeof value) {
+      case "string":
+        return value;
+      case "number":
+        return value;
+      case "boolean":
+        return value ? "true" : "false"
+      case "function":
+        return `[function]${value.name}`;
+      default:
+        return "unknow";
+    }
+  }
+
