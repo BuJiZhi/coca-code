@@ -7,7 +7,7 @@ import {
  } from '../../types/compiler';
 import { Node } from 'acorn';
 import { Itrack } from '../../types/animate';
-import { startend2Index, /*deepCopy*/ } from '../tools';
+import { startend2Index, typeOf, /*deepCopy*/ } from '../tools';
 
 function trackSetEnd(tracks: Itrack[], endpoint: number): Itrack[] {
   let newTracks: Itrack[] = [...tracks];
@@ -61,6 +61,7 @@ const nodeHandlers: InodeHandler =  {
               content: {
                 type: "t2",
                 value: name,
+                valueType: typeOf(name),
                 startpos: idPos[0],
                 endpos: idPos[1],
                 key: `idf-${++keyCount}`
@@ -89,8 +90,9 @@ const nodeHandlers: InodeHandler =  {
                 type: "t2",
                 startpos: idNode.preTrack.content.startpos[0],
                 endpos: idNode.preTrack.content.endpos[0],
-                value: "undefined",
-                key: "undefined"
+                value: undefined,
+                valueType: typeOf(undefined),
+                key: `udf-${++keyCount}`
               }
             }};
 
@@ -103,6 +105,7 @@ const nodeHandlers: InodeHandler =  {
               startpos: initNode.preTrack.content.startpos,
               endpos: idNode.preTrack.content.startpos,
               value: initNode.value,
+              valueType: typeOf(initNode.value),
               key: `lta-${++keyCount}`
             }
           }
@@ -154,6 +157,7 @@ const nodeHandlers: InodeHandler =  {
         startpos: pos[0],
         endpos: pos[1],
         value,
+        valueType: typeOf(value),
         key: `uae-${++keyCount}`
       }
     }
@@ -191,6 +195,7 @@ const nodeHandlers: InodeHandler =  {
         startpos: pos[0],
         endpos: pos[1],
         value,
+        valueType: typeOf(value),
         key: `lta-${++keyCount}`
       }
     }
@@ -229,6 +234,7 @@ const nodeHandlers: InodeHandler =  {
         startpos: pos[0],
         endpos: pos[1],
         value,
+        valueType: typeOf(value),
         key: `idf-${++keyCount}`
       }
     }
@@ -275,6 +281,7 @@ const nodeHandlers: InodeHandler =  {
       content: {
         type: "t2",
         value: name,
+        valueType: typeOf(name),
         startpos: idPos[0],
         endpos: idPos[1],
         key: `idf-${++keyCount}`
@@ -303,7 +310,8 @@ const nodeHandlers: InodeHandler =  {
           type: "t3",
           endpos: idTrack.content.startpos,
           startpos: preTrack.content.endpos,
-          value: value,
+          value,
+          valueType: typeOf(value),
           key: `asg-${++keyCount}`
         }
       }
@@ -362,6 +370,7 @@ const nodeHandlers: InodeHandler =  {
         startpos: pos[0],
         endpos: pos[1],
         value,
+        valueType: typeOf(value),
         key: `idf-${++keyCount}`
       }
     }
@@ -454,6 +463,7 @@ const nodeHandlers: InodeHandler =  {
       content: {
         type: 't4',
         value,
+        valueType: typeOf(value),
         startpos: pos[0],
         endpos: pos[1],
         key: `upd-${++keyCount}`
@@ -488,6 +498,7 @@ const nodeHandlers: InodeHandler =  {
         startpos: pos[0],
         endpos: pos[1],
         value: id.name,
+        valueType: typeOf(id.name),
         key: `func-${++keyCount}`
       }
     }
@@ -587,6 +598,39 @@ const nodeHandlers: InodeHandler =  {
     console.log(func);
     return func.value.apply(args);
   },
+
+  ArrayExpression(nodeIterator) {
+    const { node, code } = nodeIterator;
+    const { start, end, id } = node;
+    const pos = startend2Index(start, end, code);
+    const value = nodeIterator.node.elements.map(ele => nodeIterator.traverse(ele).value)
+    // 1. 本节点动画
+    const track: Itrack = {
+      begin: trackCount++,
+      end: 0,
+      content: {
+        type: 't2',
+        value,
+        valueType: typeOf(value),
+        startpos: pos[0],
+        endpos: pos[1],
+        key: `arr-${++keyCount}`
+      }
+    }
+    nodeIterator.addTrack(track);
+    // 2.本节点操作
+    const arrOperation: Ioperation = {
+      key: operationCount++,
+      operation: () => {}
+    };
+    nodeIterator.addOperation(arrOperation);
+    // 3. 上个节点结束点，无
+    // 4. 返回
+    return {
+      value,
+      preTrack: track
+    }
+  }
 }
 
 export default nodeHandlers;

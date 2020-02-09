@@ -3,6 +3,7 @@ import { IsimpleValue } from '../../types/compiler';
 export default class SimpleValue implements IsimpleValue {
   
   kind: string;
+  // type: ValueType;
   value: any;
 
   constructor(value: any, kind: string) {

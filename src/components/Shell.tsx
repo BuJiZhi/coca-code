@@ -1,7 +1,7 @@
 import React from 'react';
 import { Icompiler, Iscope } from '../types/compiler';
 import { Button, Paper, Card, makeStyles } from '@material-ui/core';
-import { valueConvert } from '../utils/tools';
+import { valueConvert, typeOf } from '../utils/tools';
 
 interface ShellProps {
   compiler: Icompiler
@@ -42,7 +42,7 @@ const Shell: React.FC<ShellProps> = props => {
       {scope.declartion
         ? Object.keys(scope.declartion).map((item, index) => (
             <div key={ index }>
-              { item }:{ valueConvert(scope.declartion[item].value)}
+              { item }:{ valueConvert(scope.declartion[item].value, typeOf(scope.declartion[item].value))}
             </div>
           ))
         : <div></div>

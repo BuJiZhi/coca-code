@@ -1,3 +1,5 @@
+import { ValueType } from '../types/animate';
+
 export function click2cursor(
   containerOffset: [number, number],
   clickPos: [number, number],
@@ -65,18 +67,38 @@ export function deepCopy<T>(obj: T): T {
   　　return newobj;
   }
 
-export function valueConvert(value: any): any {
-    switch(typeof value) {
-      case "string":
-        return value;
-      case "number":
-        return value;
-      case "boolean":
-        return value ? "true" : "false"
-      case "function":
-        return `[function]${value.name}`;
-      default:
-        return "unknow";
-    }
+export function typeOf(value: any): ValueType {
+  return Object.prototype.toString.call(value) as ValueType;
+}
+
+export function objToArr(obj: any): Array<any> {
+  const newArr = [];
+  for (let i in obj) {
+    newArr.push(obj[i]);
   }
+  return newArr;
+}
+
+export function valueConvert(value: any, type: ValueType): any {
+  // console.log(value);
+  switch(type) {
+    case "[object String]":
+      return value;
+    case "[object Number]":
+      return value;
+    case "[object Boolean]":
+      return value ? "true" : "false";
+    case "[object Function]":
+      return `[function]${value.name}`;
+    case "[object Array]":
+      // 从那边传过来的数组会被从Array转成object
+      const arr = objToArr(value);
+      return `[${arr.join(',')}]`;
+    case "[object Object]":
+      return 'obj';
+    default:
+      console.log(typeof value);
+      return "unknow";
+  }
+}
 

@@ -186,6 +186,10 @@ interface IfuncCaller {
   callee: Node
 }
 
+interface IarrayExpression {
+  elements: Node[]
+}
+
 export type InodeTypes = 
 Icommon &
 IprogramNode &
@@ -199,7 +203,8 @@ IifStatement &
 IunaryExpression &
 IforStatement &
 IfuncDeclaration &
-IfuncCaller;
+IfuncCaller &
+IarrayExpression;
 
 export interface InodeHandler {
   Program(node: Iiterator): any,
@@ -218,6 +223,7 @@ export interface InodeHandler {
   FunctionDeclaration(node: Iiterator): void,
   FunctionExpression(node: Iiterator): [Operation, Operation],
   CallExpression(node: Iiterator): any,
+  ArrayExpression(node: Iiterator): void,
   AssignmentExpressionMap: any,
   BinaryExpressionOperatorMap: any,
   unaryoperateMap: any

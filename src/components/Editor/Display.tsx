@@ -6,10 +6,11 @@ interface Iprops {
   currentFrame: Iframe
 }
 const springFac = (content: Icontent) => {
-  const { key, type, startpos, endpos, value, process } = content;
+  const { key, type, startpos, endpos, value, valueType, process } = content;
   let springs: Ispring = {
     key: "null",
     value,
+    valueType,
     process,
     style: {
       opacity: 1

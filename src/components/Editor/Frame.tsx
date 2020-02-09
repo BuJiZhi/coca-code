@@ -17,11 +17,12 @@ interface Iprops {
   currentFrame: Iframe
 }
 const springFac = (content: Icontent, ui: Styles) => {
-  const { key, type, startpos, endpos, value, process } = content;
+  const { key, type, startpos, endpos, value, valueType, process } = content;
   const { fontWidth, lineHeight, fontSize } = ui;
   let springs: Ispring = {
     key: "null",
     value,
+    valueType,
     process,
     style: {
       opacity: 1

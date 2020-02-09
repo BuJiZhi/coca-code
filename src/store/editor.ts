@@ -26,6 +26,7 @@ const initialState: EditorState = {
       process: 'enter',
       key: 'sp-0',
       value: '',
+      valueType: '[object String]'
     }
   }],
   renderResult: [[{
@@ -34,7 +35,8 @@ const initialState: EditorState = {
     endpos: [1, 0],
     process: 'enter',
     key: 'sp-0',
-    value: ''
+    value: '',
+    valueType: '[object String]'
   }]],
   initialTrack: {
     type: 't0',
@@ -43,6 +45,7 @@ const initialState: EditorState = {
     process: 'enter',
     key: 'sp-0',
     value: '',
+    valueType: '[object String]'
   }
 }
 
