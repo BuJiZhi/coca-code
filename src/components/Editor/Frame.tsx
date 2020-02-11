@@ -117,6 +117,7 @@ const springFac = (content: Icontent, ui: Styles) => {
           top: startpos[0] * lineHeight,
           backgroundColor: "#fff",
           border: "1px solid #aaa",
+          value: `Declare function: ${value}`,
           borderRadius: "3px",
           // width: (endpos[1] - startpos[1]) * fontWidth,
           textAlign: "center",

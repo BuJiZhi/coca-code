@@ -521,38 +521,18 @@ const nodeHandlers: InodeHandler =  {
 
   // 根据节点生成对应函数
   FunctionExpression (nodeIterator) {
-    const node = nodeIterator.node
-    /**
-     * 1、定义函数需要先为其定义一个函数作用域，且允许继承父级作用域
-     * 2、注册`this`, `arguments`和形参到作用域的变量空间
-     * 3、检查return关键字
-     * 4、定义函数名和长度
-     */
-    function fnGen(sp: Iscope) {
-      return function() {
-        // scope.constDeclare('this', this)
-        sp.constDeclare('arguments', arguments);
-
-        node.params.forEach(function(param, index) {
-          //@ts-ignore
-          const name = param.name;
-          sp.varDeclare(name, arguments[index]); // 注册变量
-        })
-
-        // const signal = nodeIterator.traverse(node.body, { scope })
-        // if (Signal.isReturn(signal)) {
-        //   return signal.value
-        // }
-      }
-    }
+    const node = nodeIterator.node;
     const fn = function() {
-      const scope = nodeIterator.createScope('function')
-      scope.constDeclare('arguments', arguments);
-
-      node.params.forEach(function(param, index) {
+      const _arguments = arguments;
+      console.log(arguments.length);
+      const scope = nodeIterator.createScope('function');
+      scope.constDeclare('arguments', _arguments);
+      node.params.forEach((param, index) => {
         //@ts-ignore
         const name = param.name;
-        scope.varDeclare(name, arguments[index]); // 注册变量
+        //@ts-ignore
+        console.log(_arguments[index]);
+        scope.varDeclare(name, _arguments[index]); // 注册变量
       })
 
       nodeIterator.traverse(node.body, { scope });
@@ -571,7 +551,7 @@ const nodeHandlers: InodeHandler =  {
         mirrorScope.varDeclare(name, arguments[index]); // 注册变量
       })
 
-      nodeIterator.traverse(node.body, { mirrorScope });
+      // nodeIterator.traverse(node.body, { mirrorScope });
       // const signal = nodeIterator.traverse(node.body, { scope })
       // if (Signal.isReturn(signal)) {
       //   return signal.value
@@ -592,11 +572,16 @@ const nodeHandlers: InodeHandler =  {
   // 调用函数
   CallExpression(nodeIterator) {
     const { node } = nodeIterator;
-    console.log(node);
-    const args = node.arguments.map(arg => nodeIterator.traverse(arg));
+    const args = node.arguments.map(arg => nodeIterator.traverse(arg).value);
     const func = nodeIterator.traverse(nodeIterator.node.callee);
-    console.log(func);
-    return func.value.apply(args);
+    console.log(args);
+    // apply第一个参数为this的指向
+    return func.value.apply(null, args);
+  },
+
+  ReturnStatement(nodeIterator) {
+    const { node } = nodeIterator;
+    console.log(node);
   },
 
   ArrayExpression(nodeIterator) {

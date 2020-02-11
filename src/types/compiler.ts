@@ -224,6 +224,7 @@ export interface InodeHandler {
   FunctionExpression(node: Iiterator): [Operation, Operation],
   CallExpression(node: Iiterator): any,
   ArrayExpression(node: Iiterator): void,
+  ReturnStatement(node: Iiterator): any,
   AssignmentExpressionMap: any,
   BinaryExpressionOperatorMap: any,
   unaryoperateMap: any

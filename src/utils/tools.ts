@@ -80,7 +80,6 @@ export function objToArr(obj: any): Array<any> {
 }
 
 export function valueConvert(value: any, type: ValueType): any {
-  // console.log(value);
   switch(type) {
     case "[object String]":
       return value;
