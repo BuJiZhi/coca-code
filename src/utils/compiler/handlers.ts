@@ -2,12 +2,12 @@ import {
   InodeHandler,
   Iiterator,
   IsimpleValue,
-  Ioperation,
-  Iscope
+  Ioperation
  } from '../../types/compiler';
 import { Node } from 'acorn';
 import { Itrack } from '../../types/animate';
 import { startend2Index, typeOf, /*deepCopy*/ } from '../tools';
+import Signal from './Signal';
 
 function trackSetEnd(tracks: Itrack[], endpoint: number): Itrack[] {
   let newTracks: Itrack[] = [...tracks];
@@ -391,7 +391,6 @@ const nodeHandlers: InodeHandler =  {
   // 条件判断
   IfStatement: nodeIterator => {
     const { node } = nodeIterator;
-    console.log(node);
     const { test, consequent, alternate } = node;
     const ifStmTracks: Itrack[] = [];
     const ifOperate: Ioperation[] = [];
@@ -411,7 +410,11 @@ const nodeHandlers: InodeHandler =  {
     let mirrorScope = nodeIterator.createMirroScope('block');
     const nodes = nodeIterator.node.body as Node[];
     for (const node of nodes) {
-      nodeIterator.traverse(node as Node, {scope, mirrorScope, operations: nodeIterator.operations});
+      const signal = nodeIterator.traverse(node as Node, {scope, mirrorScope, operations: nodeIterator.operations});
+      if (Signal.isReturn(signal)) {
+        trackSetEnd(nodeIterator.tracks, trackCount);
+        return signal;
+      }
     }
     trackSetEnd(nodeIterator.tracks, trackCount);
   },
@@ -524,38 +527,27 @@ const nodeHandlers: InodeHandler =  {
     const node = nodeIterator.node;
     const fn = function() {
       const _arguments = arguments;
-      console.log(arguments.length);
       const scope = nodeIterator.createScope('function');
       scope.constDeclare('arguments', _arguments);
       node.params.forEach((param, index) => {
         //@ts-ignore
         const name = param.name;
-        //@ts-ignore
-        console.log(_arguments[index]);
         scope.varDeclare(name, _arguments[index]); // 注册变量
       })
 
-      nodeIterator.traverse(node.body, { scope });
-      // const signal = nodeIterator.traverse(node.body, { scope })
-      // if (Signal.isReturn(signal)) {
-      //   return signal.value
-      // }
+      const signal = nodeIterator.traverse(node.body, { scope });
+      if (Signal.isReturn(signal)) {
+        return signal.value
+      }
     }
     const mirrorFn = function() {
       const mirrorScope = nodeIterator.createMirroScope('function')
       mirrorScope.constDeclare('arguments', arguments);
-
       node.params.forEach(function(param, index) {
         //@ts-ignore
         const name = param.name;
         mirrorScope.varDeclare(name, arguments[index]); // 注册变量
       })
-
-      // nodeIterator.traverse(node.body, { mirrorScope });
-      // const signal = nodeIterator.traverse(node.body, { scope })
-      // if (Signal.isReturn(signal)) {
-      //   return signal.value
-      // }
     }
     Object.defineProperties(fn, {
       name: { value: node.id ? node.id.name : '' },
@@ -574,14 +566,18 @@ const nodeHandlers: InodeHandler =  {
     const { node } = nodeIterator;
     const args = node.arguments.map(arg => nodeIterator.traverse(arg).value);
     const func = nodeIterator.traverse(nodeIterator.node.callee);
-    console.log(args);
     // apply第一个参数为this的指向
     return func.value.apply(null, args);
   },
 
   ReturnStatement(nodeIterator) {
     const { node } = nodeIterator;
-    console.log(node);
+    let returnTrack: Itrack[] = [];
+    let returnOperation: Ioperation[] = [];
+    const result = nodeIterator.traverse(node.argument, {tracks: returnTrack, operations: returnOperation})
+    returnTrack = trackSetEnd(returnTrack, trackCount);
+    nodeIterator.addOperateTrack(returnOperation, returnTrack);
+    return Signal.Return(result);
   },
 
   ArrayExpression(nodeIterator) {
@@ -601,7 +597,7 @@ const nodeHandlers: InodeHandler =  {
         endpos: pos[1],
         key: `arr-${++keyCount}`
       }
-    }
+    };
     nodeIterator.addTrack(track);
     // 2.本节点操作
     const arrOperation: Ioperation = {
