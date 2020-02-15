@@ -1,27 +1,27 @@
 import { 
-  Iui,
-  UiActionTypes,
-  Position,
+  Styles,
+  StyleActionTypes,
   UPDATE_FONTWIDTH,
-  UPDATE_OFFSET,
+  SET_OFFSET,
   UPDATE_CLICKPOS,
   UPDATE_INDEX,
   UPDATE_CURSOR
-} from '../types/ui';
+} from '../types/store';
 
-const initialState: Iui = {
+const initialState: Styles = {
   containerOffset: [0, 0],
   currenIndex: [0, 0],
   fontWidth: 20,
-  fontSize: 20,
-  lineHeight: 20,
+  fontSize: 25,
+  lineHeight: 30,
+  color: [0, 0, 0],
   clickPos: [0, 0],
   cursorPos: [0, 0],
 }
 
-export function uiReducer(
+export function styleReducer(
   state=initialState,
-  action: UiActionTypes
+  action: StyleActionTypes
 ) {
   switch (action.type) {
     case UPDATE_FONTWIDTH:
@@ -29,7 +29,7 @@ export function uiReducer(
         ...state,
         fontWidth: action.payload
       }
-    case UPDATE_OFFSET:
+    case SET_OFFSET:
       return {
         ...state,
         containerOffset: action.payload
@@ -51,26 +51,5 @@ export function uiReducer(
       }
     default:
       return state;
-  }
-}
-
-export function updateFontWidth(width:number): UiActionTypes {
-  return {
-    type: UPDATE_FONTWIDTH,
-    payload: width
-  }
-}
-
-export function updateOffset(cor: Position): UiActionTypes {
-  return {
-    type: UPDATE_OFFSET,
-    payload: cor
-  }
-}
-
-export function updateClickpos(cor: Position) {
-  return {
-    type: UPDATE_CLICKPOS,
-    payload: cor
   }
 }

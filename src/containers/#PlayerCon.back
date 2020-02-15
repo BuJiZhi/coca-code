@@ -5,7 +5,7 @@ import { RootState } from '../store';
 import { Dispatch } from 'redux';
 import { EditorState, Styles } from '../types/store';
 // import { Button } from '@material-ui/core';
-import Frame from '../components/Editor/Frame';
+import Frame from '../components/Display/Frame';
 import {
   updateCurrent,
   updateRenderResult

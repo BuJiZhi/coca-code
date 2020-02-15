@@ -1,0 +1,26 @@
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  line-height: 20px;
+  font-size: 20px;
+  font-weight: normal;
+  letter-spacing: 1px;
+  /* transform: translateZ(0); 去锯齿，但是似乎没有效果 */
+  /* background-color: #eee; */
+}
+
+.measure {
+  visibility: hidden;
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 30px;
+}
+
+/* .measureLine {
+  letter-spacing: 1px;
+  display: block;
+  overflow: hidden;
+} */

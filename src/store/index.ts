@@ -1,13 +1,9 @@
-import { editorReducer } from './editor';
-import { compilerReducer } from './compiler';
-import { styleReducer } from './ui';
+import { uiReducer } from './ui';
 import { combineReducers, createStore } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 
 const rootReducer = combineReducers({
-  editor: editorReducer,
-  compiler: compilerReducer,
-  ui: styleReducer
+  ui: uiReducer
 })
 
 export type RootState = ReturnType<typeof rootReducer>;

@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import Editor from './EditorCon';
+import DisplayCon from './DisplayCon';
 
 export default class App extends Component {
   render() {
     return (
-      <div>
-        <Editor />
-      </div>
+        <div>
+          <DisplayCon />
+        </div>
     )
   }
 }
