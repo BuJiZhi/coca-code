@@ -7,8 +7,8 @@
  * t5 函数定义(function declaration)       显示函数注册效果
  */
 import React from 'react';
-import { EditorState, Styles } from '../../types/store';
-import { Iframe, Icontent, Ispring } from '../../types/animate';
+import { EditorState, Styles } from '../../types/feedback/store';
+import { Iframe, Icontent, Ispring } from '../../types/feedback/animate';
 import FrameSub from './FrameSub';
 
 interface Iprops {

@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { Iui } from '../types/ui';
-import { RootState } from '../store';
+import { Iui } from '../../types/feedback/ui';
+import { RootState } from '../../store';
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
-import Display from '../components/Display';
+import Display from '../../components/Display';
 
 export interface Idisplay {
   ui: Iui
@@ -27,7 +27,7 @@ class DisplayCon extends Component<Idisplay> {
 }
 
 const mapStateToProps = (state:RootState) => ({
-  ui: state.ui
+  ui: state.editor
 })
 
 const mapDispatchToProps = (dispatch:Dispatch) => ({

@@ -1,17 +1,17 @@
 import SimpleValue from './SimpleValue';
-import { Iscope, IscopeValue, Ivalue } from '../../types/compiler';
+import { Iscope, ScopeValue, Value } from '../../types/compiler';
 
 const standarMap = Object.create(null);
 
 export default class Scope implements Iscope{
 
   type: string;
-  parentScope: IscopeValue;
-  globalScope: IscopeValue;
-  declartion: IscopeValue;
-  childScope: IscopeValue;
+  parentScope: ScopeValue;
+  globalScope: ScopeValue;
+  declartion: ScopeValue;
+  childScope: ScopeValue;
 
-  constructor(type: string, parentScope: IscopeValue | {}, childScope: IscopeValue=[]) {
+  constructor(type: string, parentScope: ScopeValue | {}, childScope: ScopeValue=[]) {
     this.type = type;
     this.parentScope = parentScope;
     this.globalScope = standarMap;
@@ -31,7 +31,7 @@ export default class Scope implements Iscope{
     }
   }
 
-  set(name: string, value: Ivalue) {
+  set(name: string, value: Value) {
     if (this.declartion[name]) {
       return this.declartion[name].set(value);
     } else if (this.parentScope[name]) {
@@ -47,7 +47,7 @@ export default class Scope implements Iscope{
     this.childScope.push(scope);
   }
 
-  declare(name: string, value: Ivalue, kind: string='var') {
+  declare(name: string, value: Value, kind: string='var') {
     if (kind === 'var') {
       return this.varDeclare(name, value);
     } else if (kind === 'let') {
@@ -59,7 +59,7 @@ export default class Scope implements Iscope{
     }
   }
 
-  varDeclare(name: string, value: Ivalue) {
+  varDeclare(name: string, value: Value) {
     let scope: any = this;
     while (this.parentScope && scope.type !== 'function') {
       scope = scope.parentScope;
@@ -68,7 +68,7 @@ export default class Scope implements Iscope{
     return scope.declartion[name];
   }
 
-  letDeclare(name: string, value: Ivalue) {
+  letDeclare(name: string, value: Value) {
     if (this.declartion[name]) {
       throw new SyntaxError(`identifier ${name} has already been declared`);
     }
@@ -76,7 +76,7 @@ export default class Scope implements Iscope{
     return this.declartion[name];
   }
 
-  constDeclare(name: string, value: Ivalue) {
+  constDeclare(name: string, value: Value) {
     if (this.declartion[name]) {
       throw new SyntaxError(`identifier ${name} has already been declared`);
     }

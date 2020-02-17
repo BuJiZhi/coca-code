@@ -7,11 +7,10 @@ import {
   Ioptions,
   IstateHandler,
   InodeTypes,
-  ItarversBack,
   Ioperation
 } from '../../types/compiler';
-import { Itrack } from '../../types/animate';
-import { IanimateKey } from '../../types/store';
+import { Itrack } from '../../types/feedback/animate';
+import { IanimateKey } from '../../types/feedback/store';
 
 class Iterator implements Iiterator {
 
@@ -41,7 +40,7 @@ class Iterator implements Iiterator {
     this.operations = operations;
   }
 
-  traverse(node: InodeTypes, options: Ioptions={}): ItarversBack {
+  traverse(node: InodeTypes, options: Ioptions={}) {
     const { scope, tracks, operations, mirrorScope } = options;
     const nextTracks = tracks || this.tracks;
     const nextOperations = operations || this.operations;

@@ -1,76 +1,85 @@
-import { 
-  CompilerState,
-  CompilerActionTypes,
-  MirrorActionTypes,
+import {
+  Icompiler,
+  Iscope,
+  Istep,
+  compilerActionTypes,
   UPDATE_AST,
-  CLEAR_AST,
   UPDATE_SCOPE,
-  CLEAR_SCOPE,
-  UPDATE_MIRROR_SCOPE,
-  CLEAR_MIRROR_SCOPE,
-  ADD_OPERATION,
-  CLEAR_OPERATION,
-  UPDATE_CURRENT,
-  UPDATE_OPERATION
-} from '../types/store';
+  UPDATE_MIRRORSCOPE,
+  UPDATE_STEPS,
+  CLEAR_STEPS
+} from '../types/compiler';
 
-const initialState:CompilerState = {
-  ast: {},
+const initialState:Icompiler = {
+  ast: Object.create(null),
   scope: Object.create(null),
   mirrorScope: Object.create(null),
-  operations: []
+  steps: []
 }
 
-export function compilerReducer(
+export const updateAstAction = (ast:object) => {
+  return {
+    type: UPDATE_AST,
+    payload: ast
+  }
+}
+
+export const updateScopeAction = (scope:Iscope) => {
+  return {
+    type: UPDATE_SCOPE,
+    payload: scope
+  }
+}
+
+export const updateMirrorscopeAction = (scope:Iscope) => {
+  return {
+    type: UPDATE_SCOPE,
+    payload: scope
+  }
+}
+
+export const updateStepsAction = (steps:Istep[]) => {
+  return {
+    type: UPDATE_STEPS,
+    payload: steps
+  }
+}
+
+export const clearStepsAction = () => {
+  return {
+    type: CLEAR_STEPS
+  }
+}
+
+export const compilerReducer = (
   state=initialState,
-  action: CompilerActionTypes | MirrorActionTypes
-) {
-  switch (action.type) {
+  action:compilerActionTypes
+) => {
+  switch(action.type) {
     case UPDATE_AST:
       return {
         ...state,
         ast: action.payload
-      }
-    case CLEAR_AST:
-      return {
-        ...state,
-        ast: {}
       }
     case UPDATE_SCOPE:
       return {
         ...state,
         scope: action.payload
       }
-    case CLEAR_SCOPE:
-      return {
-        ...state,
-        scope: {}
-      }
-    case UPDATE_MIRROR_SCOPE:
+    case UPDATE_MIRRORSCOPE:
       return {
         ...state,
         mirrorScope: action.payload
       }
-    case CLEAR_MIRROR_SCOPE:
+    case UPDATE_STEPS:
       return {
         ...state,
-        mirrorScope: {}
+        steps: action.payload
       }
-    case UPDATE_OPERATION:
+    case CLEAR_STEPS:
       return {
         ...state,
-        operations: action.payload
-      }
-    case ADD_OPERATION:
-      const op = [...state.operations, ...action.payload];
-      return {
-        ...state,
-        operations: op
-      }
-    case CLEAR_OPERATION:
-      return {
-        ...state,
-        operations: []
+        steps: []
       }
     default:
       return state;

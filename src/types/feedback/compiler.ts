@@ -1,13 +1,14 @@
+import { IanimateKey, DocType } from "./store";
+import { IrenderResult, Itrack } from "./animate";
 import { Node } from 'acorn';
-import { Itrack } from './animation';
-export type Value = any;
-export type ScopeValue = any;
+export type Ivalue = any;
+export type IscopeValue = any;
 export type ScopeType = "function" | "block";
-export type Step = () => void;
+export type Operation = () => void;
 
-export interface Istep {
+export interface Ioperation {
   key: number,
-  operation: Step
+  operation: Operation
 }
 
 export interface IsimpleValue {
@@ -19,23 +20,24 @@ export interface IsimpleValue {
 
 export interface Iscope {
   type: string,
-  globalScope?: ScopeValue,
-  declartion: ScopeValue,
-  childScope?: ScopeValue,
-  parentScope?: ScopeValue,
-  get(name: string): Value,
-  set(name: string, value: any): Value,
+  globalScope?: IscopeValue,
+  declartion: IscopeValue,
+  childScope?: IscopeValue,
+  parentScope?: IscopeValue,
+  get(name: string): Ivalue,
+  set(name: string, value: any): Ivalue,
   addChild(scope: Iscope): void,
-  declare(name: string, value: Value, kind: string): void,
-  varDeclare(name: string, value: Value): void,
-  letDeclare(name: string, value: Value): void,
-  constDeclare(name: string, value: Value): void
+  declare(name: string, value: Ivalue, kind: string): void,
+  varDeclare(name: string, value: Ivalue): void,
+  letDeclare(name: string, value: Ivalue): void,
+  constDeclare(name: string, value: Ivalue): void
 }
 
 export interface Ioptions {
   scope?: Iscope,
   mirrorScope?: Iscope,
-  operations?: Istep[]
+  tracks?: Itrack[],
+  operations?: Ioperation[]
 }
 
 export interface Iiterator {
@@ -45,16 +47,26 @@ export interface Iiterator {
   tracks: Itrack[],
   stateHandler?: IstateHandler,
   code: string,
-  operations: Istep[],
+  operations: Ioperation[],
   traverse(node: Node, options?: Ioptions): any,
   createScope(type: ScopeType): Iscope,
   createMirroScope(type: ScopeType): Iscope,
-  createMirrorOperate(operations: Istep[]): void,
-  // createMirrorAnimate(animate: IanimateKey): void,
-  // addOperateTrack(operations: Istep[] | undefined, tracks:Itrack[] | undefined): void,
-  // storeAddTrack(track: Itrack[]): void,
-  // addTrack(track: Itrack): void,
-  addOperation(operations: Istep): void
+  createMirrorOperate(operations: Ioperation[]): void,
+  createMirrorAnimate(animate: IanimateKey): void,
+  addOperateTrack(operations: Ioperation[] | undefined, tracks:Itrack[] | undefined): void,
+  storeAddTrack(track: Itrack[]): void,
+  addTrack(track: Itrack): void,
+  addOperation(operations: Ioperation): void
+}
+
+export interface Icompiler {
+  code: string,
+  ast: Node,
+  operations: Ioperation[],
+  iterator?: Iiterator,
+  scope: Iscope,
+  mirrorScope: Iscope,
+  stateHandler: IstateHandler
 }
 
 export interface IstateHandler {
@@ -64,12 +76,12 @@ export interface IstateHandler {
   clearScope: () => void,
   updateMirrorScope: (scope: Iscope) => void,
   clearMirrorScope: () => void,
-  addOperation: (op: Istep[]) => void,
+  addOperation: (op: Ioperation[]) => void,
   clearOperation: () => void,
   updateCurrent: (current: number) => void,
   clearKeys: () => void,
-  // updateRenderResult: (result: IrenderResult) => void,
-  // addTrack: (track: Itrack) => void,
+  updateRenderResult: (result: IrenderResult) => void,
+  addTrack: (track: Itrack) => void,
   clearTracks: () => void
 }
 
@@ -79,6 +91,11 @@ const VariableDeclaration = 'VariableDeclaration';
 const VariableDeclartor = 'VariableDeclartor';
 const BinaryExpression = 'BinaryExpression';
 const Literal = 'Literal';
+
+export interface ItarversBack {
+  value: any,
+  animate: IanimateKey
+}
 
 export interface Icommon {
   start: number,
@@ -204,7 +221,7 @@ export interface InodeHandler {
   ForStatement(node:Iiterator): void,
   UpdateExpression(node: Iiterator): void,
   FunctionDeclaration(node: Iiterator): void,
-  FunctionExpression(node: Iiterator): [Step, Step],
+  FunctionExpression(node: Iiterator): [Operation, Operation],
   CallExpression(node: Iiterator): any,
   ArrayExpression(node: Iiterator): void,
   ReturnStatement(node: Iiterator): any,
@@ -213,49 +230,3 @@ export interface InodeHandler {
   unaryoperateMap: any
 }
 
-/**
- * about store
- */
-export interface Icompiler {
-  ast: Node,
-  steps: Istep[],
-  scope: Iscope,
-  mirrorScope: Iscope,
-  iterator?: Iiterator,
-}
-export const UPDATE_AST = 'UPDATE_AST';
-export const UPDATE_STEPS = 'UPDATE_STEPS';
-export const UPDATE_SCOPE = 'UPDATE_SCOPE';
-export const UPDATE_MIRRORSCOPE = 'UPDATE_MIRRORSCOPE';
-export const CLEAR_STEPS = 'CLEAR_STEPS';
-
-interface updateAst {
-  type: typeof UPDATE_AST,
-  payload: object
-}
-
-interface updateSteps {
-  type: typeof UPDATE_STEPS,
-  payload: Istep[]
-}
-
-interface updateScope {
-  type: typeof UPDATE_SCOPE,
-  payload: Iscope
-}
-
-interface updateMirrorScope {
-  type: typeof UPDATE_MIRRORSCOPE,
-  payload: Iscope
-}
-
-interface clearSteps {
-  type: typeof CLEAR_STEPS
-}
-
-export type compilerActionTypes = 
-updateAst |
-updateSteps |
-updateScope |
-updateMirrorScope |
-clearSteps;

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './common.css';
-import { Iui } from '../../types/ui';
+import { Iui } from '../../types/feedback/ui';
 
 // interface Imeasure {
 //   // updateFont: ((n: number) => void) | undefined,

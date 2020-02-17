@@ -7,7 +7,7 @@ import {
   UPDATE_CLICKPOS,
   UPDATE_INDEX,
   UPDATE_CURSOR
-} from '../types/ui';
+} from '../../types/feedback/ui';
 
 const initialState: Iui = {
   containerOffset: [0, 0],

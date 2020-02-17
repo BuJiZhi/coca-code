@@ -2,7 +2,7 @@ import React from 'react';
 import './index.css';
 import './common/baseline.css';
 import './common/theme.css';
-import { Idisplay } from '../../containers/DisplayCon';
+import { Idisplay } from '../../containers/feedback/DisplayCon';
 // import Measure from './Measure';
 
 const Display:React.FC<Idisplay> = props => {

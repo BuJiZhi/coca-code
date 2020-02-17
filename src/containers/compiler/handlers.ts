@@ -5,8 +5,8 @@ import {
   Ioperation
  } from '../../types/compiler';
 import { Node } from 'acorn';
-import { Itrack } from '../../types/animate';
-import { startend2Index, typeOf, /*deepCopy*/ } from '../tools';
+import { Itrack } from '../../types/feedback/animate';
+import { startend2Index, typeOf, /*deepCopy*/ } from '../../utils/tools';
 import Signal from './Signal';
 
 function trackSetEnd(tracks: Itrack[], endpoint: number): Itrack[] {

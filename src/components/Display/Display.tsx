@@ -1,5 +1,5 @@
 import React from 'react';
-import { Iframe, Icontent, Ispring } from '../../types/animate';
+import { Iframe, Icontent, Ispring } from '../../types/feedback/animate';
 import Element from './Element';
 
 interface Iprops {
