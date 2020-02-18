@@ -14,10 +14,8 @@ const useStyles = makeStyles(theme => ({
   root: {
     display: 'flex',
     flexDirection: 'row',
-    // position: 'absolute',
     '& > *': {
-      margin: theme.spacing(1),
-      padding: theme.spacing(1)
+      paddingRight: theme.spacing(1)
     }
   },
   showArea: {

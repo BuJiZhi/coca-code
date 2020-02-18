@@ -1,13 +1,13 @@
 import nodeHandlers from './handlers';
 import Scope from './Scope';
-import { Node } from 'acorn';
+// import { Inode } from 'acorn';
 import { 
   Iiterator,
   Iscope, 
   InodeHandler,
   Ioptions,
   IstateHandler,
-  InodeTypes,
+  Inode,
   Istep,
   ItraversBack
 } from '../../types/compiler';
@@ -15,7 +15,7 @@ import { Itrack } from '../../types/animation';
 
 class Iterator implements Iiterator {
 
-  node: Node;
+  node: Inode;
   scope: Iscope;
   mirrorScope: Iscope;
   stateHandler: IstateHandler;
@@ -24,7 +24,7 @@ class Iterator implements Iiterator {
   code: string;
 
   constructor(
-    node: Node, 
+    node: Inode, 
     scope: Iscope, 
     mirrorScope: Iscope, 
     stateHandler: IstateHandler,
@@ -41,7 +41,7 @@ class Iterator implements Iiterator {
     this.steps = steps;
   }
 
-  traverse(node: Node, options: Ioptions={}):ItraversBack {
+  traverse(node: Inode, options: Ioptions={}):ItraversBack {
     const { scope, tracks, steps, mirrorScope } = options;
     const nextTracks = tracks || this.tracks;
     const nextSteps = steps || this.steps;

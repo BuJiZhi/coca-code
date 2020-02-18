@@ -12,12 +12,11 @@ const useStyles = makeStyles(theme => ({
     bottom: theme.spacing(1),
     left: theme.spacing(1),
     padding: 0,
-    backgroundColor: "#eee"
+    backgroundColor: "rgb(51, 56, 66)"
   },
   runbox: {
     position: "absolute",
     display: "flex",
-    backgroundColor: "black",
     left: 0,
     top: theme.spacing(8),
     right: 0,
@@ -32,17 +31,19 @@ const useStyles = makeStyles(theme => ({
   resizer: {
     width: theme.spacing(1),
     height: "100%",
-    backgroundColor: "grey"
+    // backgroundColor: "grey"
   },
   shell: {
-    flex: ".4 .5"
+    position: "relative",
+    flex: ".4 .5",
+    minWidth: "500px"
   }
 }));
 const App:React.FC = () => {
   const classes = useStyles();
   return (
       <Container className={classes.root}>
-        <div><Toolbar /></div>
+        {/* <div><Toolbar /></div> */}
         <div className={classes.runbox}>
           <div className={classes.editor}><EditorCon /></div>
           <div className={classes.resizer}></div>

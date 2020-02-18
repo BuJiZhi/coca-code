@@ -3,7 +3,7 @@ import { Parser } from 'acorn';
 import Iterator from './Iterator';
 import Scope from './Scope';
 import { Node } from 'acorn';
-import { Icompiler, Iiterator, Iscope, Istep, InodeTypes } from '../../types/compiler';
+import { Icompiler, Iiterator, Iscope, Istep, Inode } from '../../types/compiler';
 import { Ieditor } from '../../types/editor';
 import { Ianimation, Itrack } from '../../types/animation';
 import { connect } from 'react-redux';
@@ -54,7 +54,6 @@ const Compiler:React.FC<Iprops> = props => {
     ...dispatches
   } = props;
   const { code } = editor;
-  // const { ast } = compiler;
   const run = () => {
     const { clearSteps, updateAst, updateScope, updateMirrorScope, clearScope, clearMirrorscope } = dispatches;
 
@@ -71,7 +70,7 @@ const Compiler:React.FC<Iprops> = props => {
 
     const iterator = new Iterator(Object.create(null), 
       scope, mirrorScope, dispatches, code, [], []);
-    iterator.traverse(ast);
+    iterator.traverse(ast as Inode);
   }
 
   const handleNextclick = () => {}

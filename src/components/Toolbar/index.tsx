@@ -1,5 +1,4 @@
 import React from 'react';
-import { Toolbar } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Compiler from '../../containers/compiler';
 
@@ -18,10 +17,9 @@ const useStyles = makeStyles(theme => ({
 const Tool:React.FC = () => {
   const classes = useStyles();
   return (
-    <Toolbar className={classes.root}>
-      <div className={classes.options}>123</div>
+    <div color="primary" className={classes.root}>
       <Compiler />
-    </Toolbar>
+    </div>
   )
 }
 

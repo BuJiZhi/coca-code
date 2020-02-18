@@ -1,6 +1,6 @@
-type Position = [number, number];
-type AnimationTypes =  'default' | 'appear' | 'move' | 'compute' | 'function' | 't5';
-type Process = 'enter' | 'stay' | 'leave';
+export type Position = [number, number];
+export type AnimationTypes =  'default' | 'appear' | 'move' | 'compute' | 'function' | 't5';
+export type Process = 'enter' | 'stay' | 'leave';
 export type ValueType = 
 "[object Null]" | 
 "[object Undefined]" | 

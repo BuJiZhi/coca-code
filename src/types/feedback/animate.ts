@@ -16,10 +16,10 @@ export type ValueType =
 export interface Itrack {
   begin: number,
   end: number,
-  content: Icontent
+  effect: Ieffect
 }
 
-export interface Icontent {
+export interface Ieffect {
   type: SpringTypes,
   startpos: Position,
   endpos: Position,

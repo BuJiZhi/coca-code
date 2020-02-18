@@ -2,11 +2,12 @@ import {
   InodeHandler,
   Iiterator,
   IsimpleValue,
-  Istep
+  Istep,
+  Inode
  } from '../../types/compiler';
 import { Node } from 'acorn';
-import { Itrack } from '../../types/feedback/animate';
-import { startend2Index, typeOf, /*deepCopy*/ } from '../../utils/tools';
+import { Itrack, Position, AnimationTypes, ValueType } from '../../types/animation';
+import { startend2Index, typeOf } from '../../utils/tools';
 import Signal from './Signal';
 
 function trackSetEnd(tracks: Itrack[], endpoint: number): Itrack[] {
@@ -20,10 +21,39 @@ function trackSetEnd(tracks: Itrack[], endpoint: number): Itrack[] {
   return newTracks;
 }
 
-let trackCount: number;
-let keyCount: number;
-let operationCount: number;
+function produceTrack(
+  value:any, 
+  type:AnimationTypes, 
+  startpos:Position, 
+  endpos:Position, 
+  keyCounter:number,
+  trackCounter:number
+  ):Itrack {
+  return {
+    begin: trackCounter,
+    end: 0,
+    effect: {
+      value,
+      type,
+      valueType: typeOf(value),
+      startpos,
+      endpos,
+      key: `${type}-${keyCounter}`
+    }
+  }
+}
 
+function produceStep(step:()=>void, stepCounter:number):Istep {
+  return {
+    key: stepCounter,
+    step
+  }
+}
+
+let trackCounter: number;
+let keyCounter: number;
+let stepCounter: number;
+const donothing = () => {};
 /**
  * 节点有主干节点以及叶子节点组成
  * 主干节点有上传动画轨道及操作函数的权限，
@@ -32,191 +62,150 @@ let operationCount: number;
 const nodeHandlers: InodeHandler =  {
 
   Program: (nodeIterator: Iiterator) => {
-    trackCount = 0;
-    keyCount = 0;
-    operationCount = 0;
+    trackCounter = 0;
+    keyCounter = 0;
+    stepCounter = 0;
     const nodes = nodeIterator.node.body as Node[];
     nodes.forEach(item => {
-      nodeIterator.traverse(item as Node, {tracks: [], steps: []});
+      nodeIterator.traverse(item as Inode);
     })
   },
 
   // 变量定义
-  // VariableDeclaration: nodeIterator => {
-  //   const code = nodeIterator.code;
-  //   const kind = nodeIterator.node.kind;
-  //   let variableTrack: Itrack[] = [];
-  //   let variableOperate: Istep[] = [];
-  //   if (nodeIterator.node.declarations) {
-  //     for (const declaration of nodeIterator.node.declarations) {
-  //       // 一个轨道列表就相当于是一条语句
-  //       const { id, init } = declaration;
-  //       if (id instanceof Node) {
-  //         const { start, end, name } = id;
-  //         const idPos = startend2Index(start, end, code);
-  //         // 1. id节点动画
-  //         const idTrack: Itrack = {
-  //           begin: trackCount++,
-  //             end: 0,
-  //             content: {
-  //               type: "t2",
-  //               value: name,
-  //               valueType: typeOf(name),
-  //               startpos: idPos[0],
-  //               endpos: idPos[1],
-  //               key: `idf-${++keyCount}`
-  //             }
-  //         }
-  //         variableTrack.push(idTrack);
-  //         // 2. id节点操作函数
-  //         const idOperate = {
-  //           key: operationCount++,
-  //           operation: () => {}
-  //         };
-  //         variableOperate.push(idOperate);
-  //         // 3. 上个节点的结束点，无
-  //         // 4. 返回值
-  //         const idNode = {
-  //           value: name,
-  //           preTrack: idTrack
-  //         }
+  VariableDeclaration: nodeIterator => {
+    const code = nodeIterator.code;
+    const kind = nodeIterator.node.kind;
+    let variableTracks: Itrack[] = [];
+    let variableSteps: Istep[] = [];
+    if (nodeIterator.node.declarations) {
+      for (const declaration of nodeIterator.node.declarations) {
+        // 一个轨道列表就相当于是一条语句
+        const { id, init } = declaration;
+        if (id instanceof Node) {
+          const { start, end, name } = id;
+          const idPos = startend2Index(start, end, code);
+          // 1. id节点动画
+          const idTrack = produceTrack(name, "appear", idPos[0], idPos[1], keyCounter++, trackCounter++);
+          variableTracks.push(idTrack);
+          // 2. id节点操作函数
+          const idStep = produceStep(donothing, stepCounter++);
+          variableSteps.push(idStep);
+          // 3. 上个节点的结束点，无
+          // 4. 返回值
+          const idNode = {value: name, preTrack: idTrack}
+          const initNode = init
+            ? nodeIterator.traverse(init as Inode, {tracks: variableTracks, steps: variableSteps})
+            : {value: undefined, preTrack: produceTrack(
+              'undefined', 
+              'appear', 
+              idNode.preTrack.effect.startpos,
+              idNode.preTrack.effect.endpos,
+              keyCounter++,
+              trackCounter++
+            )}
+          const track = produceTrack(initNode.value, "move", initNode.preTrack.effect.startpos,
+            idNode.preTrack.effect.startpos, keyCounter++, trackCounter++)
+          variableTracks.push(track);
+          nodeIterator.scope.declare(idNode.value, initNode.value, kind);
+          const step = produceStep(
+            (): void => {nodeIterator.mirrorScope.declare(idNode.value, initNode.value, kind);},
+            stepCounter++
+          );
+          variableSteps.push(step);
+          for (let i = 0; i < variableTracks.length - 1; i++) {
+            let track = variableTracks[i];
+            if (track.end === 0) {
+              track.end = trackCounter;
+            }
+          }
+        }
+      }
+      // 上传轨道及操作函数
+      nodeIterator.storeStepAndTrack(variableSteps, variableTracks);
+    }
+  },
 
-  //         const initNode = init
-  //           ? nodeIterator.traverse(init as Node, {tracks: variableTrack, operations: variableOperate})
-  //           : {value: undefined, preTrack: {
-  //             begin: trackCount++,
-  //             end: 0,
-  //             content: {
-  //               type: "t2",
-  //               startpos: idNode.preTrack.content.startpos[0],
-  //               endpos: idNode.preTrack.content.endpos[0],
-  //               value: undefined,
-  //               valueType: typeOf(undefined),
-  //               key: `udf-${++keyCount}`
-  //             }
-  //           }};
+  unaryoperateMap: {
+    "-": (a: number) => -a
+  },
 
-  //         // 本节点动画
-  //         const track: Itrack = {
-  //           begin: trackCount++,
-  //           end: trackCount,
-  //           content: {
-  //             type: "t3",
-  //             startpos: initNode.preTrack.content.startpos,
-  //             endpos: idNode.preTrack.content.startpos,
-  //             value: initNode.value,
-  //             valueType: typeOf(initNode.value),
-  //             key: `lta-${++keyCount}`
-  //           }
-  //         }
-  //         variableTrack.push(track);
-          
-  //         // 本节点操作
-  //         nodeIterator.scope.declare(idNode.value, initNode.value, kind);
-  //         const mirrorOperate = {
-  //           key: operationCount++,
-  //           operation: (): void => {
-  //             // 在state添加了mirrorScope以后，如果改变了它的值，store里是否会更新？
-  //             nodeIterator.mirrorScope.declare(idNode.value, initNode.value, kind);
-  //           }
-  //         }
-  //         variableOperate.push(mirrorOperate);
-
-  //         // 前面节点动画结束点
-  //         for (let i = 0; i < variableTrack.length - 1; i++) {
-  //           let track = variableTrack[i];
-  //           if (track.end === 0) {
-  //             track.end = trackCount;
-  //           }
-  //         }
-  //       }
-  //     }
-  //     // 上传轨道及操作函数
-  //     nodeIterator.addOperateTrack(variableOperate, variableTrack);
-  //   }
-  // },
-
-  // unaryoperateMap: {
-  //   "-": (a: number) => -a
-  // },
-
-  // // 一元操作符
-  // UnaryExpression: nodeIterator => {
-  //   const { node, code } = nodeIterator;
-  //   const { argument, operator, start, end } = node;
-  //   const pos = startend2Index(start, end, code);
-  //   const argResult = nodeIterator.traverse(argument);
-  //   const value = nodeHandlers.unaryoperateMap[operator](argResult.value);
+  // 一元操作符
+  UnaryExpression: nodeIterator => {
+    const { node, code } = nodeIterator;
+    const { argument, operator, start, end } = node;
+    const pos = startend2Index(start, end, code);
+    const argResult = nodeIterator.traverse(argument);
+    const value = nodeHandlers.unaryoperateMap[operator](argResult.value);
     
-  //   // 1.本节点动画
-  //   const track: Itrack = {
-  //     begin: trackCount++,
-  //     end: 0,
-  //     content: {
-  //       type: "t2",
-  //       startpos: pos[0],
-  //       endpos: pos[1],
-  //       value,
-  //       valueType: typeOf(value),
-  //       key: `uae-${++keyCount}`
-  //     }
-  //   }
-  //   nodeIterator.addTrack(track);
+    // 1.本节点动画
+    const track: Itrack = {
+      begin: trackCount++,
+      end: 0,
+      content: {
+        type: "t2",
+        startpos: pos[0],
+        endpos: pos[1],
+        value,
+        valueType: typeOf(value),
+        key: `uae-${++keyCount}`
+      }
+    }
+    nodeIterator.addTrack(track);
 
-  //   // 2.本节点操作函数
-  //   const unaryOp = {
-  //     key: operationCount++,
-  //     operation: () => {}
-  //   };;
-  //   nodeIterator.addOperation(unaryOp);
+    // 2.本节点操作函数
+    const unaryOp = {
+      key: operationCount++,
+      operation: () => {}
+    };;
+    nodeIterator.addOperation(unaryOp);
 
-  //   // 3.上一个节点动画结束，无
+    // 3.上一个节点动画结束，无
 
-  //   // 4. 返回
-  //   return {
-  //     value,
-  //     preTrack: track
-  //   }
-  // },
+    // 4. 返回
+    return {
+      value,
+      preTrack: track
+    }
+  },
 
-  // // 值定义
-  // Literal: nodeIterator => {
-  //   const { start, end, value } = nodeIterator.node;
+  // 值定义
+  Literal: nodeIterator => {
+    const { start, end, value } = nodeIterator.node;
 
-  //   const code = nodeIterator.code;
-  //   const pos = startend2Index(start, end, code);
+    const code = nodeIterator.code;
+    const pos = startend2Index(start, end, code);
 
-  //   // 本节点动画
-  //   let track: Itrack = {
-  //     begin: trackCount++,
-  //     end: 0,
-  //     content: {
-  //       type: "t2",
-  //       startpos: pos[0],
-  //       endpos: pos[1],
-  //       value,
-  //       valueType: typeOf(value),
-  //       key: `lta-${++keyCount}`
-  //     }
-  //   }
-  //   nodeIterator.addTrack(track);
+    // 本节点动画
+    let track: Itrack = {
+      begin: trackCount++,
+      end: 0,
+      content: {
+        type: "t2",
+        startpos: pos[0],
+        endpos: pos[1],
+        value,
+        valueType: typeOf(value),
+        key: `lta-${++keyCount}`
+      }
+    }
+    nodeIterator.addTrack(track);
 
-  //   // 本节点操作
-  //   const literalOperate = {
-  //     key: operationCount++,
-  //     operation: () => {}
-  //   };;
-  //   nodeIterator.addOperation(literalOperate);
-  //   // 上一个节点的结束点 无
+    // 本节点操作
+    const literalOperate = {
+      key: operationCount++,
+      operation: () => {}
+    };;
+    nodeIterator.addOperation(literalOperate);
+    // 上一个节点的结束点 无
 
-  //   // 返回值
-  //   if(nodeIterator.node.value === undefined) {
-  //     track.content.value = 'undefined';
-  //     return {value: undefined, preTrack: track};
-  //   }
-  //   track.content.value = nodeIterator.node.value;
-  //   return {value: nodeIterator.node.value, preTrack: track};
-  // },
+    // 返回值
+    if(nodeIterator.node.value === undefined) {
+      track.content.value = 'undefined';
+      return {value: undefined, preTrack: track};
+    }
+    track.content.value = nodeIterator.node.value;
+    return {value: nodeIterator.node.value, preTrack: track};
+  },
 
   // // 标识符
   // Identifier: nodeIterator => {

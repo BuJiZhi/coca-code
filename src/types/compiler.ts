@@ -7,7 +7,7 @@ export type Step = () => void;
 
 export interface Istep {
   key: number,
-  operation: Step
+  step: Step
 }
 
 export interface IsimpleValue {
@@ -45,14 +45,14 @@ export interface ItraversBack {
 }
 
 export interface Iiterator {
-  node: Node,
+  node: Inode,
   scope: Iscope,
   mirrorScope: Iscope,
   tracks: Itrack[],
   stateHandler: IstateHandler,
   code: string,
   steps: Istep[],
-  traverse(node: Node, options?: Ioptions): ItraversBack,
+  traverse(node: Inode, options?: Ioptions): ItraversBack,
   createScope(type: ScopeType): Iscope,
   createMirroScope(type: ScopeType): Iscope,
   storeStepAndTrack(operations: Istep[] | undefined, tracks:Itrack[] | undefined): void,
@@ -117,8 +117,8 @@ interface IvariableDeclartor {
 interface IbinaryExpression {
   type: typeof BinaryExpression,
   operator: string,
-  left: InodeTypes,
-  right: InodeTypes,
+  left: Inode,
+  right: Inode,
   start: number,
   end: number
 }
@@ -174,7 +174,7 @@ interface IarrayExpression {
   elements: Node[]
 }
 
-export type InodeTypes = 
+export type Inode = 
 Icommon &
 IprogramNode &
 IVariableDecalrations &
@@ -192,9 +192,9 @@ IarrayExpression;
 
 export interface InodeHandler {
   Program(node: Iiterator): any,
-  // VariableDeclaration(node: Iiterator): any,
-  // Literal(node: Iiterator): any,
-  // UnaryExpression(node: Iiterator): any,
+  VariableDeclaration(node: Iiterator): any,
+  Literal(node: Iiterator): any,
+  UnaryExpression(node: Iiterator): any,
   // Identifier(node: Iiterator): any,
   // ExpressionStatement(node: Iiterator): any,
   // AssignmentExpression(node: Iiterator): void,
@@ -211,7 +211,7 @@ export interface InodeHandler {
   // ReturnStatement(node: Iiterator): any,
   // AssignmentExpressionMap: any,
   // BinaryExpressionOperatorMap: any,
-  // unaryoperateMap: any
+  unaryoperateMap: any
 }
 
 /**
