@@ -1,11 +1,13 @@
 import { 
   Ianimation,
+  Itrack,
+  Iframes,
   animationActionTypes,
   UPDATE_CURRENT,
   UPDATE_FRAMES,
   UPDATE_TRACKS,
   CLEAR_FRAMES,
-  CLEAR_TRACKS
+  CLEAR_TRACKS,
 } from '../types/animation';
 
 const initialState:Ianimation = {
@@ -43,6 +45,39 @@ const initialState:Ianimation = {
   }
 }
 
+export const updateTracksAction = (tracks:Itrack[]) => {
+  return {
+    type: UPDATE_TRACKS,
+    payload: tracks
+  }
+}
+
+export const updateFramesAction = (frames:Iframes) => {
+  return {
+    type: UPDATE_FRAMES,
+    payload: frames
+  }
+}
+
+export const updateCurrentAction = (current:number) => {
+  return {
+    type: UPDATE_CURRENT,
+    payload: current
+  }
+}
+
+export const clearTracksAction = () => {
+  return {
+    type: CLEAR_TRACKS,
+  }
+}
+
+export const clearFramesAction = () => {
+  return {
+    type: CLEAR_FRAMES
+  }
+}
+
 export const animationReducer = (
   state=initialState,
   action:animationActionTypes
@@ -51,7 +86,7 @@ export const animationReducer = (
     case UPDATE_TRACKS:
       return {
         ...state,
-        tracks: action.payload
+        tracks: [...state.tracks, ...action.payload]
       }
     case UPDATE_FRAMES:
       return {

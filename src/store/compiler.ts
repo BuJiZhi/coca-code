@@ -7,13 +7,17 @@ import {
   UPDATE_SCOPE,
   UPDATE_MIRRORSCOPE,
   UPDATE_STEPS,
-  CLEAR_STEPS
+  CLEAR_STEPS,
+  CLEAR_SCOPES,
+  CLEAR_MIRRORSCOPES
 } from '../types/compiler';
+
+import { deepCopy } from '../utils/tools';
 
 const initialState:Icompiler = {
   ast: Object.create(null),
-  scope: Object.create(null),
-  mirrorScope: Object.create(null),
+  scopes: [],
+  mirrorScopes: [],
   steps: []
 }
 
@@ -33,7 +37,7 @@ export const updateScopeAction = (scope:Iscope) => {
 
 export const updateMirrorscopeAction = (scope:Iscope) => {
   return {
-    type: UPDATE_SCOPE,
+    type: UPDATE_MIRRORSCOPE,
     payload: scope
   }
 }
@@ -51,6 +55,18 @@ export const clearStepsAction = () => {
   }
 }
 
+export const clearScopeAction = () => {
+  return {
+    type: CLEAR_SCOPES
+  }
+}
+
+export const clearMirrorscopeAction = () => {
+  return {
+    type: CLEAR_MIRRORSCOPES
+  }
+}
+
 export const compilerReducer = (
   state=initialState,
   action:compilerActionTypes
@@ -62,24 +78,38 @@ export const compilerReducer = (
         ast: action.payload
       }
     case UPDATE_SCOPE:
+      let newScopes = [...state.scopes];
+      newScopes.push(action.payload);
       return {
         ...state,
-        scope: action.payload
+        scopes: newScopes
       }
     case UPDATE_MIRRORSCOPE:
+      let newMirrorScopes = [...state.mirrorScopes];
+      newMirrorScopes.push(action.payload);
       return {
         ...state,
-        mirrorScope: action.payload
+        mirrorScopes: newMirrorScopes
       }
     case UPDATE_STEPS:
       return {
         ...state,
-        steps: action.payload
+        steps: [...state.steps, ...action.payload]
       }
     case CLEAR_STEPS:
       return {
         ...state,
         steps: []
+      }
+    case CLEAR_SCOPES:
+      return {
+        ...state,
+        scopes: []
+      }
+    case CLEAR_MIRRORSCOPES:
+      return {
+        ...state,
+        mirrorScopes: []
       }
     default:
       return state;

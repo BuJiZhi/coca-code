@@ -3,7 +3,7 @@ import { Iui } from '../../types/feedback/ui';
 import { RootState } from '../../store';
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
-import Display from '../../components/Display';
+import Display from '../../components/feedback';
 
 export interface Idisplay {
   ui: Iui

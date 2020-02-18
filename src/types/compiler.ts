@@ -35,42 +35,43 @@ export interface Iscope {
 export interface Ioptions {
   scope?: Iscope,
   mirrorScope?: Iscope,
-  operations?: Istep[]
+  steps?: Istep[],
+  tracks?: Itrack[]
+}
+
+export interface ItraversBack {
+  value: Value,
+  preTrack: Itrack
 }
 
 export interface Iiterator {
-  node: InodeTypes,
+  node: Node,
   scope: Iscope,
   mirrorScope: Iscope,
   tracks: Itrack[],
-  stateHandler?: IstateHandler,
+  stateHandler: IstateHandler,
   code: string,
-  operations: Istep[],
-  traverse(node: Node, options?: Ioptions): any,
+  steps: Istep[],
+  traverse(node: Node, options?: Ioptions): ItraversBack,
   createScope(type: ScopeType): Iscope,
   createMirroScope(type: ScopeType): Iscope,
-  createMirrorOperate(operations: Istep[]): void,
-  // createMirrorAnimate(animate: IanimateKey): void,
-  // addOperateTrack(operations: Istep[] | undefined, tracks:Itrack[] | undefined): void,
-  // storeAddTrack(track: Itrack[]): void,
-  // addTrack(track: Itrack): void,
-  addOperation(operations: Istep): void
+  storeStepAndTrack(operations: Istep[] | undefined, tracks:Itrack[] | undefined): void,
+  addTrack(track: Itrack): void,
+  addStep(step: Istep): void
 }
 
 export interface IstateHandler {
-  updateAst: (ast: object) => void,
-  clearAst: () => void,
+  
+  updateAst: (ast: Node) => void,
   updateScope: (scope: Iscope) => void,
-  clearScope: () => void,
   updateMirrorScope: (scope: Iscope) => void,
-  clearMirrorScope: () => void,
-  addOperation: (op: Istep[]) => void,
-  clearOperation: () => void,
-  updateCurrent: (current: number) => void,
-  clearKeys: () => void,
-  // updateRenderResult: (result: IrenderResult) => void,
-  // addTrack: (track: Itrack) => void,
-  clearTracks: () => void
+  updateSteps: (op: Istep[]) => void,
+  updateTracks: (track:Itrack[]) => void,
+  // updateCurrent: (current: number) => void,
+  // clearKeys: () => void,
+  // // updateRenderResult: (result: IrenderResult) => void,
+  // // addTrack: (track: Itrack) => void,
+  // clearTracks: () => void
 }
 
 // ast shape
@@ -191,26 +192,26 @@ IarrayExpression;
 
 export interface InodeHandler {
   Program(node: Iiterator): any,
-  VariableDeclaration(node: Iiterator): any,
-  Literal(node: Iiterator): any,
-  UnaryExpression(node: Iiterator): any,
-  Identifier(node: Iiterator): any,
-  ExpressionStatement(node: Iiterator): any,
-  AssignmentExpression(node: Iiterator): void,
-  BinaryExpression(node: Iiterator): void,
-  IfStatement(node: Iiterator): void,
-  BlockStatement(node: Iiterator): void,
-  WhileStatement(node: Iiterator): void,
-  ForStatement(node:Iiterator): void,
-  UpdateExpression(node: Iiterator): void,
-  FunctionDeclaration(node: Iiterator): void,
-  FunctionExpression(node: Iiterator): [Step, Step],
-  CallExpression(node: Iiterator): any,
-  ArrayExpression(node: Iiterator): void,
-  ReturnStatement(node: Iiterator): any,
-  AssignmentExpressionMap: any,
-  BinaryExpressionOperatorMap: any,
-  unaryoperateMap: any
+  // VariableDeclaration(node: Iiterator): any,
+  // Literal(node: Iiterator): any,
+  // UnaryExpression(node: Iiterator): any,
+  // Identifier(node: Iiterator): any,
+  // ExpressionStatement(node: Iiterator): any,
+  // AssignmentExpression(node: Iiterator): void,
+  // BinaryExpression(node: Iiterator): void,
+  // IfStatement(node: Iiterator): void,
+  // BlockStatement(node: Iiterator): void,
+  // WhileStatement(node: Iiterator): void,
+  // ForStatement(node:Iiterator): void,
+  // UpdateExpression(node: Iiterator): void,
+  // FunctionDeclaration(node: Iiterator): void,
+  // FunctionExpression(node: Iiterator): [Step, Step],
+  // CallExpression(node: Iiterator): any,
+  // ArrayExpression(node: Iiterator): void,
+  // ReturnStatement(node: Iiterator): any,
+  // AssignmentExpressionMap: any,
+  // BinaryExpressionOperatorMap: any,
+  // unaryoperateMap: any
 }
 
 /**
@@ -219,8 +220,8 @@ export interface InodeHandler {
 export interface Icompiler {
   ast: Node,
   steps: Istep[],
-  scope: Iscope,
-  mirrorScope: Iscope,
+  scopes: Iscope[],
+  mirrorScopes: Iscope[],
   iterator?: Iiterator,
 }
 export const UPDATE_AST = 'UPDATE_AST';
@@ -228,10 +229,12 @@ export const UPDATE_STEPS = 'UPDATE_STEPS';
 export const UPDATE_SCOPE = 'UPDATE_SCOPE';
 export const UPDATE_MIRRORSCOPE = 'UPDATE_MIRRORSCOPE';
 export const CLEAR_STEPS = 'CLEAR_STEPS';
+export const CLEAR_SCOPES = 'CLEAR_SCOPES';
+export const CLEAR_MIRRORSCOPES = 'CLEAR_MIRRORSCOPES';
 
 interface updateAst {
   type: typeof UPDATE_AST,
-  payload: object
+  payload: Node
 }
 
 interface updateSteps {
@@ -253,9 +256,19 @@ interface clearSteps {
   type: typeof CLEAR_STEPS
 }
 
+interface clearScopes {
+  type: typeof CLEAR_SCOPES
+}
+
+interface clearMirrorScope {
+  type: typeof CLEAR_MIRRORSCOPES
+}
+
 export type compilerActionTypes = 
 updateAst |
 updateSteps |
 updateScope |
 updateMirrorScope |
-clearSteps;
+clearSteps |
+clearScopes |
+clearMirrorScope;
