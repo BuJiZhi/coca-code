@@ -108,8 +108,7 @@ interface IVariableDecalrations {
 
 interface IvariableDeclartor {
   type: typeof VariableDeclartor,
-  start: number,
-  end: number,
+  declarations: Node[],
   id: Iid,
   init?: IbinaryExpression
 }
@@ -226,6 +225,7 @@ export interface Icompiler {
 }
 export const UPDATE_AST = 'UPDATE_AST';
 export const UPDATE_STEPS = 'UPDATE_STEPS';
+export const REPLACE_STEPS = 'REPLACE_STEPS';
 export const UPDATE_SCOPE = 'UPDATE_SCOPE';
 export const UPDATE_MIRRORSCOPE = 'UPDATE_MIRRORSCOPE';
 export const CLEAR_STEPS = 'CLEAR_STEPS';
@@ -239,6 +239,11 @@ interface updateAst {
 
 interface updateSteps {
   type: typeof UPDATE_STEPS,
+  payload: Istep[]
+}
+
+interface replaceSteps {
+  type: typeof REPLACE_STEPS,
   payload: Istep[]
 }
 
@@ -267,6 +272,7 @@ interface clearMirrorScope {
 export type compilerActionTypes = 
 updateAst |
 updateSteps |
+replaceSteps |
 updateScope |
 updateMirrorScope |
 clearSteps |

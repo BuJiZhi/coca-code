@@ -82,7 +82,7 @@ class Iterator implements Iiterator {
 
   addStep(fn: Istep) {
     const that: any = this;
-    that.operations.push(fn);
+    that.steps.push(fn);
   }
 }
 

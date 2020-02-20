@@ -8,7 +8,7 @@
  */
 import React from 'react';
 import { EditorState, Styles } from '../../types/feedback/store';
-import { Iframe, Icontent, Ispring } from '../../types/feedback/animate';
+import { Iframe, Ieffect, Ispring } from '../../types/feedback/animate';
 import FrameSub from './FrameSub';
 
 interface Iprops {
@@ -16,7 +16,7 @@ interface Iprops {
   ui: Styles,
   currentFrame: Iframe
 }
-const springFac = (content: Icontent, ui: Styles) => {
+const springFac = (content: Ieffect, ui: Styles) => {
   const { key, type, startpos, endpos, value, valueType, process } = content;
   const { fontWidth, lineHeight, fontSize } = ui;
   let springs: Ispring = {

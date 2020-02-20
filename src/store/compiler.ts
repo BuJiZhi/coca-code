@@ -7,12 +7,11 @@ import {
   UPDATE_SCOPE,
   UPDATE_MIRRORSCOPE,
   UPDATE_STEPS,
+  REPLACE_STEPS,
   CLEAR_STEPS,
   CLEAR_SCOPES,
   CLEAR_MIRRORSCOPES
 } from '../types/compiler';
-
-import { deepCopy } from '../utils/tools';
 
 const initialState:Icompiler = {
   ast: Object.create(null),
@@ -45,6 +44,13 @@ export const updateMirrorscopeAction = (scope:Iscope) => {
 export const updateStepsAction = (steps:Istep[]) => {
   return {
     type: UPDATE_STEPS,
+    payload: steps
+  }
+}
+
+export const replaceStepsAction = (steps:Istep[]) => {
+  return {
+    type: REPLACE_STEPS,
     payload: steps
   }
 }
@@ -95,6 +101,11 @@ export const compilerReducer = (
       return {
         ...state,
         steps: [...state.steps, ...action.payload]
+      }
+    case REPLACE_STEPS:
+      return {
+        ...state,
+        steps: action.payload
       }
     case CLEAR_STEPS:
       return {

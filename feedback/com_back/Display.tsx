@@ -1,11 +1,11 @@
 import React from 'react';
-import { Iframe, Icontent, Ispring } from '../../types/feedback/animate';
+import { Iframe, Ieffect, Ispring } from '../../types/feedback/animate';
 import Element from './Element';
 
 interface Iprops {
   currentFrame: Iframe
 }
-const springFac = (content: Icontent) => {
+const springFac = (content: Ieffect) => {
   const { key, type, startpos, endpos, value, valueType, process } = content;
   let springs: Ispring = {
     key: "null",

@@ -79,7 +79,6 @@ const nodeHandlers: InodeHandler =  {
     let variableSteps: Istep[] = [];
     if (nodeIterator.node.declarations) {
       for (const declaration of nodeIterator.node.declarations) {
-        // 一个轨道列表就相当于是一条语句
         const { id, init } = declaration;
         if (id instanceof Node) {
           const { start, end, name } = id;
@@ -93,6 +92,7 @@ const nodeHandlers: InodeHandler =  {
           // 3. 上个节点的结束点，无
           // 4. 返回值
           const idNode = {value: name, preTrack: idTrack}
+
           const initNode = init
             ? nodeIterator.traverse(init as Inode, {tracks: variableTracks, steps: variableSteps})
             : {value: undefined, preTrack: produceTrack(
@@ -103,6 +103,7 @@ const nodeHandlers: InodeHandler =  {
               keyCounter++,
               trackCounter++
             )}
+
           const track = produceTrack(initNode.value, "move", initNode.preTrack.effect.startpos,
             idNode.preTrack.effect.startpos, keyCounter++, trackCounter++)
           variableTracks.push(track);
@@ -112,6 +113,7 @@ const nodeHandlers: InodeHandler =  {
             stepCounter++
           );
           variableSteps.push(step);
+
           for (let i = 0; i < variableTracks.length - 1; i++) {
             let track = variableTracks[i];
             if (track.end === 0) {
@@ -134,76 +136,35 @@ const nodeHandlers: InodeHandler =  {
     const { node, code } = nodeIterator;
     const { argument, operator, start, end } = node;
     const pos = startend2Index(start, end, code);
-    const argResult = nodeIterator.traverse(argument);
+    const argResult = nodeIterator.traverse(argument as Inode);
     const value = nodeHandlers.unaryoperateMap[operator](argResult.value);
-    
     // 1.本节点动画
-    const track: Itrack = {
-      begin: trackCount++,
-      end: 0,
-      content: {
-        type: "t2",
-        startpos: pos[0],
-        endpos: pos[1],
-        value,
-        valueType: typeOf(value),
-        key: `uae-${++keyCount}`
-      }
-    }
+    const track = produceTrack(value, "appear", pos[0], pos[1], keyCounter, trackCounter);
     nodeIterator.addTrack(track);
-
     // 2.本节点操作函数
-    const unaryOp = {
-      key: operationCount++,
-      operation: () => {}
-    };;
-    nodeIterator.addOperation(unaryOp);
-
-    // 3.上一个节点动画结束，无
-
+    const unaryStep = produceStep(donothing, stepCounter++);
+    nodeIterator.addStep(unaryStep);
     // 4. 返回
-    return {
-      value,
-      preTrack: track
-    }
+    return {value,preTrack: track}
   },
 
   // 值定义
   Literal: nodeIterator => {
     const { start, end, value } = nodeIterator.node;
-
     const code = nodeIterator.code;
     const pos = startend2Index(start, end, code);
-
     // 本节点动画
-    let track: Itrack = {
-      begin: trackCount++,
-      end: 0,
-      content: {
-        type: "t2",
-        startpos: pos[0],
-        endpos: pos[1],
-        value,
-        valueType: typeOf(value),
-        key: `lta-${++keyCount}`
-      }
-    }
+    const track:Itrack = produceTrack(value, "appear", pos[0], pos[1], keyCounter++, trackCounter++);
     nodeIterator.addTrack(track);
-
     // 本节点操作
-    const literalOperate = {
-      key: operationCount++,
-      operation: () => {}
-    };;
-    nodeIterator.addOperation(literalOperate);
-    // 上一个节点的结束点 无
-
+    const literalStep = produceStep(donothing, stepCounter++);
+    nodeIterator.addStep(literalStep);
     // 返回值
     if(nodeIterator.node.value === undefined) {
-      track.content.value = 'undefined';
+      track.effect.value = 'undefined';
       return {value: undefined, preTrack: track};
     }
-    track.content.value = nodeIterator.node.value;
+    track.effect.value = nodeIterator.node.value;
     return {value: nodeIterator.node.value, preTrack: track};
   },
 

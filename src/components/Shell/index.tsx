@@ -26,7 +26,7 @@ const useStyles = makeStyles(theme => ({
     height: theme.spacing(2),
     backgroundColor: "rgb(51, 56, 66)"
   }
-}))
+}));
 
 const Shell:React.FC = () => {
   const classes = useStyles();

@@ -1,4 +1,4 @@
-import { ValueType } from '../types/feedback/animate';
+import { ValueType } from '../types/animation';
 
 export function click2cursor(
   containerOffset: [number, number],

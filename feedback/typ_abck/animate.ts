@@ -38,5 +38,5 @@ export interface Ispring {
   style: any
 }
 
-export type Iframe = Icontent[];
+export type Iframe = Ieffect[];
 export type IrenderResult = Iframe[];
