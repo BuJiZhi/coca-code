@@ -1,5 +1,13 @@
 export type Position = [number, number];
-export type AnimationTypes =  'default' | 'appear' | 'move' | 'compute' | 'function' | 't5';
+export type AnimationTypes =  
+'default' | 
+'base' | 
+'appear' |
+'move' |
+'compute' |
+'function' |
+'block' |
+'t5';
 export type Process = 'enter' | 'stay' | 'leave';
 export type ValueType = 
 "[object Null]" | 

@@ -1,8 +1,8 @@
 import {Ieffect, Ispring} from '../../types/animation';
-import {Ieditor} from '../../types/editor';
-const produceSpring = (content:Ieffect, editor:Ieditor) => {
+const produceSpring = (content:Ieffect, fontWidth:number, lineHeight:number) => {
   const {key, type, startpos, endpos, value, valueType, process} = content;
-  const {fontWidth, lineHeight} = editor;
+  const gutterWidth = 32;
+  const paddingHeight = 4;
   let springs:Ispring = {
     key,
     value,
@@ -14,66 +14,88 @@ const produceSpring = (content:Ieffect, editor:Ieditor) => {
     }
   }
   const outlined = {
-    backgroundColor: "#fff",
-    border: "1px solid #aaa",
-    borderRadius: "3px",
-    width: (endpos[1] - startpos[1]) * fontWidth,
+    boxSizing: "border-box",
+    backgroundColor: "rgb(82, 139, 255)",
+    color: "rgb(206, 203, 236)",
+    width: (endpos[1] - startpos[1]) * fontWidth + 2,
+    borderRadius: "2px",
     textAlign: "center",
     overflow: "hidden"
   }
   const common = {
+    display: 'block',
     position: 'absolute',
+    paddingTop: 0,
+    paddingBottom: 0,
     zIndex: 1000,
-    fontSize: lineHeight
+    fontWeight: 500,
+    fontSize: lineHeight - 8,
+    lineHeight: `${lineHeight}px`,
+    height: `${lineHeight}px`
   }
   switch(type) {
     case 'default':
       springs.style = {}
       break;
-    case 'appear':
+    case 'base':
+      springs.style = {
+        to: {
+          top: (startpos[0]) * lineHeight + paddingHeight,
+          width: "100%",
+          height: `${lineHeight * (endpos[0] - startpos[0] + 1)}px`,
+          backgroundColor: "#fff",
+          opacity: 0.1,
+          zIndex: 0
+        }
+      }
+      break;
+    case 'appear': // 翻转？
       springs.style = {
         to:{
-          fontWeight: 500,
-          left: startpos[1] * fontWidth,
-          top: startpos[0] * lineHeight,
+          left: startpos[1] * fontWidth + gutterWidth,
+          top: (startpos[0]) * lineHeight + paddingHeight,
           ...outlined
         },
         from: {
-          fontWeight: 100
+          height: `${lineHeight}px`
         }
       }
       break;
     case 'compute':
       springs.style = {
         to: {
-          left: startpos[1] * fontWidth,
-          top: startpos[0] * lineHeight,
-          fontWeight: 500,
-          ...outlined
+          left: startpos[1] * fontWidth + gutterWidth,
+          top: startpos[0] * lineHeight + paddingHeight,
+          ...outlined,
+          backgroundColor: "rgb(255, 171, 25)",
+          color: "rgb(255, 255, 255)"
         },
         from: {
-          fontWeight: 100
         }
       }
       break;
-    case 'move': {
+    case 'move': 
       springs.style = {
         to: {
           color: 'red',
-          left: endpos[1] * fontWidth,
-          top: endpos[0] * lineHeight,
+          left: endpos[1] * fontWidth + gutterWidth,
+          top: endpos[0] * lineHeight + paddingHeight,
           ...outlined,
+
           opacity: 0,
         },
         from: {
           color: 'green',
-          left: startpos[1] * fontWidth,
-          top: startpos[0] * lineHeight,
+          left: startpos[1] * fontWidth + gutterWidth,
+          top: startpos[0] * lineHeight + paddingHeight,
           opacity: 1
         }
       }
       break;
-    }
+    case 'block':
+      springs.style = {
+
+      }
     // case 't4':
     //   springs.style = {
     //     to: {
@@ -112,7 +134,7 @@ const produceSpring = (content:Ieffect, editor:Ieditor) => {
     //   }
     default:
       break;
-  }
+  } 
   springs.style.from = {...common, ...springs.style.from}
   springs.style.to = {...common, ...springs.style.to}
   return springs;

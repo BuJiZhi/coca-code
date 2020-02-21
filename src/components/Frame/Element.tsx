@@ -7,13 +7,21 @@ interface Iprops {
 }
 
 const Element: React.FC<Iprops> = ({info}) => {
-  const { value, valueType, process, style } = info;  
+  const { value, valueType, process, style } = info;
+  const { height, lineHeight } = style;  
   const spring = useSpring(style);
   return (
-    <animated.div 
+    <animated.div
       style={ process === 'enter' ? spring : style.to }
     >
-      { valueConvert(value, valueType) }
+      <animated.span
+        style={{
+          height, 
+          lineHeight
+        }}
+      >
+        { valueConvert(value, valueType) }
+      </animated.span>
     </animated.div>
   );
 }

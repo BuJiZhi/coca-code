@@ -7,7 +7,7 @@ import 'codemirror/mode/javascript/javascript';
 interface Iprops {
   code: string,
   handleUpdateCode(code: string): void
-  updateWidthAndHeight(width:number, height:number): void
+  updateWidthAndHeight(width:number, lineHeight:number): void
 }
 
 const Editor:React.FC<Iprops> = ({
@@ -16,12 +16,12 @@ const Editor:React.FC<Iprops> = ({
   updateWidthAndHeight
 }) => {
   const [fontWidth, setWidth] = useState(7);
-  const [lineHeight, setHeight ] = useState(13);
+  const [lineHeight, setLineHeight ] = useState(13);
   const handleMirrorBeforeChange = (editor:any, data:any, value:string) => {
-    const height = editor.defaultTextHeight();
-    const width = editor.defaultCharWidth();
-    setWidth(width);
-    setHeight(height)
+    const newHineHeight = editor.defaultTextHeight();
+    const newWidth = editor.defaultCharWidth();
+    setWidth(newWidth);
+    setLineHeight(newHineHeight);
     handleUpdateCode(value);
   }
 

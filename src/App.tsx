@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import EditorCon from './containers/EditorCon';
 import Toolbar from './components/Toolbar';
 import ShellCon from './containers/ShellCon';
+import FrameCon from './containers/FrameCon';
 import { Container } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 const useStyles = makeStyles(theme => ({
@@ -23,6 +24,7 @@ const useStyles = makeStyles(theme => ({
     bottom: 0
   },
   editor: {
+    position: "relative",
     flex: ".6 .5",
     minWidth: "500px",
     height: "100%",
@@ -45,7 +47,10 @@ const App:React.FC = () => {
       <Container className={classes.root}>
         {/* <div><Toolbar /></div> */}
         <div className={classes.runbox}>
-          <div className={classes.editor}><EditorCon /></div>
+          <div className={classes.editor}>
+            <EditorCon />
+            <FrameCon />
+          </div>
           <div className={classes.resizer}></div>
           <div className={classes.shell}>
             <ShellCon />

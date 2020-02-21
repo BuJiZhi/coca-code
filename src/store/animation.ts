@@ -25,15 +25,7 @@ const initialState:Ianimation = {
       valueType: '[object String]'
     }
   }],
-  frames: [[{
-    type: 'default',
-    startpos: [0, 0],
-    endpos: [1, 0],
-    process: 'enter',
-    key: 'sp-0',
-    value: '',
-    valueType: '[object String]'
-  }]],
+  frames: [[]],
   defaultFrame: {
     type: 'default',
     startpos: [0, 0],

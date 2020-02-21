@@ -64,6 +64,8 @@ const Compiler:React.FC<Iprops> = props => {
     updateCurrent,
     replaceSteps,
     updateFrames,
+    clearFrames,
+    clearTracks,
     ...dispatches
   } = props;
   const { current, tracks, frames, defaultFrame } = animation;
@@ -75,6 +77,9 @@ const Compiler:React.FC<Iprops> = props => {
     clearSteps();
     clearScope();
     clearMirrorscope();
+    clearTracks();
+    clearFrames();
+    updateCurrent(0);
 
     const ast = Parser.parse(code);
     const scope = new Scope('function', null);

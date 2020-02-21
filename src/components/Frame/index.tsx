@@ -1,20 +1,26 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import Element from './Element';
 import {Ieditor} from '../../types/editor';
-import { IsingleFrame } from '../../types/animation';
+import { IsingleFrame, Ispring } from '../../types/animation';
 import produceSpring from './produceSpring';
 
 interface Iprops {
-  editor: Ieditor,
-  frame: IsingleFrame
+  fontWidth: number;
+  lineHeight: number;
+  frame: IsingleFrame;
 }
 
-const Display: React.FC<Iprops> = ({editor, frame}) => {
-  if (!frame) return <div></div>;
-  let springLst = [];
-  for (let i = 0; i < frame.length; i++) {
-    springLst.push(produceSpring(frame[i], editor));
-  }
+const Display: React.FC<Iprops> = ({fontWidth, lineHeight, frame}) => {
+  const [springLst, setSpring] = useState([] as Ispring[]);
+  useEffect(() => {
+    if (frame) {
+      let springTemp:Ispring[] = [];
+      for (let i = 0; i < frame.length; i++) {
+        springTemp.push(produceSpring(frame[i], fontWidth, lineHeight));
+      }
+      setSpring(springTemp);
+    }
+  }, [frame])
   return (
     <div>
       {springLst.map((item) =>

@@ -43,6 +43,13 @@ function produceTrack(
   }
 }
 
+function produceBaseTrack(start:number, end:number, code:string):Itrack {
+  const pos = startend2Index(start, end, code);
+  return produceTrack(
+    '', 'base', pos[0], pos[1], -1, trackCounter
+  )
+}
+
 function produceStep(step:()=>void, stepCounter:number):Istep {
   return {
     key: stepCounter,
@@ -71,11 +78,11 @@ const nodeHandlers: InodeHandler =  {
     })
   },
 
-  // 变量定义
   VariableDeclaration: nodeIterator => {
-    const code = nodeIterator.code;
-    const kind = nodeIterator.node.kind;
+    const {code, node} = nodeIterator
+    const {kind, start, end} = node;
     let variableTracks: Itrack[] = [];
+    variableTracks.push(produceBaseTrack(start, end, code));
     let variableSteps: Istep[] = [];
     if (nodeIterator.node.declarations) {
       for (const declaration of nodeIterator.node.declarations) {
@@ -106,6 +113,7 @@ const nodeHandlers: InodeHandler =  {
 
           const track = produceTrack(initNode.value, "move", initNode.preTrack.effect.startpos,
             idNode.preTrack.effect.startpos, keyCounter++, trackCounter++)
+          console.log(track)
           variableTracks.push(track);
           nodeIterator.scope.declare(idNode.value, initNode.value, kind);
           const step = produceStep(
@@ -113,53 +121,84 @@ const nodeHandlers: InodeHandler =  {
             stepCounter++
           );
           variableSteps.push(step);
-
-          for (let i = 0; i < variableTracks.length - 1; i++) {
-            let track = variableTracks[i];
-            if (track.end === 0) {
-              track.end = trackCounter;
-            }
-          }
         }
       }
       // 上传轨道及操作函数
+      trackSetEnd(variableTracks, trackCounter);
       nodeIterator.storeStepAndTrack(variableSteps, variableTracks);
     }
   },
 
   unaryoperateMap: {
-    "-": (a: number) => -a
+    "-": (nodeIterator:Iiterator) => {
+      const nodeReturn = nodeIterator.traverse(nodeIterator.node.argument as Inode);
+      nodeReturn.value = -nodeReturn.value;
+      return nodeReturn;
+    },
+    "+": (nodeIterator:Iiterator) => {
+      const nodeReturn = nodeIterator.traverse(nodeIterator.node.argument as Inode);
+      nodeReturn.value = +nodeReturn.value;
+      return nodeReturn;
+    },
+    "!": (nodeIterator:Iiterator) => {
+      const nodeReturn = nodeIterator.traverse(nodeIterator.node.argument as Inode);
+      nodeReturn.value = !nodeReturn.value;
+      return nodeReturn;
+    },
+    "~": (nodeIterator:Iiterator) => {
+      const nodeReturn = nodeIterator.traverse(nodeIterator.node.argument as Inode);
+      nodeReturn.value = ~nodeReturn.value;
+      return nodeReturn;
+    },
+    "typeof": (nodeIterator:Iiterator) => {
+      const argument = <Inode>nodeIterator.node.argument;
+      if (argument.type === 'Identifier') {
+        const result = nodeIterator.traverse(nodeIterator.node.argument as Inode);
+        try {
+          const value = nodeIterator.scope.get(argument.name);
+          const type = value ? typeof value : 'undefined';
+          result.value = type;
+          return result;
+        } catch(err) {
+          if (err.message === `${argument.name} is not defined`) {
+            result.value = 'undefined';
+            return result;
+          } else {
+            throw err;
+          }
+        } 
+      }
+      const nodeReturn = nodeIterator.traverse(nodeIterator.node.argument as Inode);
+      nodeReturn.value = +nodeReturn.value;
+      return nodeReturn;
+    }
+    // unfinished
+    // "void": (nodeIterator:Iiterator) => {
+    // },
+    // "delete": (nodeIterator:Iiterator) => {
+    // },
   },
 
-  // 一元操作符
   UnaryExpression: nodeIterator => {
     const { node, code } = nodeIterator;
     const { argument, operator, start, end } = node;
     const pos = startend2Index(start, end, code);
-    const argResult = nodeIterator.traverse(argument as Inode);
-    const value = nodeHandlers.unaryoperateMap[operator](argResult.value);
-    // 1.本节点动画
-    const track = produceTrack(value, "appear", pos[0], pos[1], keyCounter, trackCounter);
+    const result = nodeHandlers.unaryoperateMap[operator](nodeIterator);
+    const track = produceTrack(result.value, "appear", pos[0], pos[1], keyCounter++, trackCounter);
     nodeIterator.addTrack(track);
-    // 2.本节点操作函数
     const unaryStep = produceStep(donothing, stepCounter++);
     nodeIterator.addStep(unaryStep);
-    // 4. 返回
-    return {value,preTrack: track}
+    return {value: result.value, preTrack: track}
   },
 
-  // 值定义
   Literal: nodeIterator => {
     const { start, end, value } = nodeIterator.node;
     const code = nodeIterator.code;
     const pos = startend2Index(start, end, code);
-    // 本节点动画
     const track:Itrack = produceTrack(value, "appear", pos[0], pos[1], keyCounter++, trackCounter++);
     nodeIterator.addTrack(track);
-    // 本节点操作
     const literalStep = produceStep(donothing, stepCounter++);
     nodeIterator.addStep(literalStep);
-    // 返回值
     if(nodeIterator.node.value === undefined) {
       track.effect.value = 'undefined';
       return {value: undefined, preTrack: track};
@@ -168,48 +207,73 @@ const nodeHandlers: InodeHandler =  {
     return {value: nodeIterator.node.value, preTrack: track};
   },
 
-  // // 标识符
-  // Identifier: nodeIterator => {
-  //   const { code, node } = nodeIterator;
-  //   const { name, start, end } = node;
-  //   const pos = startend2Index(start, end, code);
-    
-  //   const value = nodeIterator.scope.get(name).value;
-  //   // track
-  //   let track: Itrack = {
-  //     begin: trackCount++,
-  //     end: 0,
-  //     content: {
-  //       type: "t2",
-  //       startpos: pos[0],
-  //       endpos: pos[1],
-  //       value,
-  //       valueType: typeOf(value),
-  //       key: `idf-${++keyCount}`
-  //     }
-  //   }
-  //   nodeIterator.addTrack(track);
-  //   // operation
-  //   const identifierOperate = {
-  //     key: operationCount++,
-  //     operation: () => {}
-  //   };;
-  //   nodeIterator.addOperation(identifierOperate);
-  //   return {
-  //     value,
-  //     preTrack: track
-  //   }
-  // },
+  Identifier: nodeIterator => {
+    const { code, node } = nodeIterator;
+    const { name, start, end } = node;
+    const pos = startend2Index(start, end, code);
+    const value = nodeIterator.scope.get(name).value;
+    let track = produceTrack(value, 'appear', pos[0], pos[1], keyCounter++, trackCounter++);
+    nodeIterator.addTrack(track);
+    const identifierOperate = produceStep(
+      donothing,
+      stepCounter++,
+    )
+    nodeIterator.addStep(identifierOperate);
+    return {value, preTrack: track};
+  },
+  
+  BinaryExpressionOperatorMap: {
+    '==': (a:number, b:number) => a == b,
+    '!=': (a:number, b:number) => a != b,
+    '===': (a:number, b:number) => a === b,
+    '!==': (a:number, b:number) => a !== b,
+    '<': (a:number, b:number) => a < b,
+    '<=': (a:number, b:number) => a <= b,
+    '>': (a:number, b:number) => a > b,
+    '>=': (a:number, b:number) => a >= b,
+    '<<': (a:number, b:number) => a << b,
+    '>>': (a:number, b:number) => a >> b,
+    '>>>': (a:number, b:number) => a >>> b,
+    '+': (a:number, b:number) => a + b,
+    '-': (a:number, b:number) => a - b,
+    '*': (a:number, b:number) => a * b,
+    '/': (a:number, b:number) => a / b,
+    '%': (a:number, b:number) => a % b,
+    '**': (a:number, b:number) => a ** b,
+    '|': (a:number, b:number) => a | b,
+    '^': (a:number, b:number) => a ^ b,
+    '&': (a:number, b:number) => a & b,
+    'in': (a:any, b:object | any[]) => a in b,
+    'instanceof': (a:any, b:any) => a instanceof b
+  },
 
-  // // 表达式
-  // ExpressionStatement: nodeIterator => {
-  //   let expressionTrack: Itrack[] = [];
-  //   let expressionOperate: Istep[] = [];
-  //   nodeIterator.traverse(nodeIterator.node.expression, {tracks: expressionTrack, operations: expressionOperate});
-  //   expressionTrack = trackSetEnd(expressionTrack, trackCount);
-  //   nodeIterator.addOperateTrack(expressionOperate, expressionTrack);
-  //   // return result;
-  // },
+  BinaryExpression: nodeIterator => {
+    const {code, node} = nodeIterator;
+    const {start, end} = node;
+    const pos = startend2Index(start, end, code);
+    const right = nodeIterator.traverse(node.right).value;
+    const left = nodeIterator.traverse(node.left).value;
+    const result = nodeHandlers.BinaryExpressionOperatorMap[nodeIterator.node.operator](left, right);
+    let value = result === true ? 'true' : result === false ? 'false' : result;
+    let track = produceTrack(value, 'compute', pos[0], pos[1], keyCounter++, trackCounter++);
+    nodeIterator.addTrack(track);
+    const binaryOp = produceStep(donothing, stepCounter++);
+    nodeIterator.addStep(binaryOp);
+    return {value: result, preTrack: track};
+  },
+
+  ExpressionStatement: nodeIterator => {
+    let expressionTrack: Itrack[] = [];
+    let expressionStep: Istep[] = [];
+    nodeIterator.traverse(nodeIterator.node.expression, {tracks: expressionTrack, steps: expressionStep});
+    expressionTrack = trackSetEnd(expressionTrack, trackCounter);
+    nodeIterator.storeStepAndTrack(expressionStep, expressionTrack);
+  },
+
+  MemberExpression: nodeIterator => {
+    const {node, code} = nodeIterator;
+    console.log(node);
+  },
 
   // AssignmentExpressionMap: {
   //  "=": (simpleValue: IsimpleValue, value: any) => simpleValue.set(value),
@@ -286,56 +350,6 @@ const nodeHandlers: InodeHandler =  {
   //     // 3. 上一个节点的结束点,无
 
   //   }
-  // },
-
-  // // 运算操作
-  // BinaryExpressionOperatorMap: {
-  //   '+': (a: number, b: number) => a + b,
-  //   '-': (a: number, b: number) => a - b,
-  //   '*': (a: number, b: number) => a * b,
-  //   '/': (a: number, b: number) => a / b,
-  //   '%': (a: number, b: number) => a % b,
-  //   '==': (a: number, b: number) => a === b,
-  //   '>': (a: number, b: number) => a > b,
-  //   '<': (a: number, b: number) => a < b,
-  //   '>=': (a: number, b: number) => a >= b,
-  //   '<=': (a: number, b: number) => a <= b
-  // },
-
-  // BinaryExpression: nodeIterator => {
-  //   const { code, node } = nodeIterator;
-  //   const { start, end } = node;
-  //   const pos = startend2Index(start, end, code);
-  //   // 从右到左运算？
-  //   const right = nodeIterator.traverse(node.right).value;
-  //   const left = nodeIterator.traverse(node.left).value;
-  //   const result = nodeHandlers.BinaryExpressionOperatorMap[nodeIterator.node.operator](left, right);
-  //   // 1.本节点动画
-  //   let value = result === true ? 'true' : result === false ? 'false' : result;
-  //   let track: Itrack = {
-  //     begin: trackCount++,
-  //     end: 0,
-  //     content: {
-  //       type: "t4",
-  //       startpos: pos[0],
-  //       endpos: pos[1],
-  //       value,
-  //       valueType: typeOf(value),
-  //       key: `idf-${++keyCount}`
-  //     }
-  //   }
-  //   nodeIterator.addTrack(track);
-
-  //   // 2.本节点操作函数
-  //   const binaryOp = {
-  //     key: operationCount++,
-  //     operation: () => {}
-  //   };;
-  //   nodeIterator.addOperation(binaryOp);
-  //   // 3.上个节点动画结束, 无
-
-  //   // 4. 返回
-  //   return {value: result, preTrack: track};
   // },
 
   // // 条件判断
@@ -562,6 +576,59 @@ const nodeHandlers: InodeHandler =  {
   //     preTrack: track
   //   }
   // }
+
+  ObjectExpression(nodeIterator) {
+    const {node, code} = nodeIterator;
+    const {start, end} = node;
+    const basePos = startend2Index(start, end, code);
+    const obj = Object.create(null);
+    const baseTrack = produceTrack(
+      '       \n', 'block', basePos[0], basePos[0], keyCounter++, trackCounter++
+    );
+    nodeIterator.addTrack(baseTrack);
+    const baseStep = produceStep(donothing,stepCounter++);
+    nodeIterator.addStep(baseStep);
+    let track;
+    for (const prop of nodeIterator.node.properties) {
+      let key;
+      if (prop.key.type === 'Literal') {
+        const keyResult = nodeIterator.traverse(prop.key);
+        key = `${keyResult.value}`;
+      } else if (prop.key.type === 'Identifier') {
+        const {start, end} = prop.key;
+        const keyPos = startend2Index(start, end, code);
+        const keyTrack = produceTrack(
+          prop.key.name, 'appear', keyPos[0], keyPos[1], keyCounter++, trackCounter++
+        );
+        nodeIterator.addTrack(keyTrack);
+        const keyStep = produceStep(donothing, stepCounter++);
+        nodeIterator.addStep(keyStep);
+        key = prop.key.name;
+      } else {
+        throw new Error(`[ObjectExpression] Unsupported property key type "${prop.key.type}"`)
+      }
+      const value = nodeIterator.traverse(prop.value).value;
+      track = produceTrack(
+        `${key}: ${value}\n`, 
+        'block',
+        basePos[0],
+        basePos[0],
+        keyCounter++,
+        trackCounter++
+      )
+      nodeIterator.addTrack(track);
+      obj[key] = value;
+      const step = produceStep(
+        donothing,
+        stepCounter++
+      );
+      nodeIterator.addStep(step);
+    }
+    return {
+      value: obj,
+      preTrack: track
+    }
+  }
 }
 
 export default nodeHandlers;

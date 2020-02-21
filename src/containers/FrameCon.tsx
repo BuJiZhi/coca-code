@@ -14,10 +14,12 @@ interface Iprops {
 const FrameCon:React.FC<Iprops> = props => {
   const {editor, animation} = props;
   const {current, frames} = animation;
+  const {fontWidth, lineHeight} = editor;
 
   return (
     <Frame 
-      editor={editor}
+      fontWidth={fontWidth}
+      lineHeight={lineHeight}
       frame={frames[current]}
     />
   )
