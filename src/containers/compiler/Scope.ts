@@ -1,4 +1,4 @@
-import SimpleValue from './SimpleValue';
+import SimpleValue from './Value';
 import { Iscope, ScopeValue, Value } from '../../types/compiler';
 
 const standarMap = Object.create(null);

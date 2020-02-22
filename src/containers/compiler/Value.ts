@@ -1,4 +1,4 @@
-import { IsimpleValue } from '../../types/compiler';
+import { IsimpleValue, ImemberValue } from '../../types/compiler';
 
 export default class SimpleValue implements IsimpleValue {
   
@@ -23,4 +23,27 @@ export default class SimpleValue implements IsimpleValue {
       return this.value;
     }
   }
+}
+
+export class MemberValue implements ImemberValue {
+  
+  obj:object;
+  prop:string;
+  
+  constructor(obj:object, prop:string) {
+    this.obj = obj;
+    this.prop = prop;
+  }
+
+  set(value:any) {
+    const that:any = this;
+    that.obj[this.prop] = value;
+    return value;
+  }
+
+  get() {
+    const that:any = this;
+    return that.obj[that.prop];
+  }
+
 }

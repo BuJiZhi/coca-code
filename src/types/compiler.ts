@@ -17,6 +17,13 @@ export interface IsimpleValue {
   set(value: any): void
 }
 
+export interface ImemberValue {
+  obj: object,
+  [prop:string]: any,
+  set(value:any): void,
+  get(): void
+}
+
 export interface Iscope {
   type: string,
   globalScope?: ScopeValue,
@@ -137,9 +144,9 @@ interface Iexpression {
 }
 
 interface IifStatement {
-  test: Node,
-  consequent: Node,
-  alternate?: Node
+  test: Inode,
+  consequent: Inode,
+  alternate?: Inode
 }
 
 interface IunaryExpression {
@@ -181,6 +188,12 @@ interface Iprop {
   key: Inode
 }
 
+interface ImemberExpression {
+  object: Inode,
+  property: Inode,
+  computed: boolean
+}
+
 export type Inode = 
 Icommon &
 IprogramNode &
@@ -197,6 +210,7 @@ IfuncDeclaration &
 IfuncCaller &
 IarrayExpression &
 IobjectExpression &
+ImemberExpression &
 Iprop;
 
 export interface InodeHandler {
@@ -206,21 +220,21 @@ export interface InodeHandler {
   UnaryExpression(node: Iiterator): any,
   Identifier(node: Iiterator): any,
   ExpressionStatement(node: Iiterator): any,
-  // AssignmentExpression(node: Iiterator): void,
+  AssignmentExpression(node: Iiterator): void,
   BinaryExpression(node: Iiterator): void,
   MemberExpression(node: Iiterator): void,
-  // IfStatement(node: Iiterator): void,
-  // BlockStatement(node: Iiterator): void,
-  // WhileStatement(node: Iiterator): void,
-  // ForStatement(node:Iiterator): void,
-  // UpdateExpression(node: Iiterator): void,
+  IfStatement(node: Iiterator): void,
+  BlockStatement(node: Iiterator): void,
+  WhileStatement(node: Iiterator): void,
+  ForStatement(node:Iiterator): void,
+  UpdateExpression(node: Iiterator): void,
   // FunctionDeclaration(node: Iiterator): void,
   // FunctionExpression(node: Iiterator): [Step, Step],
   // CallExpression(node: Iiterator): any,
   // ArrayExpression(node: Iiterator): void,
   ObjectExpression(node: Iiterator): void,
   // ReturnStatement(node: Iiterator): any,
-  // AssignmentExpressionMap: any,
+  AssignmentExpressionMap: any,
   BinaryExpressionOperatorMap: any,
   unaryoperateMap: any
 }

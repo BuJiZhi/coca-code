@@ -28,18 +28,17 @@ function num2index(
   num: number,
   code: string
 ): [number, number]{
-  let ln: number = 0;
-  let ch: number = 0;
-  let isbegin = 1;
+  let ln:number = 0;
+  let ch:number = 0;
+  let isEnd:boolean = false;
   for (let i = 0; i <= code.length && i <= num; i++) {
     if (code[i] === '\n') {
-      ln += 1;
-      isbegin = 1;
-      ch = 0;
+      isEnd = true;
     } else {
-      if (isbegin) {
+      if (isEnd) {
         ch = 0;
-        isbegin = 0;
+        ln += 1;
+        isEnd = false;
       } else {
         ch += 1;
       }

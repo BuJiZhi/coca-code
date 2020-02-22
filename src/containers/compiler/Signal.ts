@@ -23,23 +23,23 @@ export default class Signal implements Isignal {
     return new Signal('break', label)
   }
 
-  static Continue(label: any) {
+  static Continue(label:any) {
     return new Signal('continue', label)
   }
 
-  static isReturn(signal: Isignal) {
+  static isReturn(signal:any) {
     return signal instanceof Signal && signal.type === 'return';
   }
 
-  static isBreak(signal: Isignal) {
+  static isBreak(signal:any) {
     return signal instanceof Signal && signal.type === 'break';
   }
 
-  static isContinue(signal: Isignal) {
+  static isContinue(signal:any) {
     return signal instanceof Signal && signal.type === 'continue';
   }
 
-  static isSignal(signal: Isignal) {
+  static isSignal(signal:any) {
     return signal instanceof Signal;
   }
 }
