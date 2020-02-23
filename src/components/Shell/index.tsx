@@ -1,6 +1,8 @@
 import React from 'react';
 import Toolbar from '../Toolbar';
 import { makeStyles } from '@material-ui/core/styles';
+import {Icompiler} from '../../types/compiler';
+import Scope from './Scope';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -20,6 +22,7 @@ const useStyles = makeStyles(theme => ({
     color: "#eee"
   },
   scopes: {
+    position: 'relative',
     height: "50%"
   },
   resizer: {
@@ -28,13 +31,20 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const Shell:React.FC = () => {
+interface Iprops {
+  compiler: Icompiler;
+}
+
+const Shell:React.FC<Iprops> = ({compiler}) => {
+  const {scopes} = compiler;
   const classes = useStyles();
   return (
     <div className={classes.root}>
       <Toolbar />
       <div className={classes.shell}>
-        <div className={classes.scopes}></div>
+        <div className={classes.scopes}>
+          <Scope scopes={scopes}/>
+        </div>
         <div className={classes.resizer}></div>
         <div></div>
       </div>

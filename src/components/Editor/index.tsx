@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Controlled as Mirror } from 'react-codemirror2';
+import React, {useState, useEffect} from "react";
+import {Controlled as Mirror} from 'react-codemirror2';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/material.css';
 import 'codemirror/mode/javascript/javascript';

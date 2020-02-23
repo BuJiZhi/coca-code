@@ -12,8 +12,11 @@ interface Iprops {
 }
 
 const ShellCon:React.FC<Iprops> = props => {
+  const {compiler} = props;
   return (
-    <Shell />
+    <Shell 
+      compiler={compiler}
+    />
   );
 }
 

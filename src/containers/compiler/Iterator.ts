@@ -56,7 +56,9 @@ class Iterator implements Iiterator {
   }
 
   createScope(scopeType='block') {
-    this.scope =  new Scope(scopeType, this.scope);
+    const newScope = new Scope(scopeType, this.scope);
+    this.scope.addChild(newScope);
+    this.scope = newScope;
     this.stateHandler.updateScope(this.scope);
     return this.scope;
   }
