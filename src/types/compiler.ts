@@ -1,5 +1,5 @@
 import { Node } from 'acorn';
-import { Itrack } from './animation';
+import { Itrack, Ilocations } from './animation';
 export type Value = any;
 export type ScopeValue = any;
 export type ScopeType = "function" | "block";
@@ -68,60 +68,63 @@ export interface Iiterator {
 }
 
 export interface IstateHandler {
-  
   updateAst: (ast: Node) => void,
   updateScope: (scope: Iscope) => void,
   updateMirrorScope: (scope: Iscope) => void,
   updateSteps: (op: Istep[]) => void,
   updateTracks: (track:Itrack[]) => void,
-  // updateCurrent: (current: number) => void,
-  // clearKeys: () => void,
-  // // updateRenderResult: (result: IrenderResult) => void,
-  // // addTrack: (track: Itrack) => void,
-  // clearTracks: () => void
 }
 
 // ast shape
-const Program = 'Program';
-const VariableDeclaration = 'VariableDeclaration';
-const VariableDeclartor = 'VariableDeclartor';
-const BinaryExpression = 'BinaryExpression';
-const Literal = 'Literal';
+type nodeTypes = 
+'Program' | 
+'VariableDeclaration' | 
+'VariableDeclartor' | 
+'BinaryExpression' | 
+'NumberLiteral' |
+'StringLiteral' |
+'Identifier' |
+'MemberExpression' |
+'Literal';
 
-export interface Icommon {
-  start: number,
-  end: number
+export interface Itoken {
+  type: string;
+  value: string;
+  start: number;
+  end: number;
 }
 
-export interface Iid {
-  type: string,
+export interface Icommon {
+  type: nodeTypes,
+  start: number,
+  end: number,
+  loc: Ilocations
+}
+
+export interface Iid extends Icommon {
   name: string,
   start: number,
   end: number
 }
 
-interface IprogramNode {
-  type: typeof Program,
-  body: Node[] | Node,
+interface IprogramNode extends Icommon{
+  body: Inode[] | Inode,
   sourceType?: string,
   declarations?: IvariableDeclartor[],
 }
 
-interface IVariableDecalrations {
-  type: typeof VariableDeclaration,
+export interface IVariableDecalrations extends Icommon{
   declarations: IvariableDeclartor[],
   kind: string
 }
 
-interface IvariableDeclartor {
-  type: typeof VariableDeclartor,
-  declarations: Node[],
+interface IvariableDeclartor extends Icommon{
+  declarations: Inode[],
   id: Iid,
   init?: IbinaryExpression
 }
 
-interface IbinaryExpression {
-  type: typeof BinaryExpression,
+interface IbinaryExpression extends Icommon{
   operator: string,
   left: Inode,
   right: Inode,
@@ -129,40 +132,43 @@ interface IbinaryExpression {
   end: number
 }
 
-export interface Iliteral {
-  type: typeof Literal,
+export interface InumberLiteral extends Icommon {
+  value: string,
+}
+
+export interface Iliteral extends Icommon{
   value: any,
   raw: any
 }
 
-export interface Iidentifier {
+export interface Iidentifier extends Icommon{
   name: string
 }
 
-interface Iexpression {
+interface Iexpression extends Icommon{
   expression: any
 }
 
-interface IifStatement {
+interface IifStatement extends Icommon{
   test: Inode,
   consequent: Inode,
   alternate?: Inode
 }
 
-interface IunaryExpression {
+interface IunaryExpression extends Icommon{
   prefix: boolean,
   argument: Node,
   operator: String
 }
 
-interface IforStatement {
+interface IforStatement extends Icommon{
   init?: Node,
   test: Node,
   update: Node,
   body: Node
 }
 
-interface IfuncDeclaration {
+interface IfuncDeclaration extends Icommon{
   id : Node,
   expression: Boolean,
   generator: Boolean,
@@ -171,43 +177,43 @@ interface IfuncDeclaration {
   body: Node
 }
 
-interface IfuncCaller {
-  arguments: [],
+interface IcallExpression extends Icommon{
+  arguments: Inode[],
   callee: Node
 }
 
-interface IarrayExpression {
+interface IarrayExpression extends Icommon{
   elements: Node[]
 }
 
-interface IobjectExpression {
+interface IobjectExpression extends Icommon{
   properties: Inode[]
 }
 
-interface Iprop {
+interface Iprop extends Icommon{
   key: Inode
 }
 
-interface ImemberExpression {
+interface ImemberExpression extends Icommon{
   object: Inode,
   property: Inode,
   computed: boolean
 }
 
 export type Inode = 
-Icommon &
 IprogramNode &
 IVariableDecalrations &
 IvariableDeclartor &
 IbinaryExpression &
 Iliteral &
+InumberLiteral &
 Iidentifier &
 Iexpression &
 IifStatement &
 IunaryExpression &
 IforStatement &
 IfuncDeclaration &
-IfuncCaller &
+IcallExpression &
 IarrayExpression &
 IobjectExpression &
 ImemberExpression &
@@ -217,26 +223,26 @@ export interface InodeHandler {
   Program(node: Iiterator): any,
   VariableDeclaration(node: Iiterator): any,
   Literal(node: Iiterator): any,
-  UnaryExpression(node: Iiterator): any,
-  Identifier(node: Iiterator): any,
-  ExpressionStatement(node: Iiterator): any,
-  AssignmentExpression(node: Iiterator): void,
-  BinaryExpression(node: Iiterator): void,
-  MemberExpression(node: Iiterator): void,
-  IfStatement(node: Iiterator): void,
-  BlockStatement(node: Iiterator): void,
-  WhileStatement(node: Iiterator): void,
-  ForStatement(node:Iiterator): void,
-  UpdateExpression(node: Iiterator): void,
+  // UnaryExpression(node: Iiterator): any,
+  // Identifier(node: Iiterator): any,
+  // ExpressionStatement(node: Iiterator): any,
+  // AssignmentExpression(node: Iiterator): void,
+  // BinaryExpression(node: Iiterator): void,
+  // MemberExpression(node: Iiterator): void,
+  // IfStatement(node: Iiterator): void,
+  // BlockStatement(node: Iiterator): void,
+  // WhileStatement(node: Iiterator): void,
+  // ForStatement(node:Iiterator): void,
+  // UpdateExpression(node: Iiterator): void,
   // FunctionDeclaration(node: Iiterator): void,
   // FunctionExpression(node: Iiterator): [Step, Step],
   // CallExpression(node: Iiterator): any,
   // ArrayExpression(node: Iiterator): void,
-  ObjectExpression(node: Iiterator): void,
+  // ObjectExpression(node: Iiterator): void,
   // ReturnStatement(node: Iiterator): any,
-  AssignmentExpressionMap: any,
-  BinaryExpressionOperatorMap: any,
-  unaryoperateMap: any
+  // AssignmentExpressionMap: any,
+  // BinaryExpressionOperatorMap: any,
+  // unaryoperateMap: any
 }
 
 /**

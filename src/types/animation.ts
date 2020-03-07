@@ -1,4 +1,12 @@
 export type Position = [number, number];
+export interface Ilocation {
+  line: number;
+  column: number;
+}
+export interface Ilocations {
+  start: Ilocation,
+  end: Ilocation
+}
 export type AnimationTypes =  
 'default' | 
 'base' | 
@@ -27,8 +35,8 @@ export interface Itrack {
 }
 export interface Ieffect {
   type: AnimationTypes,
-  startpos: Position,
-  endpos: Position,
+  startpos: Ilocation,
+  endpos: Ilocation,
   process?: Process,
   key: string,
   value: any,

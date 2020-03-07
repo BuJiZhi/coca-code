@@ -1,6 +1,8 @@
 import {Ieffect, Ispring} from '../../types/animation';
 const produceSpring = (content:Ieffect, fontWidth:number, lineHeight:number) => {
   const {key, type, startpos, endpos, value, valueType, process} = content;
+  startpos.line -= 1;
+  endpos.line -= 1;
   const gutterWidth = 32;
   const paddingHeight = 4;
   let springs:Ispring = {
@@ -17,7 +19,7 @@ const produceSpring = (content:Ieffect, fontWidth:number, lineHeight:number) => 
     boxSizing: "border-box",
     backgroundColor: "rgb(82, 139, 255)",
     color: "rgb(206, 203, 236)",
-    width: (endpos[1] - startpos[1]) * fontWidth + 2,
+    width: (endpos.column - startpos.column) * fontWidth + 2,
     borderRadius: "2px",
     textAlign: "center",
     overflow: "hidden"
@@ -40,9 +42,9 @@ const produceSpring = (content:Ieffect, fontWidth:number, lineHeight:number) => 
     case 'base':
       springs.style = {
         to: {
-          top: (startpos[0]) * lineHeight + paddingHeight,
+          top: (startpos.line) * lineHeight + paddingHeight,
           width: "100%",
-          height: `${lineHeight * (endpos[0] - startpos[0] + 1)}px`,
+          height: `${lineHeight * (endpos.line - startpos.line + 1)}px`,
           backgroundColor: "#fff",
           opacity: 0.1,
           zIndex: 0
@@ -52,8 +54,8 @@ const produceSpring = (content:Ieffect, fontWidth:number, lineHeight:number) => 
     case 'appear': // 翻转？
       springs.style = {
         to:{
-          left: startpos[1] * fontWidth + gutterWidth,
-          top: (startpos[0]) * lineHeight + paddingHeight,
+          left: startpos.column * fontWidth + gutterWidth,
+          top: startpos.line * lineHeight + paddingHeight,
           ...outlined
         },
         from: {
@@ -64,8 +66,8 @@ const produceSpring = (content:Ieffect, fontWidth:number, lineHeight:number) => 
     case 'compute':
       springs.style = {
         to: {
-          left: startpos[1] * fontWidth + gutterWidth,
-          top: startpos[0] * lineHeight + paddingHeight,
+          left: startpos.column * fontWidth + gutterWidth,
+          top: startpos.line * lineHeight + paddingHeight,
           ...outlined,
           backgroundColor: "rgb(255, 171, 25)",
           color: "rgb(255, 255, 255)"
@@ -78,16 +80,16 @@ const produceSpring = (content:Ieffect, fontWidth:number, lineHeight:number) => 
       springs.style = {
         to: {
           color: 'red',
-          left: endpos[1] * fontWidth + gutterWidth,
-          top: endpos[0] * lineHeight + paddingHeight,
+          left: endpos.column * fontWidth + gutterWidth,
+          top: endpos.line * lineHeight + paddingHeight,
           ...outlined,
 
           opacity: 0,
         },
         from: {
           color: 'green',
-          left: startpos[1] * fontWidth + gutterWidth,
-          top: startpos[0] * lineHeight + paddingHeight,
+          left: startpos.column * fontWidth + gutterWidth,
+          top: startpos.line * lineHeight + paddingHeight,
           opacity: 1
         }
       }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Cm from '../../components/Cm';
 import { Parser } from 'acorn';
+import {parse} from 'sarama.js';
 import Iterator from './Iterator';
 import Scope from './Scope';
 import { Node } from 'acorn';
@@ -81,7 +82,7 @@ const Compiler:React.FC<Iprops> = props => {
     clearFrames();
     updateCurrent(0);
 
-    const ast = Parser.parse(code);
+    const ast = parse(code, {locations: true});
     const scope = new Scope('function', null);
     const mirrorScope = new Scope('function', null);
     updateAst(ast);

@@ -2,7 +2,7 @@ import React, {useState, useEffect} from "react";
 import {Controlled as Mirror} from 'react-codemirror2';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/material.css';
-import 'codemirror/mode/javascript/javascript';
+import 'codemirror/mode/python/python';
 
 interface Iprops {
   code: string,
@@ -34,7 +34,7 @@ const Editor:React.FC<Iprops> = ({
       value={code}
       onBeforeChange={handleMirrorBeforeChange}
       options={{
-        mode: "javascript",
+        mode: "python",
         theme: "material",
         lineNumbers: true
       }}

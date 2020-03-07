@@ -36,7 +36,7 @@ export const updateCodeAction = (code:string) => {
 }
 
 const initialState: Ieditor = {
-  code: "// hello world",
+  code: "# hello world",
   fontWidth: 7,
   lineHeight: 15,
   height: 15

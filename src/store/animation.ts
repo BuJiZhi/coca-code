@@ -17,8 +17,8 @@ const initialState:Ianimation = {
     end: 0,
     effect: {
       type: 'default',
-      startpos: [0, 0],
-      endpos: [0, 0],
+      startpos: {line: 0, column: 0},
+      endpos: {line: 0, column: 0},
       process: 'enter',
       key: 'sp-0',
       value: '',
@@ -28,8 +28,8 @@ const initialState:Ianimation = {
   frames: [[]],
   defaultFrame: {
     type: 'default',
-    startpos: [0, 0],
-    endpos: [0, 0],
+    startpos: {line: 0, column: 0},
+    endpos: {line: 0, column: 0},
     process: 'enter',
     key: 'sp-0',
     value: '',

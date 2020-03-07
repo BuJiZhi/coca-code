@@ -23,7 +23,8 @@ const useStyles = makeStyles(theme => ({
   },
   scopes: {
     position: 'relative',
-    height: "50%"
+    height: '50%',
+    overflow: 'hidden'
   },
   resizer: {
     height: theme.spacing(2),
@@ -36,14 +37,14 @@ interface Iprops {
 }
 
 const Shell:React.FC<Iprops> = ({compiler}) => {
-  const {scopes} = compiler;
+  const {mirrorScopes} = compiler;
   const classes = useStyles();
   return (
     <div className={classes.root}>
       <Toolbar />
       <div className={classes.shell}>
         <div className={classes.scopes}>
-          <Scope scopes={scopes}/>
+          <Scope scopes={mirrorScopes}/>
         </div>
         <div className={classes.resizer}></div>
         <div></div>

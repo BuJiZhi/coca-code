@@ -50,6 +50,7 @@ class Iterator implements Iiterator {
     const _eval = nodeHandlers[node.type as keyof InodeHandler];
     const iterator = new Iterator(node, nextScope, nextMirrorScope, this.stateHandler, this.code, nextTracks, nextSteps);
     if (!_eval) {
+      // console.log(node);
       throw new Error(`No handler for ${node.type}`)
     }
     return _eval(iterator);
@@ -64,7 +65,9 @@ class Iterator implements Iiterator {
   }
 
   createMirroScope(scopeType='block') {
-    this.mirrorScope =  new Scope(scopeType, this.mirrorScope);
+    const newMirrorScope =  new Scope(scopeType, this.mirrorScope);
+    this.mirrorScope.addChild(newMirrorScope);
+    this.mirrorScope = newMirrorScope;
     this.stateHandler.updateMirrorScope(this.mirrorScope);
     return this.mirrorScope;
   }
