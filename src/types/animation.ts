@@ -29,9 +29,10 @@ export type ValueType =
 "[object RegExp]" | 
 "[object Object]";
 export interface Itrack {
-  begin: number,
-  end: number,
-  effect: Ieffect
+  begin: number;
+  end: number;
+  loc: Ilocations;
+  effect: Ieffect;
 }
 export interface Ieffect {
   type: AnimationTypes,

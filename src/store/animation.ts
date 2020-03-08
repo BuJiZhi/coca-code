@@ -15,6 +15,10 @@ const initialState:Ianimation = {
   tracks: [{
     begin: 0,
     end: 0,
+    loc: {
+      start: {line: 0, column: 0},
+      end: {line: 0, column: 0},
+    },
     effect: {
       type: 'default',
       startpos: {line: 0, column: 0},
