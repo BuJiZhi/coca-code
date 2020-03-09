@@ -5,12 +5,10 @@ import {
   Istep,
   Inode,
   ImemberValue,
-  ItraversBack,
   IVariableDecalrations
  } from '../../types/compiler';
-import {Node} from 'acorn';
 import {Itrack, AnimationTypes, ValueType, Ilocation, Ilocations} from '../../types/animation';
-import {startend2Index, typeOf} from '../../utils/tools';
+import {typeOf} from '../../utils/tools';
 import Signal from './Signal';
 import {MemberValue} from './Value';
 
@@ -46,11 +44,6 @@ function produceTrack(
     }
   }
 }
-
-// function produceBaseTrack(start:number, end:number, code:string, counter:number):Itrack {
-//   const pos = startend2Index(start, end, code);
-//   return produceTrack('', 'base', pos[0], pos[1], counter, trackCounter);
-// }
 
 function produceBaseTrackAtLoc(loc:Ilocations, counter:number):Itrack {
   return produceTrack('', 'base', loc, counter, trackCounter);
@@ -302,13 +295,14 @@ const nodeHandlers: InodeHandler =  {
     nodeIterator.storeStepAndTrack(expressionStep, expressionTrack);
   },
 
-  // MemberExpression: nodeIterator => {
-  //   const {node, code, scope} = nodeIterator;
-  //   const {object, property} = node;
-  //   const obj = nodeIterator.traverse(object);
-  //   const prop = node.property.name;
-  //   // return obj[prop];
-  // },
+  MemberExpression: nodeIterator => {
+    const {node} = nodeIterator;
+    const {object, property} = node;
+    const obj = nodeIterator.traverse(object);
+    const prop = node.property.name;
+    console.log(node)
+    // return obj[prop];
+  },
 
   AssignmentExpressionMap: {
     '=': (value:IsimpleValue | ImemberValue, v:any) => value.set(v),
@@ -381,11 +375,12 @@ const nodeHandlers: InodeHandler =  {
     nodeIterator.storeStepAndTrack(ifSteps, ifStmTracks);
   },
 
-  BlockStatement:nodeIterator => {
+  BlockStatement: nodeIterator => {
     let scope = nodeIterator.createScope('block');
     let mirrorScope = nodeIterator.createMirroScope('block');
     const nodes = nodeIterator.node.body as Inode[];
     for (const node of nodes) {
+      console.log(node)
       const signal = nodeIterator.traverse(node as Inode, {scope, mirrorScope});
       if (Signal.isReturn(signal)) {
         trackSetEnd(nodeIterator.tracks, trackCounter);
@@ -395,19 +390,19 @@ const nodeHandlers: InodeHandler =  {
     trackSetEnd(nodeIterator.tracks, trackCounter);
   },
 
-  // WhileStatement(nodeIterator) {
-  //   const { node } = nodeIterator;
-  //   const { test } = node;
-  //   const whileTrack: Itrack[] = [];
-  //   const whileSteps: Istep[] = [];
-  //   let whileCount = 0; //  防止死循环的出现
-  //   while (nodeIterator.traverse(test, {tracks: whileTrack, steps:whileSteps}).value && whileCount < 100) {
-  //     nodeIterator.traverse(node.body as Inode, {tracks: whileTrack, steps:whileSteps});
-  //     trackSetEnd(whileTrack, trackCounter);
-  //     whileCount += 1;
-  //   }
-  //   nodeIterator.storeStepAndTrack(whileSteps, whileTrack);
-  // },
+  WhileStatement(nodeIterator) {
+    const { node } = nodeIterator;
+    const { test } = node;
+    const whileTrack: Itrack[] = [];
+    const whileSteps: Istep[] = [];
+    let whileCount = 0; //  防止死循环的出现
+    while (nodeIterator.traverse(test, {tracks: whileTrack, steps:whileSteps}).value && whileCount < 100) {
+      nodeIterator.traverse(node.body as Inode, {tracks: whileTrack, steps:whileSteps});
+      trackSetEnd(whileTrack, trackCounter);
+      whileCount += 1;
+    }
+    nodeIterator.storeStepAndTrack(whileSteps, whileTrack);
+  },
 
   // ForStatement(nodeIterator) {
   //   const { node, code } = nodeIterator;

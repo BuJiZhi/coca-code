@@ -1,7 +1,6 @@
 import SimpleValue from './Value';
 import { Iscope, ScopeValue, Value } from '../../types/compiler';
-
-const standarMap = Object.create(null);
+import buildIn from './buildIn';
 
 export default class Scope implements Iscope{
 
@@ -14,7 +13,7 @@ export default class Scope implements Iscope{
   constructor(type: string, parentScope: ScopeValue | {}, childScope: ScopeValue=[]) {
     this.type = type;
     this.parentScope = parentScope;
-    this.globalScope = standarMap;
+    this.globalScope = buildIn;
     this.declartion = Object.create(null);
     this.childScope = childScope;
   }
@@ -27,6 +26,7 @@ export default class Scope implements Iscope{
     } else if (this.globalScope.declartion) {
       return this.globalScope.declartion[name];
     } else {
+      console.log(this.globalScope)
       throw new Error(`${name} is not defined`);
     }
   }

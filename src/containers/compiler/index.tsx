@@ -36,7 +36,6 @@ import {
   clearFramesAction
 } from '../../store/animation';
 
-
 interface Iprops {
   compiler: Icompiler;
   editor: Ieditor;
@@ -83,7 +82,7 @@ const Compiler:React.FC<Iprops> = props => {
     updateCurrent(0);
 
     const ast = parse(code, {locations: true});
-    const scope = new Scope('function', null);
+    let scope = new Scope('function', null);
     const mirrorScope = new Scope('function', null);
     updateAst(ast);
     updateScope(scope);
