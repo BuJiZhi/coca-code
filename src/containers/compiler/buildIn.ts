@@ -10,10 +10,16 @@ export const __pythonRuntime  = {
   }
 }
 
+const values = {
+  Array: String,
+  true: true,
+  false: false
+}
+
 let buildIn = {
   declartion:{
     __pythonRuntime,
-    Array: Array
+   ...values
   }
 };
 

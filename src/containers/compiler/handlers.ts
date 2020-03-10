@@ -1,3 +1,4 @@
+// 2020.3.11 track add a skip propety?
 import { 
   InodeHandler,
   Iiterator,
@@ -372,7 +373,7 @@ const nodeHandlers: InodeHandler =  {
     const {loc, test, consequent, alternate} = node;
     const ifStmTracks: Itrack[] = [];
     const ifSteps: Istep[] = [];
-    const baseTrack = produceBaseTrackAtLoc(loc, basetrackCounter + 1);
+    const baseTrack = produceBaseTrackAtLoc(loc, ++basetrackCounter);
     ifStmTracks.push(baseTrack);
     const testResult = nodeIterator.traverse(test, {tracks:ifStmTracks, steps:ifSteps});
     if (testResult.value) {
@@ -402,7 +403,7 @@ const nodeHandlers: InodeHandler =  {
     const {node} = nodeIterator;
     const {test, loc} = node;
     const whileTrack: Itrack[] = [];
-    const baseTrack = produceBaseTrackAtLoc(loc, basetrackCounter + 1);
+    const baseTrack = produceBaseTrackAtLoc(loc, ++basetrackCounter);
     whileTrack.push(baseTrack);
     const whileSteps: Istep[] = [];
     let whileCount = 0; //  防止死循环的出现
@@ -415,8 +416,48 @@ const nodeHandlers: InodeHandler =  {
   },
 
   ForInStatement(nodeIterator) {
-    const {node} = nodeIterator;
-    // console.log(node);
+    const {node, scope} = nodeIterator;
+    const {left, right, body, loc} = node;
+    console.log(node);
+    const forTrack = [];
+    const baseTrack = produceBaseTrackAtLoc(loc, basetrackCounter);
+    forTrack.push(baseTrack);
+    const forStep = [];
+    const iterate = scope.get('__filbertRight0').value;
+    for (let j = 0; j < iterate.length; j++ ) {
+      const name = left.name;
+      const leftloc = left.loc;
+      const leftTrack = produceTrack(name, "appear", leftloc, keyCounter++, trackCounter++);
+      forTrack.push(leftTrack);
+      const leftStep = produceStep(donothing, stepCounter++);
+      forStep.push(leftStep);
+      const leftNode = {
+        value: name,
+        preTrack: leftTrack
+      }
+
+      const rightNode = nodeIterator.traverse(right);
+      const rightTrack = produceTrack(
+        rightNode.value[j], 
+        "move",
+        {
+          start: rightNode.preTrack.effect.startpos,
+          end: leftNode.preTrack.effect.startpos
+        },
+        keyCounter++, 
+        trackCounter++)
+      forTrack.push(rightTrack);
+      nodeIterator.scope.declare(leftNode.value, rightNode.value[j], 'var');
+      const step = produceStep(
+        (): void => {nodeIterator.mirrorScope.declare(leftNode.value, rightNode.value[j], 'var');},
+            stepCounter++
+        );
+      forStep.push(step);
+
+      nodeIterator.traverse(body, {steps:forStep, tracks:forTrack});
+    }
+    trackSetEnd(forTrack, trackCounter);
+    nodeIterator.storeStepAndTrack(forStep, forTrack);
   },
 
   ForStatement(nodeIterator) {

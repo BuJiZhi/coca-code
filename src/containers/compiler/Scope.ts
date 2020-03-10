@@ -38,7 +38,8 @@ export default class Scope implements Iscope{
     } else if (this.globalScope[name]) {
       return this.globalScope[name].set(value);
     } else {
-      throw new Error(`${name} is not defined`);
+      return this.declartion[name].set(value);
+      // throw new Error(`${name} is not defined`);
     }
   }
 
