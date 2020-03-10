@@ -162,10 +162,10 @@ interface IunaryExpression extends Icommon{
 }
 
 interface IforStatement extends Icommon{
-  init?: Node,
-  test: Node,
-  update: Node,
-  body: Node
+  init?: Inode,
+  test: Inode,
+  update: Inode,
+  body: Inode
 }
 
 interface IfuncDeclaration extends Icommon{
@@ -173,8 +173,8 @@ interface IfuncDeclaration extends Icommon{
   expression: Boolean,
   generator: Boolean,
   async: Boolean,
-  params: Node[],
-  body: Node
+  params: Inode[],
+  body: Inode
 }
 
 interface IcallExpression extends Icommon{
@@ -183,7 +183,7 @@ interface IcallExpression extends Icommon{
 }
 
 interface IarrayExpression extends Icommon{
-  elements: Node[]
+  elements: Inode[]
 }
 
 interface IobjectExpression extends Icommon{
@@ -195,9 +195,14 @@ interface Iprop extends Icommon{
 }
 
 interface ImemberExpression extends Icommon{
-  object: Inode,
-  property: Inode,
-  computed: boolean
+  object: Inode;
+  property: Inode;
+  computed: boolean;
+}
+
+interface InewExpression extends Icommon {
+  callee: Inode;
+  arguments: Inode;
 }
 
 export type Inode = 
@@ -217,6 +222,7 @@ IcallExpression &
 IarrayExpression &
 IobjectExpression &
 ImemberExpression &
+InewExpression &
 Iprop;
 
 export interface InodeHandler {
@@ -232,12 +238,14 @@ export interface InodeHandler {
   IfStatement(node: Iiterator): void,
   BlockStatement(node: Iiterator): void,
   WhileStatement(node: Iiterator): void,
-  // ForStatement(node:Iiterator): void,
-  // UpdateExpression(node: Iiterator): void,
+  ForStatement(node:Iiterator): void,
+  UpdateExpression(node: Iiterator): void,
+  NewExpression(node: Iiterator): any,
+  ForInStatement(node: Iiterator): any,
   // FunctionDeclaration(node: Iiterator): void,
   // FunctionExpression(node: Iiterator): [Step, Step],
   CallExpression(node: Iiterator): any,
-  // ArrayExpression(node: Iiterator): void,
+  ArrayExpression(node: Iiterator): void,
   // ObjectExpression(node: Iiterator): void,
   // ReturnStatement(node: Iiterator): any,
   AssignmentExpressionMap: any,

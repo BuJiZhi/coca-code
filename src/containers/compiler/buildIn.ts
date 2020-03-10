@@ -1,26 +1,19 @@
-import {IsimpleValue, ImemberValue} from '../../types/compiler';
 export const __pythonRuntime  = {
-  ops: (a:number, b:number) => a + b,
-  '=': (value:IsimpleValue | ImemberValue, v:any) => value.set(v),
-  '+=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() + v),
-  '-=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() - v),
-  '*=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() * v),
-  '/=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() / v),
-  '%=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() % v),
-  '**=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() ** v),
-  '<<=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() << v) ,
-  '>>=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() >> v),
-  '>>>=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() >>> v),
-  '|=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() | v),
-  '^=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() ^ v),
-  '&=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() & v),
-  '++': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() + 1),
-  '--': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() - 1),
+  ops: {
+    add: (a:number, b:number) => a + b,
+    multiply: (a:number, b:number) => a * b
+  },
+  objects: {
+    list: function() {
+      return new Array(arguments);
+    }
+  }
 }
 
 let buildIn = {
   declartion:{
-    __pythonRuntime
+    __pythonRuntime,
+    Array: Array
   }
 };
 

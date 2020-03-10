@@ -24,9 +24,8 @@ export default class Scope implements Iscope{
     } else if (this.parentScope) {
       return this.parentScope.get(name);
     } else if (this.globalScope.declartion) {
-      return this.globalScope.declartion[name];
+      return {value:this.globalScope.declartion[name]};
     } else {
-      console.log(this.globalScope)
       throw new Error(`${name} is not defined`);
     }
   }

@@ -18,8 +18,10 @@ const produceSpring = (content:Ieffect, fontWidth:number, lineHeight:number) => 
   const outlined = {
     boxSizing: "border-box",
     backgroundColor: "rgb(82, 139, 255)",
+    // padding: "1px",
     color: "rgb(206, 203, 236)",
     width: (endpos.column - startpos.column) * fontWidth + 2,
+    border: "1px solid rgba(245, 245, 245, .05)",
     borderRadius: "2px",
     textAlign: "center",
     overflow: "hidden"
