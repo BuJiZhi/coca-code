@@ -92,7 +92,7 @@ const Compiler:React.FC<Iprops> = props => {
     updateMirrorScope(mirrorScope);
 
     const iterator = new Iterator(Object.create(null), 
-      scope, mirrorScope, dispatches, code, [], []);
+      scope, mirrorScope, dispatches, code, [], [], false);
     iterator.traverse(ast as Inode);
   }
 
@@ -111,18 +111,19 @@ const Compiler:React.FC<Iprops> = props => {
    * 冒泡排序
    */
   const stepsSort = ():void => {
-    const oldSteps = deepCopy(steps);
-    const sortedSteps = [[]];
-    let temp:Istep;
-    for (let i = 0;i < oldSteps.length; i++) {
-      for (let j = i + 1; j < oldSteps.length - 1; j++) {
-        if (oldSteps[j].key > oldSteps[j + 1].key) {
-          temp = oldSteps[j]
-          oldSteps[j] = oldSteps[j + 1];
-          oldSteps[j + 1] = temp;
-        }
-      }
+    const oldSteps = [...steps];
+    let sortedSteps:Istep[][] = [[]];
+    let len = 0;
+    for (let step of oldSteps) {
+      if (step.key > len) len = step.key;
     }
+    for (let i = 0; i < len; i++) {
+      sortedSteps.push([]);
+    }
+    for (let step of oldSteps) {
+      sortedSteps[step.key].push(step);
+    }
+    console.log(sortedSteps);
     updateSortedsteps(sortedSteps);
   }
 

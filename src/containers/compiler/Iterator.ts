@@ -1,6 +1,5 @@
 import nodeHandlers from './handlers';
 import Scope from './Scope';
-// import { Inode } from 'acorn';
 import { 
   Iiterator,
   Iscope, 
@@ -22,6 +21,7 @@ class Iterator implements Iiterator {
   tracks: Itrack[] | [];
   steps: Istep[] | [];
   code: string;
+  skip: boolean;
 
   constructor(
     node: Inode, 
@@ -30,7 +30,8 @@ class Iterator implements Iiterator {
     stateHandler: IstateHandler,
     code: string,
     tracks: Itrack[],
-    steps: Istep[]
+    steps: Istep[],
+    skip: boolean
     ) {
     this.node = node;
     this.scope = scope;
@@ -39,19 +40,20 @@ class Iterator implements Iiterator {
     this.code = code;
     this.tracks = tracks;
     this.steps = steps;
+    this.skip = skip;
   }
 
   traverse(node: Inode, options: Ioptions={}):ItraversBack {
-    const { scope, tracks, steps, mirrorScope } = options;
+    const { scope, tracks, steps, mirrorScope, skip } = options;
     const nextTracks = tracks || this.tracks;
     const nextSteps = steps || this.steps;
     const nextScope = scope || this.scope;
     const nextMirrorScope = mirrorScope || this.mirrorScope;
+    const nextskip = skip || this.skip;
     const _eval = nodeHandlers[node.type as keyof InodeHandler];
-    const iterator = new Iterator(node, nextScope, nextMirrorScope, this.stateHandler, this.code, nextTracks, nextSteps);
+    const iterator = new Iterator(node, nextScope, nextMirrorScope, this.stateHandler, this.code, nextTracks, nextSteps, nextskip);
     if (!_eval) {
-      // console.log(node);
-      throw new Error(`No handler for ${node.type}`)
+      throw new Error(`No handler for ${node.type}`);
     }
     return _eval(iterator);
   }

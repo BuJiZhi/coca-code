@@ -43,7 +43,8 @@ export interface Ioptions {
   scope?: Iscope,
   mirrorScope?: Iscope,
   steps?: Istep[],
-  tracks?: Itrack[]
+  tracks?: Itrack[],
+  skip?: boolean
 }
 
 export interface ItraversBack {
@@ -52,19 +53,20 @@ export interface ItraversBack {
 }
 
 export interface Iiterator {
-  node: Inode,
-  scope: Iscope,
-  mirrorScope: Iscope,
-  tracks: Itrack[],
-  stateHandler: IstateHandler,
-  code: string,
-  steps: Istep[],
-  traverse(node: Inode, options?: Ioptions): ItraversBack,
-  createScope(type: ScopeType): Iscope,
-  createMirroScope(type: ScopeType): Iscope,
-  storeStepAndTrack(operations: Istep[] | undefined, tracks:Itrack[] | undefined): void,
-  addTrack(track: Itrack): void,
-  addStep(step: Istep): void
+  node: Inode;
+  scope: Iscope;
+  mirrorScope: Iscope;
+  tracks: Itrack[];
+  stateHandler: IstateHandler;
+  code: string;
+  steps: Istep[];
+  skip: boolean;
+  traverse(node: Inode, options?: Ioptions): ItraversBack;
+  createScope(type: ScopeType): Iscope;
+  createMirroScope(type: ScopeType): Iscope;
+  storeStepAndTrack(operations: Istep[] | undefined, tracks:Itrack[] | undefined): void;
+  addTrack(track: Itrack): void;
+  addStep(step: Istep): void;
 }
 
 export interface IstateHandler {

@@ -102,7 +102,7 @@ const nodeHandlers: InodeHandler =  {
   },
 
   VariableDeclaration: nodeIterator => {
-    const {node} = nodeIterator
+    const {node, skip} = nodeIterator
     const {kind, loc, declarations} = node as IVariableDecalrations;
     let variableTracks: Itrack[] = [];
     variableTracks.push(produceBaseTrackAtLoc(loc, basetrackCounter));
@@ -218,10 +218,11 @@ const nodeHandlers: InodeHandler =  {
   },
 
   Literal: nodeIterator => {
-    const {loc, value} = nodeIterator.node;
+    const {node, skip} = nodeIterator;
+    const {loc, value} = node;
     const track:Itrack = produceTrack(value, "appear", loc, keyCounter++, trackCounter++);
-    nodeIterator.addTrack(track);
-    const literalStep = produceStep(donothing, stepCounter++);
+    const literalStep = produceStep(donothing, skip ? stepCounter : stepCounter++);
+    if (!skip) {nodeIterator.addTrack(track);}
     nodeIterator.addStep(literalStep);
     if(nodeIterator.node.value === undefined) {
       track.effect.value = 'undefined';

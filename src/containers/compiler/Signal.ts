@@ -1,5 +1,3 @@
-import { sign } from "crypto";
-
 interface Isignal {
   type: string,
   value: any
