@@ -7,6 +7,7 @@ import {
   UPDATE_SCOPE,
   UPDATE_MIRRORSCOPE,
   UPDATE_STEPS,
+  UPDATE_SORTEDSTEPS,
   REPLACE_STEPS,
   CLEAR_STEPS,
   CLEAR_SCOPES,
@@ -17,7 +18,8 @@ const initialState:Icompiler = {
   ast: Object.create(null),
   scopes: [],
   mirrorScopes: [],
-  steps: []
+  steps: [],
+  sortedSteps: [[]]
 }
 
 export const updateAstAction = (ast:object) => {
@@ -73,6 +75,13 @@ export const clearMirrorscopeAction = () => {
   }
 }
 
+export const updateSortedstepsAction = (sortedSteps:Istep[][]) => {
+  return {
+    type: UPDATE_SORTEDSTEPS,
+    payload: sortedSteps
+  }
+}
+
 export const compilerReducer = (
   state=initialState,
   action:compilerActionTypes
@@ -121,6 +130,11 @@ export const compilerReducer = (
       return {
         ...state,
         mirrorScopes: []
+      }
+    case UPDATE_SORTEDSTEPS:
+      return {
+        ...state,
+        sortedSteps: action.payload
       }
     default:
       return state;

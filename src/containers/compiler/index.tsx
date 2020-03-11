@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import Cm from '../../components/Cm';
-import { Parser } from 'acorn';
+import {Parser} from 'acorn';
 import {parse} from 'sarama.js';
 import Iterator from './Iterator';
 import Scope from './Scope';
-import { Node } from 'acorn';
-import { deepCopy } from '../../utils/tools';
+import {Node} from 'acorn';
+import {deepCopy} from '../../utils/tools';
 import { 
   Icompiler, 
   Iiterator, 
@@ -13,16 +13,17 @@ import {
   Istep, 
   Inode 
 } from '../../types/compiler';
-import { Ieditor } from '../../types/editor';
-import { Ianimation, Iframes, Itrack } from '../../types/animation';
-import { connect } from 'react-redux';
-import { RootState } from '../../store';
-import { Dispatch } from 'redux';
+import {Ieditor} from '../../types/editor';
+import {Ianimation, Iframes, Itrack} from '../../types/animation';
+import {connect} from 'react-redux';
+import {RootState} from '../../store';
+import {Dispatch} from 'redux';
 import {
   updateAstAction,
   updateScopeAction,
   updateMirrorscopeAction,
   updateStepsAction,
+  updateSortedstepsAction,
   replaceStepsAction,
   clearStepsAction,
   clearScopeAction,
@@ -44,6 +45,7 @@ interface Iprops {
   updateScope(scope:Iscope): void;
   updateMirrorScope(scope:Iscope): void;
   updateSteps(steps:Istep[]): void;
+  updateSortedsteps(sorted:Istep[][]): void;
   replaceSteps(steps:Istep[]): void;
   clearSteps(): void;
   clearScope(): void;
@@ -63,16 +65,17 @@ const Compiler:React.FC<Iprops> = props => {
     children,
     updateCurrent,
     replaceSteps,
+    updateSortedsteps,
     updateFrames,
     clearFrames,
     clearTracks,
     ...dispatches
   } = props;
-  const { current, tracks, frames, defaultFrame } = animation;
-  const { steps } = compiler;
-  const { code } = editor;
+  const {current, tracks, frames, defaultFrame} = animation;
+  const {steps, sortedSteps} = compiler;
+  const {code} = editor;
   const run = () => {
-    const { clearSteps, updateAst, updateScope, updateMirrorScope, clearScope, clearMirrorscope } = dispatches;
+    const {clearSteps, updateAst, updateScope, updateMirrorScope, clearScope, clearMirrorscope} = dispatches;
     
     clearSteps();
     clearScope();
@@ -96,25 +99,31 @@ const Compiler:React.FC<Iprops> = props => {
   const handleNextclick = () => {
     if (current < frames.length - 1) {
       const newIdx = current + 1;
-      steps[newIdx].step();
+      for (let st of sortedSteps[newIdx]) {
+        st.step();
+      }
       updateCurrent(newIdx);
     }
   }
 
   /**
    * 操作函数重新排序
-   * 每个对象的key应该和索引一致
+   * 冒泡排序
    */
   const stepsSort = ():void => {
-    const oldStpes = [...steps];
-    const sortedSteps: Istep[] = [];
-    for (let op of oldStpes) {
-      sortedSteps.push(Object.create(null));
+    const oldSteps = deepCopy(steps);
+    const sortedSteps = [[]];
+    let temp:Istep;
+    for (let i = 0;i < oldSteps.length; i++) {
+      for (let j = i + 1; j < oldSteps.length - 1; j++) {
+        if (oldSteps[j].key > oldSteps[j + 1].key) {
+          temp = oldSteps[j]
+          oldSteps[j] = oldSteps[j + 1];
+          oldSteps[j + 1] = temp;
+        }
+      }
     }
-    for (let op of oldStpes) {
-      sortedSteps[op.key] = op;
-    }
-    replaceSteps(sortedSteps);
+    updateSortedsteps(sortedSteps);
   }
 
   const animationRender = ():void => {
@@ -175,6 +184,7 @@ const mapDispatchToProps = (dispatch:Dispatch) => ({
   clearFrames: () => dispatch(clearFramesAction()),
   updateCurrent: (current:number) => dispatch(updateCurrentAction(current)),
   replaceSteps: (steps:Istep[]) => dispatch(replaceStepsAction(steps)),
+  updateSortedsteps: (sorted:Istep[][]) => dispatch(updateSortedstepsAction(sorted))
 })
 
 export default connect(

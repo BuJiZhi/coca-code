@@ -259,6 +259,7 @@ export interface InodeHandler {
 export interface Icompiler {
   ast: Node,
   steps: Istep[],
+  sortedSteps: Istep[][],
   scopes: Iscope[],
   mirrorScopes: Iscope[],
   iterator?: Iiterator,
@@ -271,6 +272,7 @@ export const UPDATE_MIRRORSCOPE = 'UPDATE_MIRRORSCOPE';
 export const CLEAR_STEPS = 'CLEAR_STEPS';
 export const CLEAR_SCOPES = 'CLEAR_SCOPES';
 export const CLEAR_MIRRORSCOPES = 'CLEAR_MIRRORSCOPES';
+export const UPDATE_SORTEDSTEPS = 'UPDATE_SORTEDSTEPS';
 
 interface updateAst {
   type: typeof UPDATE_AST,
@@ -309,6 +311,11 @@ interface clearMirrorScope {
   type: typeof CLEAR_MIRRORSCOPES
 }
 
+interface updateSortedsteps {
+  type: typeof UPDATE_SORTEDSTEPS,
+  payload: Istep[][]
+}
+
 export type compilerActionTypes = 
 updateAst |
 updateSteps |
@@ -317,4 +324,5 @@ updateScope |
 updateMirrorScope |
 clearSteps |
 clearScopes |
-clearMirrorScope;
+clearMirrorScope |
+updateSortedsteps;
