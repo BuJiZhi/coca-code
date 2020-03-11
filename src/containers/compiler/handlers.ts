@@ -1,4 +1,3 @@
-// 2020.3.11 track add a skip propety?
 import { 
   InodeHandler,
   Iiterator,
@@ -60,6 +59,11 @@ function getPropertyName (node:Inode, nodeIterator:Iiterator) {
   } else {
     return node.property.name
   }
+}
+
+function trackSkip(value:string):boolean {
+  if (value.length <= 2) return false;
+  return value[0] === '_' && value[0] === value[1];
 }
 
 function getIdenOrMemberValue(node:Inode, nodeIterator:Iiterator, scope:string) {
@@ -467,7 +471,7 @@ const nodeHandlers: InodeHandler =  {
     console.log(node)
     let forTrack: Itrack[] = [];
     let forSteps: Istep[] = []; 
-    const baseTrack = produceBaseTrackAtLoc(loc, ++basetrackCounter);
+    const baseTrack = produceBaseTrackAtLoc(loc, basetrackCounter);
     forTrack.push(baseTrack);
     for (nodeIterator.traverse(init as Inode, {tracks:forTrack, steps:forSteps});
       nodeIterator.traverse(test, {tracks:forTrack, steps:forSteps}).value;
