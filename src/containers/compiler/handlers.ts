@@ -11,6 +11,7 @@ import {Itrack, AnimationTypes, ValueType, Ilocation, Ilocations} from '../../ty
 import {typeOf} from '../../utils/tools';
 import Signal from './Signal';
 import {MemberValue} from './Value';
+import Counter from './Counter';
 
 function trackSetEnd(tracks: Itrack[], endpoint: number): Itrack[] {
   let newTracks: Itrack[] = [...tracks];
@@ -45,8 +46,12 @@ function produceTrack(
   }
 }
 
-function produceBaseTrackAtLoc(loc:Ilocations, counter:number):Itrack {
-  return produceTrack('', 'base', loc, counter, trackCounter);
+function produceTrackBycounter(value:any, type:AnimationTypes, loc: Ilocations, keyAndTrack:[number, number]) {
+  return produceTrack(value, type, loc, keyAndTrack[0], keyAndTrack[1]);
+}
+
+function produceBaseTrackAtLoc(loc:Ilocations, keycounter:number, trackCounter:number):Itrack {
+  return produceTrack('', 'base', loc, keycounter, trackCounter);
 }
 
 function produceStep(step:()=>void, stepCounter:number):Istep {
@@ -61,7 +66,7 @@ function getPropertyName (node:Inode, nodeIterator:Iiterator) {
   }
 }
 
-function trackSkip(value:string):boolean {
+function skipTest(value:string):boolean {
   if (value.length <= 2) return false;
   return value[0] === '_' && value[0] === value[1];
 }
@@ -82,23 +87,16 @@ function getIdenOrMemberValue(node:Inode, nodeIterator:Iiterator, scope:string) 
   }
 }
 
-let trackCounter: number;
-let basetrackCounter:number;
-let keyCounter: number;
-let stepCounter: number;
 const donothing = () => {};
 /**
  * 节点有主干节点以及叶子节点组成
  * 主干节点有上传动画轨道及操作函数的权限，
  * 因此主干节点都有创建新的轨道列表及操作列表
  */
+const counter = new Counter();
 const nodeHandlers: InodeHandler =  {
 
   Program: (nodeIterator: Iiterator) => {
-    trackCounter = 0;
-    keyCounter = 0;
-    stepCounter = 0;
-    basetrackCounter = 0;
     const nodes = nodeIterator.node.body as Inode[];
     nodes.forEach(item => {
       nodeIterator.traverse(item as Inode);
@@ -106,10 +104,10 @@ const nodeHandlers: InodeHandler =  {
   },
 
   VariableDeclaration: nodeIterator => {
-    const {node, skip} = nodeIterator
+    const {node, skip} = nodeIterator;
     const {kind, loc, declarations} = node as IVariableDecalrations;
     let variableTracks: Itrack[] = [];
-    variableTracks.push(produceBaseTrackAtLoc(loc, basetrackCounter));
+    variableTracks.push(produceBaseTrackAtLoc(loc, ...counter.getBaseKeyAndTrackCount(skip)));
     let variableSteps: Istep[] = [];
     if (declarations) {
       for (const declaration of declarations) {
@@ -118,23 +116,22 @@ const nodeHandlers: InodeHandler =  {
           const name = id.name;
           const idloc = id.loc;
           // 1. id节点动画
-          const idTrack = produceTrack(name, "appear", idloc, keyCounter++, trackCounter++);
+          const idTrack = produceTrackBycounter(name, "appear", idloc, counter.getKeyAndTrackCount(skip));
           variableTracks.push(idTrack);
           // 2. id节点操作函数
-          const idStep = produceStep(donothing, stepCounter++);
+          const idStep = produceStep(donothing, counter.getStepcount(skip));
           variableSteps.push(idStep);
           // 3. 上个节点的结束点，无
           // 4. 返回值
           const idNode = {value: name, preTrack: idTrack}
 
           const initNode = init
-            ? nodeIterator.traverse(init as Inode, {tracks: variableTracks, steps: variableSteps})
+            ? nodeIterator.traverse(init as Inode, {tracks: variableTracks, steps: variableSteps, skip:skip})
             : {value: undefined, preTrack: produceTrack(
               'undefined', 
               'appear', 
               idNode.preTrack.loc,
-              keyCounter++,
-              trackCounter++
+              ...counter.getKeyAndTrackCount(skip),
             )}
           const track = produceTrack(
             initNode.value, 
@@ -143,90 +140,89 @@ const nodeHandlers: InodeHandler =  {
               start: initNode.preTrack.effect.startpos,
               end: idNode.preTrack.effect.startpos
             },
-            keyCounter++, 
-            trackCounter++)
+            ...counter.getKeyAndTrackCount(skip))
           variableTracks.push(track);
           nodeIterator.scope.declare(idNode.value, initNode.value, kind);
           const step = produceStep(
             (): void => {nodeIterator.mirrorScope.declare(idNode.value, initNode.value, kind);},
-            stepCounter++
+            counter.getStepcount(skip)
           );
           variableSteps.push(step);
         }
       }
       // 上传轨道及操作函数
-      trackSetEnd(variableTracks, trackCounter);
+      trackSetEnd(variableTracks, counter.trackCounter);
       nodeIterator.storeStepAndTrack(variableSteps, variableTracks);
     }
   },
 
-  unaryoperateMap: {
-    "-": (nodeIterator:Iiterator) => {
-      const nodeReturn = nodeIterator.traverse(nodeIterator.node.argument as Inode);
-      nodeReturn.value = -nodeReturn.value;
-      return nodeReturn;
-    },
-    "+": (nodeIterator:Iiterator) => {
-      const nodeReturn = nodeIterator.traverse(nodeIterator.node.argument as Inode);
-      nodeReturn.value = +nodeReturn.value;
-      return nodeReturn;
-    },
-    "!": (nodeIterator:Iiterator) => {
-      const nodeReturn = nodeIterator.traverse(nodeIterator.node.argument as Inode);
-      nodeReturn.value = !nodeReturn.value;
-      return nodeReturn;
-    },
-    "~": (nodeIterator:Iiterator) => {
-      const nodeReturn = nodeIterator.traverse(nodeIterator.node.argument as Inode);
-      nodeReturn.value = ~nodeReturn.value;
-      return nodeReturn;
-    },
-    "typeof": (nodeIterator:Iiterator) => {
-      const argument = <Inode>nodeIterator.node.argument;
-      if (argument.type === 'Identifier') {
-        const result = nodeIterator.traverse(nodeIterator.node.argument as Inode);
-        try {
-          const value = nodeIterator.scope.get(argument.name);
-          const type = value ? typeof value : 'undefined';
-          result.value = type;
-          return result;
-        } catch(err) {
-          if (err.message === `${argument.name} is not defined`) {
-            result.value = 'undefined';
-            return result;
-          } else {
-            throw err;
-          }
-        } 
-      }
-      const nodeReturn = nodeIterator.traverse(nodeIterator.node.argument as Inode);
-      nodeReturn.value = +nodeReturn.value;
-      return nodeReturn;
-    }
-    // unfinished
-    // "void": (nodeIterator:Iiterator) => {
-    // },
-    // "delete": (nodeIterator:Iiterator) => {
-    // },
-  },
+  // unaryoperateMap: {
+  //   "-": (nodeIterator:Iiterator) => {
+  //     const nodeReturn = nodeIterator.traverse(nodeIterator.node.argument as Inode);
+  //     nodeReturn.value = -nodeReturn.value;
+  //     return nodeReturn;
+  //   },
+  //   "+": (nodeIterator:Iiterator) => {
+  //     const nodeReturn = nodeIterator.traverse(nodeIterator.node.argument as Inode);
+  //     nodeReturn.value = +nodeReturn.value;
+  //     return nodeReturn;
+  //   },
+  //   "!": (nodeIterator:Iiterator) => {
+  //     const nodeReturn = nodeIterator.traverse(nodeIterator.node.argument as Inode);
+  //     nodeReturn.value = !nodeReturn.value;
+  //     return nodeReturn;
+  //   },
+  //   "~": (nodeIterator:Iiterator) => {
+  //     const nodeReturn = nodeIterator.traverse(nodeIterator.node.argument as Inode);
+  //     nodeReturn.value = ~nodeReturn.value;
+  //     return nodeReturn;
+  //   },
+  //   "typeof": (nodeIterator:Iiterator) => {
+  //     const argument = <Inode>nodeIterator.node.argument;
+  //     if (argument.type === 'Identifier') {
+  //       const result = nodeIterator.traverse(nodeIterator.node.argument as Inode);
+  //       try {
+  //         const value = nodeIterator.scope.get(argument.name);
+  //         const type = value ? typeof value : 'undefined';
+  //         result.value = type;
+  //         return result;
+  //       } catch(err) {
+  //         if (err.message === `${argument.name} is not defined`) {
+  //           result.value = 'undefined';
+  //           return result;
+  //         } else {
+  //           throw err;
+  //         }
+  //       } 
+  //     }
+  //     const nodeReturn = nodeIterator.traverse(nodeIterator.node.argument as Inode);
+  //     nodeReturn.value = +nodeReturn.value;
+  //     return nodeReturn;
+  //   }
+  //   // unfinished
+  //   // "void": (nodeIterator:Iiterator) => {
+  //   // },
+  //   // "delete": (nodeIterator:Iiterator) => {
+  //   // },
+  // },
 
-  UnaryExpression: nodeIterator => {
-    const {node} = nodeIterator;
-    const {operator, loc} = node;
-    const result = nodeHandlers.unaryoperateMap[operator](nodeIterator);
-    const track = produceTrack(result.value, "appear", loc, keyCounter++, trackCounter);
-    nodeIterator.addTrack(track);
-    const unaryStep = produceStep(donothing, stepCounter++);
-    nodeIterator.addStep(unaryStep);
-    return {value: result.value, preTrack: track}
-  },
+  // UnaryExpression: nodeIterator => {
+  //   const {node} = nodeIterator;
+  //   const {operator, loc} = node;
+  //   const result = nodeHandlers.unaryoperateMap[operator](nodeIterator);
+  //   const track = produceTrack(result.value, "appear", loc, keyCounter++, trackCounter);
+  //   nodeIterator.addTrack(track);
+  //   const unaryStep = produceStep(donothing, stepCounter++);
+  //   nodeIterator.addStep(unaryStep);
+  //   return {value: result.value, preTrack: track}
+  // },
 
   Literal: nodeIterator => {
     const {node, skip} = nodeIterator;
     const {loc, value} = node;
-    const track:Itrack = produceTrack(value, "appear", loc, keyCounter++, trackCounter++);
-    const literalStep = produceStep(donothing, skip ? stepCounter : stepCounter++);
-    if (!skip) {nodeIterator.addTrack(track);}
+    const track:Itrack = produceTrackBycounter(value, "appear", loc, counter.getKeyAndTrackCount(skip));
+    const literalStep = produceStep(donothing, counter.getStepcount(skip));
+    nodeIterator.addTrack(track);
     nodeIterator.addStep(literalStep);
     if(nodeIterator.node.value === undefined) {
       track.effect.value = 'undefined';
@@ -237,285 +233,285 @@ const nodeHandlers: InodeHandler =  {
   },
 
   Identifier: nodeIterator => {
-    const {node} = nodeIterator;
+    const {node, skip} = nodeIterator;
     const {name, loc} = node;
     const value = nodeIterator.scope.get(name).value;
-    let track = produceTrack(value, 'appear', loc, keyCounter++, trackCounter++);
+    let track = produceTrackBycounter(value, 'appear', loc, counter.getKeyAndTrackCount(skip));
     nodeIterator.addTrack(track);
-    const identifierOperate = produceStep(donothing, stepCounter++);
+    const identifierOperate = produceStep(donothing, counter.getStepcount(skip));
     nodeIterator.addStep(identifierOperate);
     return {value, preTrack: track};
   },
   
-  BinaryExpressionOperatorMap: {
-    '==': (a:number, b:number) => a == b,
-    '!=': (a:number, b:number) => a != b,
-    '===': (a:number, b:number) => a === b,
-    '!==': (a:number, b:number) => a !== b,
-    '<': (a:number, b:number) => a < b,
-    '<=': (a:number, b:number) => a <= b,
-    '>': (a:number, b:number) => a > b,
-    '>=': (a:number, b:number) => a >= b,
-    '<<': (a:number, b:number) => a << b,
-    '>>': (a:number, b:number) => a >> b,
-    '>>>': (a:number, b:number) => a >>> b,
-    '+': (a:number, b:number) => a + b,
-    '-': (a:number, b:number) => a - b,
-    '*': (a:number, b:number) => a * b,
-    '/': (a:number, b:number) => a / b,
-    '%': (a:number, b:number) => a % b,
-    '**': (a:number, b:number) => a ** b,
-    '|': (a:number, b:number) => a | b,
-    '^': (a:number, b:number) => a ^ b,
-    '&': (a:number, b:number) => a & b,
-    'in': (a:any, b:object | any[]) => a in b,
-    'instanceof': (a:any, b:any) => {
-      switch (b) {
-        case 'Array':
-          return a instanceof Array;
-        default:
-          if (b instanceof Object) {
-            return a instanceof b;
-          } else {
-            return false;
-          }
-      }
-    }
-  },
+  // BinaryExpressionOperatorMap: {
+  //   '==': (a:number, b:number) => a == b,
+  //   '!=': (a:number, b:number) => a != b,
+  //   '===': (a:number, b:number) => a === b,
+  //   '!==': (a:number, b:number) => a !== b,
+  //   '<': (a:number, b:number) => a < b,
+  //   '<=': (a:number, b:number) => a <= b,
+  //   '>': (a:number, b:number) => a > b,
+  //   '>=': (a:number, b:number) => a >= b,
+  //   '<<': (a:number, b:number) => a << b,
+  //   '>>': (a:number, b:number) => a >> b,
+  //   '>>>': (a:number, b:number) => a >>> b,
+  //   '+': (a:number, b:number) => a + b,
+  //   '-': (a:number, b:number) => a - b,
+  //   '*': (a:number, b:number) => a * b,
+  //   '/': (a:number, b:number) => a / b,
+  //   '%': (a:number, b:number) => a % b,
+  //   '**': (a:number, b:number) => a ** b,
+  //   '|': (a:number, b:number) => a | b,
+  //   '^': (a:number, b:number) => a ^ b,
+  //   '&': (a:number, b:number) => a & b,
+  //   'in': (a:any, b:object | any[]) => a in b,
+  //   'instanceof': (a:any, b:any) => {
+  //     switch (b) {
+  //       case 'Array':
+  //         return a instanceof Array;
+  //       default:
+  //         if (b instanceof Object) {
+  //           return a instanceof b;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //   }
+  // },
 
-  BinaryExpression: nodeIterator => {
-    const {node} = nodeIterator;
-    const {loc} = node;
-    const right = nodeIterator.traverse(node.right).value;
-    const left = nodeIterator.traverse(node.left).value;
-    const result = nodeHandlers.BinaryExpressionOperatorMap[nodeIterator.node.operator](left, right);
-    let value = result === true ? 'true' : result === false ? 'false' : result;
-    let track = produceTrack(value, 'compute', loc, keyCounter++, trackCounter++);
-    nodeIterator.addTrack(track);
-    const binaryOp = produceStep(donothing, stepCounter++);
-    nodeIterator.addStep(binaryOp);
-    return {value: result, preTrack: track};
-  },
+  // BinaryExpression: nodeIterator => {
+  //   const {node} = nodeIterator;
+  //   const {loc} = node;
+  //   const right = nodeIterator.traverse(node.right).value;
+  //   const left = nodeIterator.traverse(node.left).value;
+  //   const result = nodeHandlers.BinaryExpressionOperatorMap[nodeIterator.node.operator](left, right);
+  //   let value = result === true ? 'true' : result === false ? 'false' : result;
+  //   let track = produceTrack(value, 'compute', loc, keyCounter++, trackCounter++);
+  //   nodeIterator.addTrack(track);
+  //   const binaryOp = produceStep(donothing, stepCounter++);
+  //   nodeIterator.addStep(binaryOp);
+  //   return {value: result, preTrack: track};
+  // },
 
-  ExpressionStatement: nodeIterator => {
-    const {node} = nodeIterator;
-    const {loc} = node;
-    let expressionTrack: Itrack[] = [];
-    let expressionStep: Istep[] = [];
-    const baseTrack = produceBaseTrackAtLoc(loc, basetrackCounter);
-    expressionTrack.push(baseTrack);
-    nodeIterator.traverse(nodeIterator.node.expression, {tracks: expressionTrack, steps: expressionStep});
-    expressionTrack = trackSetEnd(expressionTrack, trackCounter);
-    nodeIterator.storeStepAndTrack(expressionStep, expressionTrack);
-  },
+  // ExpressionStatement: nodeIterator => {
+  //   const {node} = nodeIterator;
+  //   const {loc} = node;
+  //   let expressionTrack: Itrack[] = [];
+  //   let expressionStep: Istep[] = [];
+  //   const baseTrack = produceBaseTrackAtLoc(loc, basetrackCounter);
+  //   expressionTrack.push(baseTrack);
+  //   nodeIterator.traverse(nodeIterator.node.expression, {tracks: expressionTrack, steps: expressionStep});
+  //   expressionTrack = trackSetEnd(expressionTrack, trackCounter);
+  //   nodeIterator.storeStepAndTrack(expressionStep, expressionTrack);
+  // },
 
-  MemberExpression: nodeIterator => {
-    const {node} = nodeIterator;
-    const {object, property} = node;
-    const obj:{[index:string]:any} = nodeIterator.traverse(object);
-    const prop = property.name;
-    return {
-      value:obj.value[prop],
-      preTrack: obj.preTrack
-    };
-  },
+  // MemberExpression: nodeIterator => {
+  //   const {node} = nodeIterator;
+  //   const {object, property} = node;
+  //   const obj:{[index:string]:any} = nodeIterator.traverse(object);
+  //   const prop = property.name;
+  //   return {
+  //     value:obj.value[prop],
+  //     preTrack: obj.preTrack
+  //   };
+  // },
 
-  AssignmentExpressionMap: {
-    '=': (value:IsimpleValue | ImemberValue, v:any) => value.set(v),
-    '+=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() + v),
-    '-=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() - v),
-    '*=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() * v),
-    '/=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() / v),
-    '%=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() % v),
-    '**=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() ** v),
-    '<<=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() << v) ,
-    '>>=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() >> v),
-    '>>>=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() >>> v),
-    '|=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() | v),
-    '^=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() ^ v),
-    '&=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() & v),
-    '++': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() + 1),
-    '--': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() - 1)
-  },
+  // AssignmentExpressionMap: {
+  //   '=': (value:IsimpleValue | ImemberValue, v:any) => value.set(v),
+  //   '+=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() + v),
+  //   '-=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() - v),
+  //   '*=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() * v),
+  //   '/=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() / v),
+  //   '%=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() % v),
+  //   '**=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() ** v),
+  //   '<<=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() << v) ,
+  //   '>>=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() >> v),
+  //   '>>>=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() >>> v),
+  //   '|=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() | v),
+  //   '^=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() ^ v),
+  //   '&=': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() & v),
+  //   '++': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() + 1),
+  //   '--': (value:IsimpleValue | ImemberValue, v:any) => value.set(value.get() - 1)
+  // },
 
-  AssignmentExpression: nodeIterator => {
-    const {left, right, operator} = nodeIterator.node;
-    const {loc, name} = left;
-    // const baseTrack = produceBaseTrackAtLoc(loc, basetrackCounter);
-    // nodeIterator.addTrack(baseTrack);
-    const idTrack = produceTrack(name, 'appear', loc, keyCounter++, trackCounter++);
-    nodeIterator.addTrack(idTrack);
-    const idStep = produceStep(donothing, stepCounter++);
-    nodeIterator.addStep(idStep);
+  // AssignmentExpression: nodeIterator => {
+  //   const {left, right, operator} = nodeIterator.node;
+  //   const {loc, name} = left;
+  //   // const baseTrack = produceBaseTrackAtLoc(loc, basetrackCounter);
+  //   // nodeIterator.addTrack(baseTrack);
+  //   const idTrack = produceTrack(name, 'appear', loc, keyCounter++, trackCounter++);
+  //   nodeIterator.addTrack(idTrack);
+  //   const idStep = produceStep(donothing, stepCounter++);
+  //   nodeIterator.addStep(idStep);
 
-    if (right) {
-      const {value, preTrack}  = nodeIterator.traverse(right);
-      const track = produceTrack(
-        value, 'move',
-        {
-          start: preTrack.loc.start,
-          end: idTrack.loc.start
-        },
-        keyCounter++, 
-        trackCounter++
-      );
-      nodeIterator.addTrack(track);
-      let val = getIdenOrMemberValue(left, nodeIterator, 'scope');
-      nodeHandlers.AssignmentExpressionMap[operator](val, value);
-      const assnStep = produceStep(
-        () => {
-          let val = getIdenOrMemberValue(left, nodeIterator, 'mirrorscope');
-          nodeHandlers.AssignmentExpressionMap[operator](val, value);
-         },
-        stepCounter++
-      );
-      nodeIterator.addStep(assnStep);
-    }
-  },
+  //   if (right) {
+  //     const {value, preTrack}  = nodeIterator.traverse(right);
+  //     const track = produceTrack(
+  //       value, 'move',
+  //       {
+  //         start: preTrack.loc.start,
+  //         end: idTrack.loc.start
+  //       },
+  //       keyCounter++, 
+  //       trackCounter++
+  //     );
+  //     nodeIterator.addTrack(track);
+  //     let val = getIdenOrMemberValue(left, nodeIterator, 'scope');
+  //     nodeHandlers.AssignmentExpressionMap[operator](val, value);
+  //     const assnStep = produceStep(
+  //       () => {
+  //         let val = getIdenOrMemberValue(left, nodeIterator, 'mirrorscope');
+  //         nodeHandlers.AssignmentExpressionMap[operator](val, value);
+  //        },
+  //       stepCounter++
+  //     );
+  //     nodeIterator.addStep(assnStep);
+  //   }
+  // },
 
-  IfStatement:nodeIterator => {
-    const {node} = nodeIterator;
-    const {loc, test, consequent, alternate} = node;
-    const ifStmTracks: Itrack[] = [];
-    const ifSteps: Istep[] = [];
-    const baseTrack = produceBaseTrackAtLoc(loc, ++basetrackCounter);
-    ifStmTracks.push(baseTrack);
-    const testResult = nodeIterator.traverse(test, {tracks:ifStmTracks, steps:ifSteps});
-    if (testResult.value) {
-      nodeIterator.traverse(consequent, {tracks:ifStmTracks, steps:ifSteps});
-    } else if (node.alternate) {
-      nodeIterator.traverse(alternate as Inode, {tracks: ifStmTracks, steps:ifSteps});
-    }
-    trackSetEnd(ifStmTracks, trackCounter);
-    nodeIterator.storeStepAndTrack(ifSteps, ifStmTracks);
-  },
+  // IfStatement:nodeIterator => {
+  //   const {node} = nodeIterator;
+  //   const {loc, test, consequent, alternate} = node;
+  //   const ifStmTracks: Itrack[] = [];
+  //   const ifSteps: Istep[] = [];
+  //   const baseTrack = produceBaseTrackAtLoc(loc, ++basetrackCounter);
+  //   ifStmTracks.push(baseTrack);
+  //   const testResult = nodeIterator.traverse(test, {tracks:ifStmTracks, steps:ifSteps});
+  //   if (testResult.value) {
+  //     nodeIterator.traverse(consequent, {tracks:ifStmTracks, steps:ifSteps});
+  //   } else if (node.alternate) {
+  //     nodeIterator.traverse(alternate as Inode, {tracks: ifStmTracks, steps:ifSteps});
+  //   }
+  //   trackSetEnd(ifStmTracks, trackCounter);
+  //   nodeIterator.storeStepAndTrack(ifSteps, ifStmTracks);
+  // },
 
-  BlockStatement: nodeIterator => {
-    let scope = nodeIterator.createScope('block');
-    let mirrorScope = nodeIterator.createMirroScope('block');
-    const nodes = nodeIterator.node.body as Inode[];
-    for (const node of nodes) {
-      const signal = nodeIterator.traverse(node as Inode, {scope, mirrorScope});
-      if (Signal.isReturn(signal)) {
-        trackSetEnd(nodeIterator.tracks, trackCounter);
-        return signal;
-      }
-    }
-    trackSetEnd(nodeIterator.tracks, trackCounter);
-  },
+  // BlockStatement: nodeIterator => {
+  //   let scope = nodeIterator.createScope('block');
+  //   let mirrorScope = nodeIterator.createMirroScope('block');
+  //   const nodes = nodeIterator.node.body as Inode[];
+  //   for (const node of nodes) {
+  //     const signal = nodeIterator.traverse(node as Inode, {scope, mirrorScope});
+  //     if (Signal.isReturn(signal)) {
+  //       trackSetEnd(nodeIterator.tracks, trackCounter);
+  //       return signal;
+  //     }
+  //   }
+  //   trackSetEnd(nodeIterator.tracks, trackCounter);
+  // },
 
-  WhileStatement(nodeIterator) {
-    const {node} = nodeIterator;
-    const {test, loc} = node;
-    const whileTrack: Itrack[] = [];
-    const baseTrack = produceBaseTrackAtLoc(loc, ++basetrackCounter);
-    whileTrack.push(baseTrack);
-    const whileSteps: Istep[] = [];
-    let whileCount = 0; //  防止死循环的出现
-    while (nodeIterator.traverse(test, {tracks: whileTrack, steps:whileSteps}).value && whileCount < 100) {
-      nodeIterator.traverse(node.body as Inode, {tracks: whileTrack, steps:whileSteps});
-      trackSetEnd(whileTrack, trackCounter);
-      whileCount += 1;
-    }
-    nodeIterator.storeStepAndTrack(whileSteps, whileTrack);
-  },
+  // WhileStatement(nodeIterator) {
+  //   const {node} = nodeIterator;
+  //   const {test, loc} = node;
+  //   const whileTrack: Itrack[] = [];
+  //   const baseTrack = produceBaseTrackAtLoc(loc, ++basetrackCounter);
+  //   whileTrack.push(baseTrack);
+  //   const whileSteps: Istep[] = [];
+  //   let whileCount = 0; //  防止死循环的出现
+  //   while (nodeIterator.traverse(test, {tracks: whileTrack, steps:whileSteps}).value && whileCount < 100) {
+  //     nodeIterator.traverse(node.body as Inode, {tracks: whileTrack, steps:whileSteps});
+  //     trackSetEnd(whileTrack, trackCounter);
+  //     whileCount += 1;
+  //   }
+  //   nodeIterator.storeStepAndTrack(whileSteps, whileTrack);
+  // },
 
-  ForInStatement(nodeIterator) {
-    const {node, scope} = nodeIterator;
-    const {left, right, body, loc} = node;
-    console.log(node);
-    const forTrack = [];
-    const baseTrack = produceBaseTrackAtLoc(loc, basetrackCounter);
-    forTrack.push(baseTrack);
-    const forStep = [];
-    const iterate = scope.get('__filbertRight0').value;
-    for (let j = 0; j < iterate.length; j++ ) {
-      const name = left.name;
-      const leftloc = left.loc;
-      const leftTrack = produceTrack(name, "appear", leftloc, keyCounter++, trackCounter++);
-      forTrack.push(leftTrack);
-      const leftStep = produceStep(donothing, stepCounter++);
-      forStep.push(leftStep);
-      const leftNode = {
-        value: name,
-        preTrack: leftTrack
-      }
+  // ForInStatement(nodeIterator) {
+  //   const {node, scope} = nodeIterator;
+  //   const {left, right, body, loc} = node;
+  //   console.log(node);
+  //   const forTrack = [];
+  //   const baseTrack = produceBaseTrackAtLoc(loc, basetrackCounter);
+  //   forTrack.push(baseTrack);
+  //   const forStep = [];
+  //   const iterate = scope.get('__filbertRight0').value;
+  //   for (let j = 0; j < iterate.length; j++ ) {
+  //     const name = left.name;
+  //     const leftloc = left.loc;
+  //     const leftTrack = produceTrack(name, "appear", leftloc, keyCounter++, trackCounter++);
+  //     forTrack.push(leftTrack);
+  //     const leftStep = produceStep(donothing, stepCounter++);
+  //     forStep.push(leftStep);
+  //     const leftNode = {
+  //       value: name,
+  //       preTrack: leftTrack
+  //     }
 
-      const rightNode = nodeIterator.traverse(right);
-      const rightTrack = produceTrack(
-        rightNode.value[j], 
-        "move",
-        {
-          start: rightNode.preTrack.effect.startpos,
-          end: leftNode.preTrack.effect.startpos
-        },
-        keyCounter++, 
-        trackCounter++)
-      forTrack.push(rightTrack);
-      nodeIterator.scope.declare(leftNode.value, rightNode.value[j], 'var');
-      const step = produceStep(
-        (): void => {nodeIterator.mirrorScope.declare(leftNode.value, rightNode.value[j], 'var');},
-            stepCounter++
-        );
-      forStep.push(step);
+  //     const rightNode = nodeIterator.traverse(right);
+  //     const rightTrack = produceTrack(
+  //       rightNode.value[j], 
+  //       "move",
+  //       {
+  //         start: rightNode.preTrack.effect.startpos,
+  //         end: leftNode.preTrack.effect.startpos
+  //       },
+  //       keyCounter++, 
+  //       trackCounter++)
+  //     forTrack.push(rightTrack);
+  //     nodeIterator.scope.declare(leftNode.value, rightNode.value[j], 'var');
+  //     const step = produceStep(
+  //       (): void => {nodeIterator.mirrorScope.declare(leftNode.value, rightNode.value[j], 'var');},
+  //           stepCounter++
+  //       );
+  //     forStep.push(step);
 
-      nodeIterator.traverse(body, {steps:forStep, tracks:forTrack});
-    }
-    trackSetEnd(forTrack, trackCounter);
-    nodeIterator.storeStepAndTrack(forStep, forTrack);
-  },
+  //     nodeIterator.traverse(body, {steps:forStep, tracks:forTrack});
+  //   }
+  //   trackSetEnd(forTrack, trackCounter);
+  //   nodeIterator.storeStepAndTrack(forStep, forTrack);
+  // },
 
-  ForStatement(nodeIterator) {
-    const {node} = nodeIterator;
-    const {loc, init, test, update, body} = node;
-    console.log(node)
-    let forTrack: Itrack[] = [];
-    let forSteps: Istep[] = []; 
-    const baseTrack = produceBaseTrackAtLoc(loc, basetrackCounter);
-    forTrack.push(baseTrack);
-    for (nodeIterator.traverse(init as Inode, {tracks:forTrack, steps:forSteps});
-      nodeIterator.traverse(test, {tracks:forTrack, steps:forSteps}).value;
-      nodeIterator.traverse(update as Inode, {tracks: forTrack, steps:forSteps})
-      ) {
-        nodeIterator.traverse(body as Inode, {tracks:forTrack, steps:forSteps});
-    }
-    trackSetEnd(forTrack, trackCounter);
-    nodeIterator.storeStepAndTrack(forSteps, forTrack);
-  },
+  // ForStatement(nodeIterator) {
+  //   const {node} = nodeIterator;
+  //   const {loc, init, test, update, body} = node;
+  //   console.log(node)
+  //   let forTrack: Itrack[] = [];
+  //   let forSteps: Istep[] = []; 
+  //   const baseTrack = produceBaseTrackAtLoc(loc, basetrackCounter);
+  //   forTrack.push(baseTrack);
+  //   for (nodeIterator.traverse(init as Inode, {tracks:forTrack, steps:forSteps});
+  //     nodeIterator.traverse(test, {tracks:forTrack, steps:forSteps}).value;
+  //     nodeIterator.traverse(update as Inode, {tracks: forTrack, steps:forSteps})
+  //     ) {
+  //       nodeIterator.traverse(body as Inode, {tracks:forTrack, steps:forSteps});
+  //   }
+  //   trackSetEnd(forTrack, trackCounter);
+  //   nodeIterator.storeStepAndTrack(forSteps, forTrack);
+  // },
 
-  UpdateExpression(nodeIterator) {
-    const {node} = nodeIterator;
-    const {operator, loc} = node;
-    const argument = <Inode>node.argument;
-    let simpleValue = nodeIterator.scope.get(argument.name);
-    const value = nodeHandlers.AssignmentExpressionMap[operator](simpleValue);
-    const track = produceTrack(value, 'compute', loc, keyCounter++, trackCounter++);
-    nodeIterator.addTrack(track);
-    const updateStep = produceStep(
-      () => {
-        let simpleValue = nodeIterator.mirrorScope.get(argument.name);
-        nodeHandlers.AssignmentExpressionMap[operator](simpleValue);
-      },
-      stepCounter++
-    );
-    nodeIterator.addStep(updateStep);
-  },
+  // UpdateExpression(nodeIterator) {
+  //   const {node} = nodeIterator;
+  //   const {operator, loc} = node;
+  //   const argument = <Inode>node.argument;
+  //   let simpleValue = nodeIterator.scope.get(argument.name);
+  //   const value = nodeHandlers.AssignmentExpressionMap[operator](simpleValue);
+  //   const track = produceTrack(value, 'compute', loc, keyCounter++, trackCounter++);
+  //   nodeIterator.addTrack(track);
+  //   const updateStep = produceStep(
+  //     () => {
+  //       let simpleValue = nodeIterator.mirrorScope.get(argument.name);
+  //       nodeHandlers.AssignmentExpressionMap[operator](simpleValue);
+  //     },
+  //     stepCounter++
+  //   );
+  //   nodeIterator.addStep(updateStep);
+  // },
 
-  NewExpression(nodeIterator) {
-    const {node} = nodeIterator;
-    const {loc} = node;
-    const func = nodeIterator.traverse(nodeIterator.node.callee);
-    const args = nodeIterator.node.arguments.map(arg => nodeIterator.traverse(arg).value);
-    const news = new func.value(args)[0][0];
-    const track = produceTrack(news, 'appear', loc, keyCounter++, trackCounter++);
-    const step = produceStep(donothing, stepCounter++);
-    nodeIterator.addTrack(track);
-    nodeIterator.addStep(step);
-    return {
-      value: news,
-      preTrack: track
-    }
-  },
+  // NewExpression(nodeIterator) {
+  //   const {node} = nodeIterator;
+  //   const {loc} = node;
+  //   const func = nodeIterator.traverse(nodeIterator.node.callee);
+  //   const args = nodeIterator.node.arguments.map(arg => nodeIterator.traverse(arg).value);
+  //   const news = new func.value(args)[0][0];
+  //   const track = produceTrack(news, 'appear', loc, keyCounter++, trackCounter++);
+  //   const step = produceStep(donothing, stepCounter++);
+  //   nodeIterator.addTrack(track);
+  //   nodeIterator.addStep(step);
+  //   return {
+  //     value: news,
+  //     preTrack: track
+  //   }
+  // },
 
   // FunctionDeclaration: nodeIterator => {
   //   const { node, code } = nodeIterator;
@@ -593,24 +589,24 @@ const nodeHandlers: InodeHandler =  {
   // },
 
   // 调用函数
-  CallExpression(nodeIterator) {
-    const {node} = nodeIterator;
-    const args = node.arguments.map(arg => nodeIterator.traverse(arg).value);
-    const back = nodeIterator.traverse(nodeIterator.node.callee);
-    // apply第一个参数为this的指向
-    const value = back.value.apply(null, args);
-    const preTrack = back.preTrack;
-    preTrack.effect = {
-      ...back.preTrack.effect,
-      value,
-      type: 'compute',
-      valueType: `[object String]`
-    }
-    return {
-      value,
-      preTrack
-    };
-  },
+  // CallExpression(nodeIterator) {
+  //   const {node} = nodeIterator;
+  //   const args = node.arguments.map(arg => nodeIterator.traverse(arg).value);
+  //   const back = nodeIterator.traverse(nodeIterator.node.callee);
+  //   // apply第一个参数为this的指向
+  //   const value = back.value.apply(null, args);
+  //   const preTrack = back.preTrack;
+  //   preTrack.effect = {
+  //     ...back.preTrack.effect,
+  //     value,
+  //     type: 'compute',
+  //     valueType: `[object String]`
+  //   }
+  //   return {
+  //     value,
+  //     preTrack
+  //   };
+  // },
 
   // ReturnStatement(nodeIterator) {
   //   const { node } = nodeIterator;
@@ -622,23 +618,23 @@ const nodeHandlers: InodeHandler =  {
   //   return Signal.Return(result);
   // },
 
-  ArrayExpression(nodeIterator) {
-    const {node} = nodeIterator;
-    const {loc, id} = node;
-    const value = nodeIterator.node.elements.map(ele => nodeIterator.traverse(ele).value)
-    // 1. 本节点动画
-    const track = produceTrack(value, 'appear', loc, keyCounter++, trackCounter++);
-    nodeIterator.addTrack(track);
-    // 2.本节点操作
-    const arrOperation = produceStep(donothing, stepCounter++);
-    nodeIterator.addStep(arrOperation);
-    // 3. 上个节点结束点，无
-    // 4. 返回
-    return {
-      value,
-      preTrack: track
-    }
-  }
+  // ArrayExpression(nodeIterator) {
+  //   const {node} = nodeIterator;
+  //   const {loc, id} = node;
+  //   const value = nodeIterator.node.elements.map(ele => nodeIterator.traverse(ele).value)
+  //   // 1. 本节点动画
+  //   const track = produceTrack(value, 'appear', loc, keyCounter++, trackCounter++);
+  //   nodeIterator.addTrack(track);
+  //   // 2.本节点操作
+  //   const arrOperation = produceStep(donothing, stepCounter++);
+  //   nodeIterator.addStep(arrOperation);
+  //   // 3. 上个节点结束点，无
+  //   // 4. 返回
+  //   return {
+  //     value,
+  //     preTrack: track
+  //   }
+  // }
 
   // ObjectExpression(nodeIterator) {
   //   const {node, code} = nodeIterator;

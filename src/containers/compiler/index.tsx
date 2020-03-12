@@ -112,27 +112,28 @@ const Compiler:React.FC<Iprops> = props => {
    */
   const stepsSort = ():void => {
     const oldSteps = [...steps];
-    let sortedSteps:Istep[][] = [[]];
+    let newsortedSteps:Istep[][] = [[]];
     let len = 0;
     for (let step of oldSteps) {
       if (step.key > len) len = step.key;
     }
     for (let i = 0; i < len; i++) {
-      sortedSteps.push([]);
+      newsortedSteps.push([]);
     }
     for (let step of oldSteps) {
-      sortedSteps[step.key].push(step);
+      newsortedSteps[step.key].push(step);
     }
-    console.log(sortedSteps);
-    updateSortedsteps(sortedSteps);
+    updateSortedsteps(newsortedSteps);
   }
 
   const animationRender = ():void => {
     stepsSort();
     let end = 0;
     let newFrames = [];
+    // 过滤掉trackcount为-1的轨道
+    let newtracks = tracks.filter((track) => track.begin !== -1);
     // 计算轨道长度
-    for (let i = 0; i < tracks.length; i++) {
+    for (let i = 0; i < newtracks.length; i++) {
       if (tracks[i].end > end) {
         end = tracks[i].end;
       }
@@ -141,7 +142,7 @@ const Compiler:React.FC<Iprops> = props => {
     for (let j = 0; j < end; j++) {
       newFrames[j] = [defaultFrame];
     }
-    for (let i = 0; i < tracks.length; i++) {
+    for (let i = 0; i < newtracks.length; i++) {
       const { begin, end, effect } = tracks[i];
       // 轨道切割
       for (let j = begin; j < end; j++) {
