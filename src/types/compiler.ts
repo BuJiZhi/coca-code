@@ -231,12 +231,12 @@ export interface InodeHandler {
   Program(node: Iiterator): any,
   VariableDeclaration(node: Iiterator): any,
   Literal(node: Iiterator): any,
-  // UnaryExpression(node: Iiterator): any,
+  UnaryExpression(node: Iiterator): any,
   Identifier(node: Iiterator): any,
-  // ExpressionStatement(node: Iiterator): any,
-  // AssignmentExpression(node: Iiterator): void,
-  // BinaryExpression(node: Iiterator): void,
-  // MemberExpression(node: Iiterator): void,
+  ExpressionStatement(node: Iiterator): any,
+  AssignmentExpression(node: Iiterator): void,
+  BinaryExpression(node: Iiterator): void,
+  MemberExpression(node: Iiterator): void,
   // IfStatement(node: Iiterator): void,
   // BlockStatement(node: Iiterator): void,
   // WhileStatement(node: Iiterator): void,
@@ -246,13 +246,13 @@ export interface InodeHandler {
   // ForInStatement(node: Iiterator): any,
   // FunctionDeclaration(node: Iiterator): void,
   // FunctionExpression(node: Iiterator): [Step, Step],
-  // CallExpression(node: Iiterator): any,
+  CallExpression(node: Iiterator): any,
   // ArrayExpression(node: Iiterator): void,
   // ObjectExpression(node: Iiterator): void,
   // ReturnStatement(node: Iiterator): any,
-  // AssignmentExpressionMap: any,
-  // BinaryExpressionOperatorMap: any,
-  // unaryoperateMap: any
+  AssignmentExpressionMap: any,
+  BinaryExpressionOperatorMap: any,
+  unaryoperateMap: any
 }
 
 /**

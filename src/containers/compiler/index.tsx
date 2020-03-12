@@ -82,7 +82,7 @@ const Compiler:React.FC<Iprops> = props => {
     clearMirrorscope();
     clearTracks();
     clearFrames();
-    updateCurrent(0);
+    updateCurrent(-1);
 
     const ast = parse(code, {locations: true});
     let scope = new Scope('function', null);
@@ -97,12 +97,14 @@ const Compiler:React.FC<Iprops> = props => {
   }
 
   const handleNextclick = () => {
-    if (current < frames.length - 1) {
-      const newIdx = current + 1;
-      for (let st of sortedSteps[newIdx]) {
+    console.log(current);
+    console.log(sortedSteps);
+    if (current < sortedSteps.length - 1) {
+      const newCurrent = current + 1;
+      for (let st of sortedSteps[newCurrent]) {
         st.step();
       }
-      updateCurrent(newIdx);
+      updateCurrent(newCurrent);
     }
   }
 
@@ -134,8 +136,8 @@ const Compiler:React.FC<Iprops> = props => {
     let newtracks = tracks.filter((track) => track.begin !== -1);
     // 计算轨道长度
     for (let i = 0; i < newtracks.length; i++) {
-      if (tracks[i].end > end) {
-        end = tracks[i].end;
+      if (newtracks[i].end > end) {
+        end = newtracks[i].end;
       }
     }
     // 轨道初始化
@@ -143,7 +145,7 @@ const Compiler:React.FC<Iprops> = props => {
       newFrames[j] = [defaultFrame];
     }
     for (let i = 0; i < newtracks.length; i++) {
-      const { begin, end, effect } = tracks[i];
+      const {begin, end, effect} = newtracks[i];
       // 轨道切割
       for (let j = begin; j < end; j++) {
         let newContent = deepCopy(effect);

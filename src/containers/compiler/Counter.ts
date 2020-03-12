@@ -47,7 +47,7 @@ export default class Counter implements Icounter {
 
   getStepcount(isSkip:boolean) {
     if (isSkip) {
-      return this.stepCounter;
+      return this.stepCounter === 0 ? 0 :  this.stepCounter - 1;
     } else {
        // 如果是一开始，不需要增加
       this.stepCounter += 1

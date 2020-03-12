@@ -11,7 +11,7 @@ import {
 } from '../types/animation';
 
 const initialState:Ianimation = {
-  current: 0,
+  current: -1,
   tracks: [{
     begin: 0,
     end: 0,
