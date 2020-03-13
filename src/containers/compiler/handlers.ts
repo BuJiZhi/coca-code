@@ -372,52 +372,52 @@ const nodeHandlers: InodeHandler =  {
     }
   },
 
-  // IfStatement:nodeIterator => {
-  //   const {node} = nodeIterator;
-  //   const {loc, test, consequent, alternate} = node;
-  //   const ifStmTracks: Itrack[] = [];
-  //   const ifSteps: Istep[] = [];
-  //   const baseTrack = produceBaseTrackAtLoc(loc, ++basetrackCounter);
-  //   ifStmTracks.push(baseTrack);
-  //   const testResult = nodeIterator.traverse(test, {tracks:ifStmTracks, steps:ifSteps});
-  //   if (testResult.value) {
-  //     nodeIterator.traverse(consequent, {tracks:ifStmTracks, steps:ifSteps});
-  //   } else if (node.alternate) {
-  //     nodeIterator.traverse(alternate as Inode, {tracks: ifStmTracks, steps:ifSteps});
-  //   }
-  //   trackSetEnd(ifStmTracks, trackCounter);
-  //   nodeIterator.storeStepAndTrack(ifSteps, ifStmTracks);
-  // },
+  IfStatement:nodeIterator => {
+    const {node, skip} = nodeIterator;
+    const {loc, test, consequent, alternate} = node;
+    const ifStmTracks: Itrack[] = [];
+    const ifSteps: Istep[] = [];
+    const baseTrack = baseTrackAtLocBycounter(loc, counter.getBaseKeyAndTrackCount(skip));
+    ifStmTracks.push(baseTrack);
+    const testResult = nodeIterator.traverse(test, {tracks:ifStmTracks, steps:ifSteps});
+    if (testResult.value) {
+      nodeIterator.traverse(consequent, {tracks:ifStmTracks, steps:ifSteps});
+    } else if (node.alternate) {
+      nodeIterator.traverse(alternate as Inode, {tracks: ifStmTracks, steps:ifSteps});
+    }
+    trackSetEnd(ifStmTracks, counter.basetrackCounter);
+    nodeIterator.storeStepAndTrack(ifSteps, ifStmTracks);
+  },
 
-  // BlockStatement: nodeIterator => {
-  //   let scope = nodeIterator.createScope('block');
-  //   let mirrorScope = nodeIterator.createMirroScope('block');
-  //   const nodes = nodeIterator.node.body as Inode[];
-  //   for (const node of nodes) {
-  //     const signal = nodeIterator.traverse(node as Inode, {scope, mirrorScope});
-  //     if (Signal.isReturn(signal)) {
-  //       trackSetEnd(nodeIterator.tracks, trackCounter);
-  //       return signal;
-  //     }
-  //   }
-  //   trackSetEnd(nodeIterator.tracks, trackCounter);
-  // },
+  BlockStatement: nodeIterator => {
+    let scope = nodeIterator.createScope('block');
+    let mirrorScope = nodeIterator.createMirroScope('block');
+    const nodes = nodeIterator.node.body as Inode[];
+    for (const node of nodes) {
+      const signal = nodeIterator.traverse(node as Inode, {scope, mirrorScope});
+      if (Signal.isReturn(signal)) {
+        trackSetEnd(nodeIterator.tracks, counter.trackCounter);
+        return signal;
+      }
+    }
+    trackSetEnd(nodeIterator.tracks, counter.trackCounter);
+  },
 
-  // WhileStatement(nodeIterator) {
-  //   const {node} = nodeIterator;
-  //   const {test, loc} = node;
-  //   const whileTrack: Itrack[] = [];
-  //   const baseTrack = produceBaseTrackAtLoc(loc, ++basetrackCounter);
-  //   whileTrack.push(baseTrack);
-  //   const whileSteps: Istep[] = [];
-  //   let whileCount = 0; //  防止死循环的出现
-  //   while (nodeIterator.traverse(test, {tracks: whileTrack, steps:whileSteps}).value && whileCount < 100) {
-  //     nodeIterator.traverse(node.body as Inode, {tracks: whileTrack, steps:whileSteps});
-  //     trackSetEnd(whileTrack, trackCounter);
-  //     whileCount += 1;
-  //   }
-  //   nodeIterator.storeStepAndTrack(whileSteps, whileTrack);
-  // },
+  WhileStatement(nodeIterator) {
+    const {node, skip} = nodeIterator;
+    const {test, loc} = node;
+    const whileTrack: Itrack[] = [];
+    const baseTrack = baseTrackAtLocBycounter(loc, counter.getBaseKeyAndTrackCount(skip));
+    whileTrack.push(baseTrack);
+    const whileSteps: Istep[] = [];
+    let whileCount = 0; //  防止死循环的出现
+    while (nodeIterator.traverse(test, {tracks: whileTrack, steps:whileSteps}).value && whileCount < 100) {
+      nodeIterator.traverse(node.body as Inode, {tracks: whileTrack, steps:whileSteps});
+      trackSetEnd(whileTrack, counter.trackCounter);
+      whileCount += 1;
+    }
+    nodeIterator.storeStepAndTrack(whileSteps, whileTrack);
+  },
 
   // ForInStatement(nodeIterator) {
   //   const {node, scope} = nodeIterator;
@@ -500,21 +500,21 @@ const nodeHandlers: InodeHandler =  {
   //   nodeIterator.addStep(updateStep);
   // },
 
-  // NewExpression(nodeIterator) {
-  //   const {node} = nodeIterator;
-  //   const {loc} = node;
-  //   const func = nodeIterator.traverse(nodeIterator.node.callee);
-  //   const args = nodeIterator.node.arguments.map(arg => nodeIterator.traverse(arg).value);
-  //   const news = new func.value(args)[0][0];
-  //   const track = produceTrack(news, 'appear', loc, keyCounter++, trackCounter++);
-  //   const step = produceStep(donothing, stepCounter++);
-  //   nodeIterator.addTrack(track);
-  //   nodeIterator.addStep(step);
-  //   return {
-  //     value: news,
-  //     preTrack: track
-  //   }
-  // },
+  NewExpression(nodeIterator) {
+    const {node, skip} = nodeIterator;
+    const {loc} = node;
+    const func = nodeIterator.traverse(nodeIterator.node.callee);
+    const args = nodeIterator.node.arguments.map(arg => nodeIterator.traverse(arg).value);
+    const news = new func.value(args)[0][0];
+    const track = produceTrackBycounter(news, 'appear', loc, counter.getBaseKeyAndTrackCount(skip));
+    const step = produceStep(donothing, counter.getStepcount(skip));
+    nodeIterator.addTrack(track);
+    nodeIterator.addStep(step);
+    return {
+      value: news,
+      preTrack: track
+    }
+  },
 
   // FunctionDeclaration: nodeIterator => {
   //   const { node, code } = nodeIterator;
