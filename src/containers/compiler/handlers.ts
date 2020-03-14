@@ -239,7 +239,6 @@ const nodeHandlers: InodeHandler =  {
   Identifier: nodeIterator => {
     let {node, skip} = nodeIterator;
     const {name, loc} = node;
-    console.log(skip)
     if (!skip) {
       skip = skipTest(name);
     }
@@ -289,7 +288,6 @@ const nodeHandlers: InodeHandler =  {
 
   BinaryExpression: nodeIterator => {
     let {node, skip} = nodeIterator;
-    console.log(skip);
     const {loc} = node;
     const left = nodeIterator.traverse(node.left).value;
     if (!skip) {skip = skipTest(left);}
@@ -400,6 +398,7 @@ const nodeHandlers: InodeHandler =  {
     let scope = nodeIterator.createScope('block');
     let mirrorScope = nodeIterator.createMirroScope('block');
     const nodes = nodeIterator.node.body as Inode[];
+    console.log(nodes);
     for (const node of nodes) {
       const signal = nodeIterator.traverse(node as Inode, {scope, mirrorScope});
       if (Signal.isReturn(signal)) {
@@ -429,7 +428,6 @@ const nodeHandlers: InodeHandler =  {
   ForInStatement(nodeIterator) {
     const {node, scope, skip} = nodeIterator;
     const {left, right, body, loc} = node;
-    console.log(node);
     const forTrack = [];
     const forStep = [];
     const iterate = scope.get('__filbertRight0').value;
@@ -443,7 +441,7 @@ const nodeHandlers: InodeHandler =  {
       const leftNode = {value: name, preTrack: leftTrack};
 
       right.type = 'ListIdentifier';
-      const rightNode = nodeIterator.traverse(right);
+      const rightNode = nodeIterator.traverse(right, {opt: {listIndex: j}});
       const rightTrack = produceTrackBycounter(
         rightNode.value[j], 
         "move",
@@ -466,8 +464,17 @@ const nodeHandlers: InodeHandler =  {
   },
 
   ListIdentifier(nodeIterator) {
-    const {node, opt} = nodeIterator;
-    console.log(opt);
+    const {node, opt, scope, skip} = nodeIterator;
+    const {loc, name} = node;
+    const lst = scope.get(name).value;
+    const track = produceTrackBycounter(lst, 'appear', loc, counter.getKeyAndTrackCount(skip))
+    nodeIterator.addTrack(track);
+    const step = produceStep(donothing, counter.getStepcount(skip));
+    nodeIterator.addStep(step);
+    return {
+      value: lst,
+      preTrack: track
+    }
   },
 
   // ForStatement(nodeIterator) {

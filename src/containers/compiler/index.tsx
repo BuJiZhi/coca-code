@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import Cm from '../../components/Cm';
 import {Parser} from 'acorn';
-import {parse} from 'sarama.js';
 import Iterator from './Iterator';
 import Scope from './Scope';
 import {Node} from 'acorn';
@@ -36,7 +35,7 @@ import {
   clearTracksAction,
   clearFramesAction
 } from '../../store/animation';
-
+const {parse} = require('../../utils/sarama.js/index');
 interface Iprops {
   compiler: Icompiler;
   editor: Ieditor;
