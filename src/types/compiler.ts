@@ -1,5 +1,5 @@
-import { Node } from 'acorn';
-import { Itrack, Ilocations } from './animation';
+import {Node} from 'acorn';
+import {Itrack, Ilocations} from './animation';
 export type Value = any;
 export type ScopeValue = any;
 export type ScopeType = "function" | "block";
@@ -44,7 +44,8 @@ export interface Ioptions {
   mirrorScope?: Iscope,
   steps?: Istep[],
   tracks?: Itrack[],
-  skip?: boolean
+  skip?: boolean,
+  opt?: {[index:string]:any}
 }
 
 export interface ItraversBack {
@@ -58,9 +59,11 @@ export interface Iiterator {
   mirrorScope: Iscope;
   tracks: Itrack[];
   stateHandler: IstateHandler;
-  code: string;
   steps: Istep[];
   skip: boolean;
+  opt?: {
+    listIndex?: number
+  };
   traverse(node: Inode, options?: Ioptions): ItraversBack;
   createScope(type: ScopeType): Iscope;
   createMirroScope(type: ScopeType): Iscope;
@@ -87,7 +90,8 @@ type nodeTypes =
 'StringLiteral' |
 'Identifier' |
 'MemberExpression' |
-'Literal';
+'Literal' |
+'ListIdentifier';
 
 export interface Itoken {
   type: string;
@@ -243,7 +247,8 @@ export interface InodeHandler {
   // ForStatement(node:Iiterator): void,
   // UpdateExpression(node: Iiterator): void,
   NewExpression(node: Iiterator): any,
-  // ForInStatement(node: Iiterator): any,
+  ForInStatement(node: Iiterator): any,
+  ListIdentifier(node: Iiterator): any,
   // FunctionDeclaration(node: Iiterator): void,
   // FunctionExpression(node: Iiterator): [Step, Step],
   CallExpression(node: Iiterator): any,

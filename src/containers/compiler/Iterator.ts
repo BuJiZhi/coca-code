@@ -14,44 +14,54 @@ import { Itrack } from '../../types/animation';
 
 class Iterator implements Iiterator {
 
-  node: Inode;
-  scope: Iscope;
-  mirrorScope: Iscope;
-  stateHandler: IstateHandler;
-  tracks: Itrack[] | [];
-  steps: Istep[] | [];
-  code: string;
-  skip: boolean;
+  node:Inode;
+  scope:Iscope;
+  mirrorScope:Iscope;
+  stateHandler:IstateHandler;
+  tracks:Itrack[] | [];
+  steps:Istep[] | [];
+  skip:boolean;
+  opt:{[index:string]:any};
 
   constructor(
-    node: Inode, 
-    scope: Iscope, 
-    mirrorScope: Iscope, 
-    stateHandler: IstateHandler,
-    code: string,
-    tracks: Itrack[],
-    steps: Istep[],
-    skip: boolean
+    node:Inode, 
+    scope:Iscope, 
+    mirrorScope:Iscope, 
+    stateHandler:IstateHandler,
+    tracks:Itrack[],
+    steps:Istep[],
+    skip:boolean,
+    opt:{[index:string]:any}
     ) {
     this.node = node;
     this.scope = scope;
     this.mirrorScope = mirrorScope;
     this.stateHandler = stateHandler;
-    this.code = code;
     this.tracks = tracks;
     this.steps = steps;
     this.skip = skip;
+    this.opt = opt;
   }
 
-  traverse(node: Inode, options: Ioptions={}):ItraversBack {
-    const { scope, tracks, steps, mirrorScope, skip } = options;
+  traverse(node:Inode, options:Ioptions={}):ItraversBack {
+    const {scope, tracks, steps, mirrorScope, skip, opt} = options;
     const nextTracks = tracks || this.tracks;
     const nextSteps = steps || this.steps;
     const nextScope = scope || this.scope;
     const nextMirrorScope = mirrorScope || this.mirrorScope;
     const nextskip = skip || this.skip;
+    const nextopt = opt || this.opt;
     const _eval = nodeHandlers[node.type as keyof InodeHandler];
-    const iterator = new Iterator(node, nextScope, nextMirrorScope, this.stateHandler, this.code, nextTracks, nextSteps, nextskip);
+    const iterator = new Iterator(
+      node, 
+      nextScope, 
+      nextMirrorScope, 
+      this.stateHandler, 
+      nextTracks, 
+      nextSteps, 
+      nextskip,
+      nextopt
+    );
     if (!_eval) {
       throw new Error(`No handler for ${node.type}`);
     }
@@ -74,7 +84,7 @@ class Iterator implements Iiterator {
     return this.mirrorScope;
   }
 
-  storeStepAndTrack(steps: Istep[] | undefined, tracks: Itrack[] | undefined) {
+  storeStepAndTrack(steps:Istep[] | undefined, tracks:Itrack[] | undefined) {
     const that:any = this;
     const sp = steps || this.steps;
     const tk = tracks || this.tracks;
@@ -82,12 +92,12 @@ class Iterator implements Iiterator {
     that.stateHandler.updateTracks(tk);
   }
 
-  addTrack(track: Itrack): void {
+  addTrack(track:Itrack): void {
     const that: any = this;
     that.tracks.push(track);
   }
 
-  addStep(fn: Istep) {
+  addStep(fn:Istep) {
     const that: any = this;
     that.steps.push(fn);
   }

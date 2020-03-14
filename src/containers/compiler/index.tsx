@@ -92,13 +92,11 @@ const Compiler:React.FC<Iprops> = props => {
     updateMirrorScope(mirrorScope);
 
     const iterator = new Iterator(Object.create(null), 
-      scope, mirrorScope, dispatches, code, [], [], false);
+      scope, mirrorScope, dispatches, [], [], false, {});
     iterator.traverse(ast as Inode);
   }
 
   const handleNextclick = () => {
-    console.log(current);
-    console.log(sortedSteps);
     if (current < sortedSteps.length - 1) {
       const newCurrent = current + 1;
       for (let st of sortedSteps[newCurrent]) {
