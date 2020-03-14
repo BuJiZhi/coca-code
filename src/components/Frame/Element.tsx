@@ -10,6 +10,15 @@ const Element: React.FC<Iprops> = ({info}) => {
   const { value, valueType, process, style } = info;
   const { height, lineHeight } = style;  
   const spring = useSpring(style);
+  const string2arr = (str:string) => {
+    if (typeof str !== 'string') {return [];}
+    let arr = [];
+    for (let i = 0; i < str.length; i++) {
+      arr.push(str.charAt(i));
+    }
+    return arr;
+  }
+  const showvalue = string2arr(valueConvert(value, valueType));
   return (
     <animated.div
       style={ process === 'enter' ? spring : style.to }
@@ -20,7 +29,10 @@ const Element: React.FC<Iprops> = ({info}) => {
           lineHeight
         }}
       >
-        { valueConvert(value, valueType) }
+        {showvalue.map((ch, index) => (
+          <animated.span key={index}>{ch}</animated.span>
+          ))
+        }
       </animated.span>
     </animated.div>
   );

@@ -21,7 +21,7 @@ class Iterator implements Iiterator {
   tracks:Itrack[] | [];
   steps:Istep[] | [];
   skip:boolean;
-  opt:{[index:string]:any};
+  opt?:{listIndex?:number};
 
   constructor(
     node:Inode, 
@@ -31,7 +31,7 @@ class Iterator implements Iiterator {
     tracks:Itrack[],
     steps:Istep[],
     skip:boolean,
-    opt:{[index:string]:any}
+    opt?:{listIndex?:number}
     ) {
     this.node = node;
     this.scope = scope;

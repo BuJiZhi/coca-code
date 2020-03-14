@@ -35,7 +35,8 @@ import {
   clearTracksAction,
   clearFramesAction
 } from '../../store/animation';
-const {parse} = require('../../utils/sarama.js/index');
+import {parse} from 'sarama.js';
+
 interface Iprops {
   compiler: Icompiler;
   editor: Ieditor;

@@ -398,7 +398,6 @@ const nodeHandlers: InodeHandler =  {
     let scope = nodeIterator.createScope('block');
     let mirrorScope = nodeIterator.createMirroScope('block');
     const nodes = nodeIterator.node.body as Inode[];
-    console.log(nodes);
     for (const node of nodes) {
       const signal = nodeIterator.traverse(node as Inode, {scope, mirrorScope});
       if (Signal.isReturn(signal)) {
@@ -428,6 +427,7 @@ const nodeHandlers: InodeHandler =  {
   ForInStatement(nodeIterator) {
     const {node, scope, skip} = nodeIterator;
     const {left, right, body, loc} = node;
+    console.log(node);
     const forTrack = [];
     const forStep = [];
     const iterate = scope.get('__filbertRight0').value;
@@ -464,16 +464,34 @@ const nodeHandlers: InodeHandler =  {
   },
 
   ListIdentifier(nodeIterator) {
-    const {node, opt, scope, skip} = nodeIterator;
+    let {node, opt, scope, skip} = nodeIterator;
     const {loc, name} = node;
     const lst = scope.get(name).value;
-    const track = produceTrackBycounter(lst, 'appear', loc, counter.getKeyAndTrackCount(skip))
-    nodeIterator.addTrack(track);
+    const listtrack = produceTrackBycounter(lst, 'appear', loc, counter.getKeyAndTrackCount(skip));
+    nodeIterator.addTrack(listtrack);
     const step = produceStep(donothing, counter.getStepcount(skip));
     nodeIterator.addStep(step);
+    if (opt && opt.listIndex) {
+      const pointertrack = produceTrack(
+        lst[opt.listIndex], 
+        'appear', 
+        {
+          start: {...loc.start, column: loc.start.column + opt.listIndex},
+          end: {...loc.end, column: loc.start.column + opt.listIndex + lst[opt.listIndex].toString().length},
+        },
+        ++counter.keyCounter,
+        counter.trackCounter
+        );
+      console.log(pointertrack);
+      nodeIterator.addTrack(pointertrack);
+      return {
+        value: lst,
+        preTrack: pointertrack
+      }
+    }
     return {
       value: lst,
-      preTrack: track
+      preTrack: listtrack
     }
   },
 

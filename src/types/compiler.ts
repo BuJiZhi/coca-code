@@ -45,7 +45,7 @@ export interface Ioptions {
   steps?: Istep[],
   tracks?: Itrack[],
   skip?: boolean,
-  opt?: {[index:string]:any}
+  opt?: {listIndex?:number}
 }
 
 export interface ItraversBack {
@@ -61,9 +61,7 @@ export interface Iiterator {
   stateHandler: IstateHandler;
   steps: Istep[];
   skip: boolean;
-  opt?: {
-    listIndex?: number
-  };
+  opt?: {listIndex?: number};
   traverse(node: Inode, options?: Ioptions): ItraversBack;
   createScope(type: ScopeType): Iscope;
   createMirroScope(type: ScopeType): Iscope;
