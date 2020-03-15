@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 import Editor from '../components/Editor';
-import { connect } from 'react-redux';
-import { Dispatch } from 'redux';
+import {connect} from 'react-redux';
+import {Dispatch} from 'redux';
 import {RootState} from '../store';
-import { Ieditor } from '../types/editor';
+import {Ieditor} from '../types/editor';
 import { 
   updateCodeAction,
   updateFontWidthAction,
@@ -20,14 +20,14 @@ interface Iprops {
 }
 
 const EditorCon:React.FC<Iprops> = props => {
-  const { editor, updateFontWidth, updateLineHeight, updateHeight, updateCode } = props;
-  const { code } = editor;
+  const {editor, updateFontWidth, updateLineHeight, updateHeight, updateCode} = props;
+  const {code} = editor;
   const updateWidthAndHeight = (width:number, lineHeight:number) => {
     updateFontWidth(width);
     updateLineHeight(lineHeight);
   }
   return (
-    <Editor 
+    <Editor
       code={code}
       handleUpdateCode={(value:string) => updateCode(value)}
       updateWidthAndHeight={updateWidthAndHeight}

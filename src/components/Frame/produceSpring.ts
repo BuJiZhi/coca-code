@@ -1,6 +1,6 @@
 import {Ieffect, Ispring} from '../../types/animation';
 const produceSpring = (content:Ieffect, fontWidth:number, lineHeight:number) => {
-  const {key, type, startpos, endpos, value, valueType, process} = content;
+  const {key, type, startpos, endpos, value, valueType, process, index} = content;
   startpos.line -= 1;
   endpos.line -= 1;
   const gutterWidth = 32;
@@ -18,7 +18,6 @@ const produceSpring = (content:Ieffect, fontWidth:number, lineHeight:number) => 
   const outlined = {
     boxSizing: "border-box",
     backgroundColor: "rgb(82, 139, 255)",
-    // padding: "1px",
     color: "rgb(206, 203, 236)",
     width: (endpos.column - startpos.column) * fontWidth + 2,
     border: "1px solid rgba(245, 245, 245, .05)",
@@ -47,8 +46,8 @@ const produceSpring = (content:Ieffect, fontWidth:number, lineHeight:number) => 
           top: (startpos.line) * lineHeight + paddingHeight,
           width: "100%",
           height: `${lineHeight * (endpos.line - startpos.line + 1)}px`,
-          backgroundColor: "#fff",
-          opacity: 0.1,
+          backgroundColor: "#666",
+          opacity: 0.3,
           zIndex: 0
         }
       }
@@ -100,42 +99,10 @@ const produceSpring = (content:Ieffect, fontWidth:number, lineHeight:number) => 
       springs.style = {
 
       }
-    // case 't4':
-    //   springs.style = {
-    //     to: {
-    //       opacity: 1,
-    //       left: startpos[1] * fontWidth,
-    //       top: startpos[0] * lineHeight,
-    //       backgroundColor: "#fff",
-    //       border: "1px solid #aaa",
-    //       borderRadius: "3px",
-    //       width: (endpos[1] - startpos[1]) * fontWidth,
-    //       textAlign: "center",
-    //       overflow: "hidden"
-    //     },
-    //     from: {
-    //       opacity: 0
-    //     }
-    //   }
-    //   break;
-    // case 't5':
-    //   springs.style = {
-    //     to: {
-    //       opacity: 1,
-    //       left: startpos[1] * fontWidth,
-    //       top: startpos[0] * lineHeight,
-    //       backgroundColor: "#fff",
-    //       border: "1px solid #aaa",
-    //       value: `Declare function: ${value}`,
-    //       borderRadius: "3px",
-    //       // width: (endpos[1] - startpos[1]) * fontWidth,
-    //       textAlign: "center",
-    //       // overflow: "hidden"
-    //     },
-    //     from: {
-    //       opacity: 0
-    //     }
-    //   }
+    case 'list_appear':
+      springs.style = {
+        
+      }
     default:
       break;
   } 

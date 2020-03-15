@@ -15,7 +15,7 @@ export type AnimationTypes =
 'compute' |
 'function' |
 'block' |
-'t5';
+'list_appear';
 export type Process = 'enter' | 'stay' | 'leave';
 export type ValueType = 
 "[object Null]" | 
@@ -35,14 +35,15 @@ export interface Itrack {
   effect: Ieffect;
 }
 export interface Ieffect {
-  type: AnimationTypes,
-  startpos: Ilocation,
-  endpos: Ilocation,
-  process?: Process,
-  key: string,
-  value: any,
-  valueType: ValueType,
-  width?: number
+  type: AnimationTypes;
+  startpos: Ilocation;
+  endpos: Ilocation;
+  process?: Process;
+  key: string;
+  value: any;
+  valueType: ValueType;
+  width?: number;
+  index: number | undefined;
 }
 export interface Ispring {
   key: string,

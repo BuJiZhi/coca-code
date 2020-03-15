@@ -7,7 +7,7 @@ import {
   UPDATE_FRAMES,
   UPDATE_TRACKS,
   CLEAR_FRAMES,
-  CLEAR_TRACKS,
+  CLEAR_TRACKS
 } from '../types/animation';
 
 const initialState:Ianimation = {
@@ -26,7 +26,8 @@ const initialState:Ianimation = {
       process: 'enter',
       key: 'sp-0',
       value: '',
-      valueType: '[object String]'
+      valueType: '[object String]',
+      index: undefined
     }
   }],
   frames: [[]],
@@ -37,7 +38,8 @@ const initialState:Ianimation = {
     process: 'enter',
     key: 'sp-0',
     value: '',
-    valueType: '[object String]'
+    valueType: '[object String]',
+    index: undefined
   }
 }
 

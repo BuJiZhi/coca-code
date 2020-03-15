@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from "react";
 import {Controlled as Mirror} from 'react-codemirror2';
 import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/material.css';
+import 'codemirror/theme/material-ocean.css';
 import 'codemirror/mode/python/python';
 
 interface Iprops {
@@ -16,7 +16,7 @@ const Editor:React.FC<Iprops> = ({
   updateWidthAndHeight
 }) => {
   const [fontWidth, setWidth] = useState(7);
-  const [lineHeight, setLineHeight ] = useState(13);
+  const [lineHeight, setLineHeight] = useState(13);
   const handleMirrorBeforeChange = (editor:any, data:any, value:string) => {
     const newHineHeight = editor.defaultTextHeight();
     const newWidth = editor.defaultCharWidth();
@@ -30,15 +30,17 @@ const Editor:React.FC<Iprops> = ({
   }, [lineHeight]);
 
   return (
-    <Mirror
-      value={code}
-      onBeforeChange={handleMirrorBeforeChange}
-      options={{
-        mode: "python",
-        theme: "material",
-        lineNumbers: true
-      }}
-    />
+    <div style={{fontSize: "23px"}}>
+      <Mirror
+        value={code}
+        onBeforeChange={handleMirrorBeforeChange}
+        options={{
+          mode: "python",
+          theme: "material-ocean",
+          lineNumbers: true
+        }}
+      />
+    </div>
   )
 }
 

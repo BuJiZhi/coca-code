@@ -1,14 +1,14 @@
 import React from 'react';
-import { useSpring, animated } from 'react-spring';
-import { valueConvert } from '../../utils/tools';
+import {useSpring, animated} from 'react-spring';
+import {valueConvert} from '../../utils/tools';
 
 interface Iprops {
   info: any
 }
 
-const Element: React.FC<Iprops> = ({info}) => {
-  const { value, valueType, process, style } = info;
-  const { height, lineHeight } = style;  
+const Element:React.FC<Iprops> = ({info}) => {
+  const {value, valueType, process, style, index} = info;
+  const {height, lineHeight} = style;
   const spring = useSpring(style);
   const string2arr = (str:string) => {
     if (typeof str !== 'string') {return [];}
@@ -21,11 +21,11 @@ const Element: React.FC<Iprops> = ({info}) => {
   const showvalue = string2arr(valueConvert(value, valueType));
   return (
     <animated.div
-      style={ process === 'enter' ? spring : style.to }
+      style={process === 'enter' ? spring : style.to}
     >
       <animated.span
         style={{
-          height, 
+          height,
           lineHeight
         }}
       >

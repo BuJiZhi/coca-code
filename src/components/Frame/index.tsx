@@ -20,11 +20,11 @@ const Display: React.FC<Iprops> = ({fontWidth, lineHeight, frame}) => {
       }
       setSpring(springTemp);
     }
-  }, [frame])
+  }, [frame]);
   return (
     <div>
       {springLst.map((item) =>
-        <Element info={ item } key= { item.key }/>)
+        <Element info={item} key= {item.key}/>)
       }
     </div>
   )
