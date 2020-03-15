@@ -7,7 +7,8 @@ interface Iprops {
 }
 
 const Element:React.FC<Iprops> = ({info}) => {
-  const {value, valueType, process, style, index} = info;
+  const {value, valueType, process, style} = info;
+  console.log(style.index);
   const {height, lineHeight} = style;
   const spring = useSpring(style);
   const string2arr = (str:string) => {

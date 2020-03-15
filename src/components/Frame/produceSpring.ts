@@ -10,6 +10,7 @@ const produceSpring = (content:Ieffect, fontWidth:number, lineHeight:number) => 
     value,
     valueType,
     process,
+    index,
     style: {
       opacity: 1,
       reset: true
@@ -23,7 +24,10 @@ const produceSpring = (content:Ieffect, fontWidth:number, lineHeight:number) => 
     border: "1px solid rgba(245, 245, 245, .05)",
     borderRadius: "2px",
     textAlign: "center",
-    overflow: "hidden"
+    overflow: "hidden",
+    highlight: {
+      backgroundColor: "rgb(82, 139, 255)"
+    }
   }
   const common = {
     display: 'block',

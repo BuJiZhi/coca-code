@@ -46,11 +46,12 @@ export interface Ieffect {
   index: number | undefined;
 }
 export interface Ispring {
-  key: string,
-  value: any,
-  valueType: ValueType,
-  process?: Process,
-  style: any
+  key: string;
+  value: any;
+  valueType: ValueType;
+  process?: Process;
+  index?: number | undefined;
+  style: any;
 }
 /**
  * about store
