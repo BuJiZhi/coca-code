@@ -1,6 +1,6 @@
 import {Ieffect, Ispring} from '../../types/animation';
 const produceSpring = (content:Ieffect, fontWidth:number, lineHeight:number) => {
-  const {key, type, startpos, endpos, value, valueType, process, index} = content;
+  const {key, type, startpos, endpos, value, valueType, process, idx} = content;
   startpos.line -= 1;
   endpos.line -= 1;
   const gutterWidth = 32;
@@ -10,7 +10,12 @@ const produceSpring = (content:Ieffect, fontWidth:number, lineHeight:number) => 
     value,
     valueType,
     process,
-    index,
+    idx,
+    fontWidth,
+    lineHeight,
+    highlight: {
+      backgroundColor: "rgb(0, 0, 255)"
+    },
     style: {
       opacity: 1,
       reset: true
@@ -20,14 +25,12 @@ const produceSpring = (content:Ieffect, fontWidth:number, lineHeight:number) => 
     boxSizing: "border-box",
     backgroundColor: "rgb(82, 139, 255)",
     color: "rgb(206, 203, 236)",
-    width: (endpos.column - startpos.column) * fontWidth + 2,
+    width: Math.abs(endpos.column - startpos.column) * fontWidth,
     border: "1px solid rgba(245, 245, 245, .05)",
     borderRadius: "2px",
     textAlign: "center",
     overflow: "hidden",
-    highlight: {
-      backgroundColor: "rgb(82, 139, 255)"
-    }
+    
   }
   const common = {
     display: 'block',
@@ -88,11 +91,9 @@ const produceSpring = (content:Ieffect, fontWidth:number, lineHeight:number) => 
           left: endpos.column * fontWidth + gutterWidth,
           top: endpos.line * lineHeight + paddingHeight,
           ...outlined,
-
-          opacity: 0,
+          opacity: 0
         },
         from: {
-          color: 'green',
           left: startpos.column * fontWidth + gutterWidth,
           top: startpos.line * lineHeight + paddingHeight,
           opacity: 1

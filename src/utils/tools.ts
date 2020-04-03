@@ -78,25 +78,64 @@ export function objToArr(obj: any): Array<any> {
   return newArr;
 }
 
-export function valueConvert(value: any, type: ValueType): any {
-  switch(type) {
-    case "[object String]":
-      return value;
-    case "[object Number]":
-      return value;
-    case "[object Boolean]":
-      return value ? "true" : "false";
-    case "[object Function]":
-      return `[function]${value.name}`;
-    case "[object Array]":
-      // 从那边传过来的数组会被从Array转成object
-      const arr = objToArr(value);
-      return `[${arr.join(',')}]`;
-    case "[object Object]":
-      return 'obj';
-    default:
-      console.log(typeof value);
-      return "unknow";
-  }
+export function value2arr(value:any) {
+  let arr:any[] = [];
+  if (typeof value === 'string') {
+    for (let i = 0; i < value.length; i++) {
+      arr.push(value.charAt(i));
+    }
+  } else if (typeof value === 'object') {
+    for (let key in value) {
+      arr.push(value[key]);
+    }
+  } 
+  return arr;
 }
 
+export function valueConvert(value: any, type: ValueType):{value: string[],charNums:number}  {
+  switch(type) {
+    case "[object String]":
+      const val = value2arr(value);
+      return {
+        value: val,
+        charNums: val.length
+      }
+    case "[object Number]":
+      const numval = value2arr(value.toString());
+      return {
+        value: numval,
+        charNums: numval.length
+      }
+    case "[object Boolean]":
+      const boolval = value ? ["True"] : ["False"]
+      return {
+        value: boolval,
+        charNums: boolval[0].length 
+      }
+    case "[object Function]":
+      const fnval = [`[fn]${value.name}`];
+      return {
+        value: fnval,
+        charNums: fnval.length
+      };
+    case "[object Array]":
+      // 从那边传过来的数组会被从Array转成object
+      const arrval = value2arr(value);
+      return {
+        value: arrval,
+        charNums: JSON.stringify(arrval).length
+      }
+    case "[object Object]":
+      const objval = ['obj'];
+      return {
+        value: objval,
+        charNums: 0
+      }
+    default:
+      console.log(typeof value);
+      return {
+        value: ["unknow"],
+        charNums: 0
+      };
+  }
+}

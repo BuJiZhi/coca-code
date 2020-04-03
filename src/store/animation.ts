@@ -26,8 +26,7 @@ const initialState:Ianimation = {
       process: 'enter',
       key: 'sp-0',
       value: '',
-      valueType: '[object String]',
-      index: undefined
+      valueType: '[object String]'
     }
   }],
   frames: [[]],
@@ -38,8 +37,7 @@ const initialState:Ianimation = {
     process: 'enter',
     key: 'sp-0',
     value: '',
-    valueType: '[object String]',
-    index: undefined
+    valueType: '[object String]'
   }
 }
 

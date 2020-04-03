@@ -7,35 +7,36 @@ interface Iprops {
 }
 
 const Element:React.FC<Iprops> = ({info}) => {
-  const {value, valueType, process, style} = info;
-  console.log(style.index);
-  const {height, lineHeight} = style;
-  const spring = useSpring(style);
-  const string2arr = (str:string) => {
-    if (typeof str !== 'string') {return [];}
-    let arr = [];
-    for (let i = 0; i < str.length; i++) {
-      arr.push(str.charAt(i));
+  const {value, valueType, process, style, idx, highlight, lineHeight, fontWidth} = info;
+  const showvalue = valueConvert(value, valueType);
+  
+  if (showvalue.charNums * fontWidth > style.to.width) {
+    if (style.to.top) {
+      style.to.top -= lineHeight;
+      style.to.width = showvalue.charNums * fontWidth;
+      if (style.from.top) style.from.top -= lineHeight;
     }
-    return arr;
   }
-  const showvalue = string2arr(valueConvert(value, valueType));
-  return (
-    <animated.div
-      style={process === 'enter' ? spring : style.to}
-    >
-      <animated.span
-        style={{
-          height,
-          lineHeight
-        }}
+  const spring = useSpring(style);
+  const elementContained = () => {
+    return (
+      <animated.div
+        style={process === 'enter' ? spring : style.to}
       >
-        {showvalue.map((ch, index) => (
-          <animated.span key={index}>{ch}</animated.span>
-          ))
-        }
-      </animated.span>
-    </animated.div>
+        <animated.span>
+          {showvalue.value.map((ch, index) => (
+            <animated.span key={index} style={index === idx ? highlight : {}}>{ch}</animated.span>
+            ))
+          }
+        </animated.span>
+      </animated.div>
+    )
+  }
+  
+  return (
+    <div>
+      {elementContained()}
+    </div>
   );
 }
 

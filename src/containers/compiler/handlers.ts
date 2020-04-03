@@ -7,7 +7,7 @@ import {
   ImemberValue,
   IVariableDecalrations
  } from '../../types/compiler';
-import {Itrack, AnimationTypes, ValueType, Ilocation, Ilocations} from '../../types/animation';
+import {Itrack, AnimationTypes, Ilocations} from '../../types/animation';
 import {typeOf} from '../../utils/tools';
 import Signal from './Signal';
 import {MemberValue} from './Value';
@@ -29,7 +29,8 @@ function produceTrack(
   type:AnimationTypes, 
   loc: Ilocations,
   keyCounter:number,
-  trackCounter:number
+  trackCounter:number,
+  idx?:number
   ):Itrack {
   return {
     begin: trackCounter,
@@ -41,13 +42,14 @@ function produceTrack(
       valueType: typeOf(value),
       startpos: loc.start,
       endpos: loc.end,
-      key: `${type}-${keyCounter}`
+      key: `${type}-${keyCounter}`,
+      idx
     }
   }
 }
 
-function produceTrackBycounter(value:any, type:AnimationTypes, loc: Ilocations, keyAndTrack:[number, number]) {
-  return produceTrack(value, type, loc, keyAndTrack[0], keyAndTrack[1]);
+function produceTrackBycounter(value:any, type:AnimationTypes, loc: Ilocations, keyAndTrack:[number, number], idx?:number) {
+  return produceTrack(value, type, loc, keyAndTrack[0], keyAndTrack[1], idx);
 }
 
 function produceBaseTrackAtLoc(loc:Ilocations, keycounter:number, trackCounter:number):Itrack {
@@ -467,28 +469,16 @@ const nodeHandlers: InodeHandler =  {
     let {node, opt, scope, skip} = nodeIterator;
     const {loc, name} = node;
     const lst = scope.get(name).value;
-    const listtrack = produceTrackBycounter(lst, 'appear', loc, counter.getKeyAndTrackCount(skip));
+    const listtrack = produceTrackBycounter(
+      lst, 
+      'appear', 
+      loc, 
+      counter.getKeyAndTrackCount(skip), 
+      opt && opt.listIndex ?  opt.listIndex * 2 + 1 : undefined
+      );
     nodeIterator.addTrack(listtrack);
     const step = produceStep(donothing, counter.getStepcount(skip));
     nodeIterator.addStep(step);
-    if (opt && opt.listIndex) {
-      const pointertrack = produceTrack(
-        lst[opt.listIndex], 
-        'appear', 
-        {
-          start: {...loc.start, column: loc.start.column + opt.listIndex},
-          end: {...loc.end, column: loc.start.column + opt.listIndex + lst[opt.listIndex].toString().length},
-        },
-        ++counter.keyCounter,
-        counter.trackCounter
-        );
-      console.log(pointertrack);
-      nodeIterator.addTrack(pointertrack);
-      return {
-        value: lst,
-        preTrack: pointertrack
-      }
-    }
     return {
       value: lst,
       preTrack: listtrack

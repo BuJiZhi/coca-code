@@ -43,15 +43,18 @@ export interface Ieffect {
   value: any;
   valueType: ValueType;
   width?: number;
-  index: number | undefined;
+  idx?: number | undefined;
 }
 export interface Ispring {
   key: string;
   value: any;
   valueType: ValueType;
   process?: Process;
-  index?: number | undefined;
+  idx?: number | undefined;
   style: any;
+  fontWidth: number;
+  lineHeight: number;
+  highlight: {[index:string]:any};
 }
 /**
  * about store
